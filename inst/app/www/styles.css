@@ -1,0 +1,55 @@
+
+/* file input buttons */
+    .btn-file {
+      background-color: #008000; /* Blue */
+      color: white;
+      border-color: #008000;
+    }
+    .btn-file:hover {
+      background-color: #006400; /* Darker blue on hover */
+      border-color: #006400;
+    }
+
+/* file download buttons */
+.btn.btn-default.shiny-download-link {
+      color: white;
+      background-color: #FF7F50;
+      border-color: #FF7F50;
+    }
+
+
+/* card header color */
+ .card-header  {
+  background-color: #6A5ACD !important; /* Example: Slate Blue */
+  color: white;
+}
+
+.my-solid-border-card {
+          border: 1px solid green;
+           border-radius: 5px;
+        }
+
+/* nave tab colors */
+       /* Teal navbar background for darkly theme */
+    .navbar.navbar-expand-lg,
+    .navbar-dark.bg-dark {
+      background-color: #008080 !important;  /* teal */
+    }
+    /* Navbar text */
+    .navbar .nav-link, .navbar-brand {
+      color: #808080 !important;  /* white */
+    }
+    /* Active tab */
+    .navbar .nav-link.active {
+      color: #FF0000 !important;  /* orange */
+      font-weight: bold;
+    }
+ /* text input label colors */
+    .form-group label.control-label {
+      color: #00008B; /* Change to your desired color */
+      /*background-color: #F0F8FF;*/
+    }
+
+    .navbar-brand {
+  margin-right: 300px; /* Adjust the value as needed */
+}
