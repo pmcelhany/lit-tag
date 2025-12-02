@@ -1,0 +1,262 @@
+---
+title: "`r params$report_title`"
+author: "`r params$name`"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+format: html
+execute:
+  echo: false
+  warning: false
+embed-resources: true
+params:
+  report_title: "report title"
+  name: "author name"
+  d: NA
+  categories: NA
+  note_var: NA
+  include_url: NA
+  include_abstract: NA
+  include_tags: NA
+  include_tags_missing: NA
+  include_tags_not_applicable: NA
+  include_notes: NA
+  include_pagebreaks: NA
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r library}
+
+library(tidyverse)
+library(here)
+
+```
+
+```{r get-data-from-params }
+#| eval: true
+
+d <- as.data.frame(params$d) %>%
+   replace(is.na(.), "NA")
+categories <- params$categories
+note_var <- params$note_var
+include_url <- params$include_url
+include_abstract <- params$include_abstract
+include_tags <- params$include_tags
+include_tags_missing <- params$include_tags_missing
+include_tags_not_applicable <- params$include_tags_not_applicable
+include_notes <- params$include_notes
+include_pagebreaks <- params$include_pagebreaks
+
+```
+
+```{r library-for-test}
+#| eval: false
+
+library(readxl)
+library(janitor)
+```
+
+```{r read-file-for-test}
+#| eval: false
+
+d <- read_csv(here("data/lit_export.csv")) %>%
+  mutate(across(everything(), as.character))
+
+```
+
+```{r read-tags-for-test}
+#| eval: false
+
+tag_var <- read_csv(here("data/tag_var.csv")) %>%
+  #filter(!str_detect(values.tag_variables, "note")) %>%
+  pull(values.tag_variables)
+
+tag_var <- tag_var[!str_detect(tag_var, "note")]
+
+```
+
+```{r read-notes-for-test}
+#| eval: false
+
+note_var <- read_csv(here("data/notes_var.csv")) %>%
+  pull(Notes)
+  
+```
+
+```{r read-categories-for-test}
+#| eval: false
+
+category_file_path <- here("data/categories_11_public_tags.xlsx")
+
+read_xl_clean <- function(path, sheet){
+  read_excel(path, sheet) %>%
+    clean_names()
+}
+
+categories <- category_file_path %>%
+  excel_sheets() %>%
+  purrr::set_names() %>%
+  map(\(x) read_xl_clean(category_file_path, sheet = x))
+
+max_tag_per_cat <- names(categories) %>%
+  map(\(x) length(categories[[x]])) %>%
+  unlist() %>%
+  max()
+
+d_cat_tag <- NULL
+for(i in 1:length(categories)){
+  d_cat_temp <-  data.frame(c(names(categories[[i]]), 
+                              rep(NA, max_tag_per_cat - length(names(categories[[i]])))))
+  d_cat_tag <- bind_cols(d_cat_tag, d_cat_temp)
+}
+
+names(d_cat_tag) <- names(categories)
+
+categories <- as.list(d_cat_tag)
+
+```
+
+```{r set-include-for-test}
+#| eval: false
+
+include_url <- TRUE
+include_abstract <- TRUE
+include_tags <- TRUE
+include_tags_missing <- TRUE
+include_tags_not_applicable <- TRUE
+include_notes <- TRUE
+include_pagebreaks <- TRUE
+
+```
+
+```{r}
+#| label: create-report
+#| results: 'asis'
+#| eval: false
+
+for(i in 1:nrow(d)){
+  cat("## ", d$title[i], "\n")
+  cat(d$publication_year[i], "\n\n")
+  cat(d$author[i], "\n\n")
+  if(include_url){
+    cat("[Paper URL](", d$url[i], ")\n\n", sep = "")
+  }
+  if(include_abstract){
+    cat("**Abstract:**", d$abstract_note[i], "\n\n")
+  }
+  if(include_tags){
+    for(j in 1:length(tag_var)){
+      if(include_tags_missing & include_tags_not_applicable){
+        cat("**", tag_var[j], ":** ",
+            str_replace_all(d[[tag_var[j]]][i], ";", "; "), ".\n", sep = "")
+      } 
+      if(!include_tags_missing & include_tags_not_applicable){
+        if(!is.na(d[[tag_var[j]]][i])){
+          cat("**", tag_var[j], ":** ",
+            str_replace_all(d[[tag_var[j]]][i], ";", "; "), ".\n", sep = "")
+        }
+      }
+      if(include_tags_missing & !include_tags_not_applicable){
+        if(is.na(d[[tag_var[j]]][i])){
+          cat("**", tag_var[j], ":** ",
+            str_replace_all(d[[tag_var[j]]][i], ";", "; "), ".\n", sep = "")
+        } else{
+          if(d[[tag_var[j]]][i] != "not_applicable"){
+            cat("**", tag_var[j], ":** ",
+              str_replace_all(d[[tag_var[j]]][i], ";", "; "), ".\n", sep = "")
+          }
+        }
+      }
+      if(!include_tags_missing & !include_tags_not_applicable & !is.na(d[[tag_var[j]]][i])){
+        if(d[[tag_var[j]]][i] != "not_applicable"){
+          cat("**", tag_var[j], ":** ",
+            str_replace_all(d[[tag_var[j]]][i], ";", "; "), ".\n", sep = "")
+        }
+      }
+    }
+  }
+  if(include_notes){
+    cat("\n\n")
+    for(j in 1:length(note_var)){
+      cat(paste("**", note_var[j], ":**", sep = ""), d[[note_var[j]]][i], "\n\n")
+    }
+  }
+  if(include_pagebreaks){
+    cat("{{< pagebreak >}}")
+  }
+  cat("\n")
+}
+
+```
+
+```{r}
+#| label: create-report-categories
+#| results: 'asis'
+#| eval: true
+
+
+for(i in 1:nrow(d)){
+  cat("## ", d$title[i], "\n")
+  cat(d$publication_year[i], "\n\n")
+  cat(d$author[i], "\n\n")
+  if(include_url){
+    cat("[Paper URL](", d$url[i], ")\n\n", sep = "")
+  }
+  if(include_abstract){
+    cat("**Abstract:**", d$abstract_note[i], "\n\n")
+  }
+  if(include_tags){
+    cat("<u>**TAGS**</u>\n\n")
+    for(j in 1:length(categories)){
+      
+      # get a list of tags in category j that meet criteria
+      cat_tags <- categories[[j]] %>%
+        discard(categories[[j]] == "NA")
+      
+      d_value <- cat_tags %>%
+        map(\(x) d[[x]][i]) %>%
+        unlist()
+      
+      cat_tag_names <- data.frame(c_tag = cat_tags, d_val = d_value) %>%
+        mutate(keep_tag = TRUE) %>%
+        mutate(keep_tag =
+                 case_when(!include_tags_missing & d_val == "NA" ~ FALSE,
+                           !include_tags_not_applicable & 
+                             d_val == "not_applicable" ~ FALSE,
+                           .default = TRUE)) %>%
+        filter(keep_tag) %>%
+        pull(c_tag)
+      
+      if(length(cat_tag_names) > 0){
+        cat("[**", names(categories)[j], "**]{.underline}  \n", sep = "")
+        for(k in 1:length(cat_tag_names)){
+          tag_name <- cat_tag_names[k]
+          cat("**", tag_name, ":** ",
+              str_replace_all(d[[tag_name]][i], ";", "; "), sep = "")
+          if(k != length(cat_tag_names)){
+          cat(" | ")
+          }
+        }  
+      }
+      cat("\n\n")
+    }
+  }
+  if(include_notes){
+    cat("<u>**NOTES**</u>\n\n")
+    for(j in 1:length(note_var)){
+      if(include_tags_missing){
+        cat(paste("**", note_var[j], ":**", sep = ""), d[[note_var[j]]][i], "\n\n")
+      } else{
+        if(d[[note_var[j]]][i] != "NA"){
+          cat(paste("**", note_var[j], ":**", sep = ""), d[[note_var[j]]][i], "\n\n")
+        }
+      }
+      
+    }
+  }
+  if(include_pagebreaks){
+    cat("{{< pagebreak >}}")
+  }
+  cat("\n")
+}
+
+```

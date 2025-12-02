@@ -18,6 +18,16 @@
     }
 
 
+/* To style all action buttons */
+.btn.action-button {
+  font-size: 18px;
+}
+
+/* If you want to target the text of the buttons themselves */
+    .btn.radio-button-group {
+      font-size: 20px; /* Adjust as needed */
+    }
+
 /* card header color */
  .card-header  {
   background-color: #6A5ACD !important; /* Example: Slate Blue */
