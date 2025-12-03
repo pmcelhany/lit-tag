@@ -14,6 +14,13 @@
 #' @import quarto
 #' @import scales
 #' @import writexl
+#' @import stringr
+#' @import purrr
+#' @import lubridate
+#' @import readr
+#' @import dplyr
+#' @import tidyr
+#' @import ggplot2
 #' @noRd
 
 
@@ -30,8 +37,8 @@ viewer_server <- function(id) {
       d_meta <- d[1,] %>%
         t() %>%
         as.data.frame() %>%
-        rownames_to_column("cat_label") %>%
-        rename(select_type = V1) %>%
+        tibble::rownames_to_column("cat_label") %>%
+         rename(select_type = V1) %>%
         set_rownames(names(d %>% clean_names()))
 
       return(d_meta)
@@ -41,9 +48,9 @@ viewer_server <- function(id) {
     category_remove_meta_fun <- function(d){
       d_cat <- d %>%
         clean_names() %>%
-        rowid_to_column() %>%
-        filter(rowid > 1) %>%
-        select(-rowid)
+        mutate(row_id = 1:nrow(.)) %>%
+        filter(row_id > 1) %>%
+        select(-row_id)
 
       return(d_cat)
     }
@@ -57,8 +64,8 @@ viewer_server <- function(id) {
       choice_opts <- NULL
       if(meta[y,"select_type"] %in% c("check_box_single", "check_box_multiple")){
         choice_opts <- cat %>%
-          pluck(x) %>%
-          pull(y) %>%
+           pluck(x) %>%
+           pull(y) %>%
           sort() %>%
           na.omit()
         if("not_applicable" %in% choice_opts){
@@ -70,11 +77,6 @@ viewer_server <- function(id) {
       if(meta[y,"select_type"] == "check_box_single"){
         box <- radioButtons(inputId = ns(y),
                             label = meta[y,"cat_label"],
-                            # choices = cat %>%
-                            #   pluck(x) %>%
-                            #   pull(y) %>%
-                            #   sort() %>%
-                            #   na.omit(),
                             choices = choice_opts,
                             selected = character(0))
       }
@@ -82,11 +84,6 @@ viewer_server <- function(id) {
       if(meta[y,"select_type"] == "check_box_multiple"){
         box <- checkboxGroupInput(inputId = ns(y),
                                   label = meta[y,"cat_label"],
-                                  # choices = cat %>%
-                                  #   pluck(x) %>%
-                                  #   pull(y) %>%
-                                  #   sort() %>%
-                                  #   na.omit()
                                   choices = choice_opts
         )
       }
@@ -164,24 +161,24 @@ viewer_server <- function(id) {
 
         values$categories_with_meta <- category_file_path %>%
           excel_sheets() %>%
-          purrr::set_names() %>%
-          purrr::map(\(x) read_excel(category_file_path, sheet = x))
+           set_names() %>%
+           map(\(x) read_excel(category_file_path, sheet = x))
 
         values$d_category_meta <- values$categories_with_meta %>%
-          purrr::map(\(x) category_meta_fun(x)) %>%
-          list_rbind()
+           map(\(x) category_meta_fun(x)) %>%
+           list_rbind()
 
         # create a list of data frames with the categories and response
         values$categories <- values$categories_with_meta %>%
-          purrr::map(\(x) category_remove_meta_fun(x))
+           map(\(x) category_remove_meta_fun(x))
 
         values$tag_variables <- c( row.names(values$d_category_meta) %>%
-                                     str_subset("notes", negate = TRUE),
+                                     stringr::str_subset("notes", negate = TRUE),
                                    values$categories$notes %>%
-                                     pull("notes"))
+                                      pull("notes"))
 
         notes_variables <- values$categories$notes %>%
-          pull("notes")
+           pull("notes")
 
         incProgress(2/4)
 
@@ -196,14 +193,14 @@ viewer_server <- function(id) {
           return(a)
         }
 
-        values$d_mcdr_tagged <- read_csv(database_file_path) %>%
-          mutate(across(everything(), as.character)) %>%
+        values$d_mcdr_tagged <-  read_csv(database_file_path) %>%
+           mutate(across(everything(), as.character)) %>%
           remove_empty(which = "rows") %>%
-          mutate(pub_name_short = .data[["publication_title"]] %>%
-                   purrr::map(\(x) journal_abrev_fun(x)) %>%
+           mutate(pub_name_short = .data[["publication_title"]] %>%
+                    map(\(x) journal_abrev_fun(x)) %>%
                    unlist()) %>%
-          mutate(first_author = word(author, sep = ";")) %>%
-          mutate(first_author =
+           mutate(first_author = word(author, sep = ";")) %>%
+           mutate(first_author =
                    paste(str_trim(word(first_author, sep = ",")),
                          str_sub(str_trim(word(author, 2,2, sep = ",")), 1, 1),
                          sep = "_")) %>%
@@ -221,7 +218,7 @@ viewer_server <- function(id) {
         ### Filter database ---------------
         # the d_mcdr_filtered dataframe is the filtered data shown in table
         values$d_mcdr_filtered <- values$d_mcdr_tagged %>%
-          filter(if(input$exclude_obsolete &
+           filter(if(input$exclude_obsolete &
                     "date_time_obsolete_db" %in% names(.))
             (is.na(date_time_obsolete_db) | date_time_obsolete_db == "NA") else
               TRUE)
@@ -233,7 +230,7 @@ viewer_server <- function(id) {
 
         ### Filter  table -----------------------------------------
         output$table <- renderDT(values$d_mcdr_filtered %>%
-                                   select(author, publication_year, title),
+                                    select(author, publication_year, title),
                                  selection = "single",
                                  options = list(dom = "t",
                                                 pageLength = 10000,
@@ -246,7 +243,7 @@ viewer_server <- function(id) {
 
         ### Full  table -----------------------------------------
         output$table_full <- DT::renderDataTable(values$d_mcdr_tagged %>%
-                                               select(author, publication_year, title),
+                                                    select(author, publication_year, title),
                                              selection = "none",
                                              options =
                                                list(dom = "t",
@@ -265,19 +262,19 @@ viewer_server <- function(id) {
                                "pub_name_short", "first_author")
 
         cat_without_notes <- values$categories %>%
-          list_modify(notes = zap())
+           list_modify(notes = zap())
 
         plot_opt_list <- names(cat_without_notes) %>%
-          purrr::set_names() %>%
-          purrr::map(\(x) names(cat_without_notes[[x]])) %>%
-          list_assign(paper_fields = plot_paper_fields)
+           set_names() %>%
+           map(\(x) names(cat_without_notes[[x]])) %>%
+           list_assign(paper_fields = plot_paper_fields)
 
         opt_list_name_order <- c("paper_fields",
                                  names(plot_opt_list)[1:length(plot_opt_list)-1])
 
         plot_opt_list_sorted <- opt_list_name_order %>%
-          purrr::set_names() %>%
-          purrr::map(\(x) plot_opt_list[[x]])
+           set_names() %>%
+           map(\(x) plot_opt_list[[x]])
 
         updateVirtualSelect(inputId = "plot_x_var",
                             choices = plot_opt_list_sorted,
@@ -300,8 +297,8 @@ viewer_server <- function(id) {
         summary_tbl_paper_fields <- c(plot_paper_fields, "doi", "url")
 
         summary_opt_list <- names(cat_without_notes) %>%
-          purrr::set_names() %>%
-          purrr::map(\(x) names(cat_without_notes[[x]])) %>%
+           set_names() %>%
+           map(\(x) names(cat_without_notes[[x]])) %>%
           list_assign(notes = notes_variables) %>%
           list_assign(paper_fields = summary_tbl_paper_fields)
 
@@ -310,8 +307,8 @@ viewer_server <- function(id) {
                                          names(summary_opt_list)[1:length(summary_opt_list)-1])
 
         summary_opt_list_sorted <- summary_opt_list_name_order %>%
-          purrr::set_names() %>%
-          purrr::map(\(x) summary_opt_list[[x]])
+           set_names() %>%
+           map(\(x) summary_opt_list[[x]])
 
         updateVirtualSelect(inputId = "summary_var",
                             choices = c(summary_opt_list_sorted),
@@ -321,14 +318,14 @@ viewer_server <- function(id) {
         ### Add tag input to ui --------------------------------------
         #insert tag panels
         names(values$categories) %>%
-          str_subset("notes", negate = TRUE) %>%
-          purrr::map(\(x)
+          stringr::str_subset("notes", negate = TRUE) %>%
+           map(\(x)
               nav_insert(id = "tag_tabs",
                          nav_panel(x,
                                    card(card_header(x),
                                         card_body(fluidRow(names(values$categories %>%
-                                                                   pluck(x)) %>%
-                                                             purrr::map(\(y)
+                                                                    pluck(x)) %>%
+                                                              map(\(y)
                                                                  select_box_fun(x, y,
                                                                                 cat = values$categories,
                                                                                 meta = values$d_category_meta)
@@ -337,7 +334,7 @@ viewer_server <- function(id) {
         ### Add notes input to ui  ------------------------------------
         output$notes  <- renderUI({
           notes_variables %>%
-            purrr::map(\(x)  textInput(ns(x), x))
+             map(\(x)  textInput(ns(x), x))
         })
 
         ### Render n paper in selection summary -------------
@@ -394,7 +391,7 @@ viewer_server <- function(id) {
       }
 
       values$tag_variables %>%
-        purrr::map(\(x) clear_tag_input(x))
+         map(\(x) clear_tag_input(x))
     })
 
     ## Select papers button ----------------------
@@ -438,7 +435,7 @@ viewer_server <- function(id) {
         add_criteria("author", input$author) %>%
         add_criteria("title", input$title) %>%
         add_criteria("abstract_note", input$abstract) %>%
-        filter(value != "")
+         filter(value != "")
 
 
       tag_df_fun <- function(tag){
@@ -446,9 +443,9 @@ viewer_server <- function(id) {
       }
 
       d_tag_criteria <-  values$tag_variables %>%
-        purrr::map(\(x) tag_df_fun(x)) %>%
-        list_rbind() %>%
-        filter(value != "")
+         map(\(x) tag_df_fun(x)) %>%
+         list_rbind() %>%
+         filter(value != "")
 
       d_years_criteria <- NULL
       years <- NULL
@@ -468,7 +465,7 @@ viewer_server <- function(id) {
       d_missing_criteria = NULL
       if(!is.null(input$select_missing)){
         d_missing_criteria <- data.frame(field = input$select_missing) %>%
-          mutate(value = "missing")
+           mutate(value = "missing")
       }
 
       #d_criteria <- NULL
@@ -502,7 +499,7 @@ viewer_server <- function(id) {
       }
 
       d_filtered <- d_filtered %>%
-        filter(if(input$exclude_obsolete &
+         filter(if(input$exclude_obsolete &
                   "date_time_obsolete_db" %in% names(.))
           (is.na(date_time_obsolete_db) | date_time_obsolete_db == "NA") else
             TRUE)
@@ -510,7 +507,7 @@ viewer_server <- function(id) {
       # year range is a special case
       d_criteria_paper_tag <- bind_rows(d_years_criteria, d_paper_criteria,
                                         d_tag_criteria) %>%
-        filter(field != "years")
+         filter(field != "years")
 
       if(nrow(d_criteria_paper_tag) > 0){
         for(i in 1:nrow(d_criteria_paper_tag)){
@@ -532,7 +529,7 @@ viewer_server <- function(id) {
 
           d_filtered <-
             d_filtered[d_filtered$meet_criteria,]  %>%
-            select(-meet_criteria) %>%
+             select(-meet_criteria) %>%
             remove_empty(which = "rows")
         }
       }
@@ -540,16 +537,16 @@ viewer_server <- function(id) {
       #filter by year range
       if("years" %in% d_criteria$field){
         d_filtered <- d_filtered %>%
-          mutate(year = as.numeric(publication_year)) %>%
-          filter(year >= years[1] & year <= years[2]) %>%
-          select(-year)
+           mutate(year = as.numeric(publication_year)) %>%
+           filter(year >= years[1] & year <= years[2]) %>%
+           select(-year)
 
       }
       #
       if(!is.null(d_missing_criteria)){
         for(i in 1:length(d_missing_criteria$field)){
           d_filtered <- d_filtered %>%
-            filter(is.na(.data[[d_missing_criteria$field[i]]]) |
+             filter(is.na(.data[[d_missing_criteria$field[i]]]) |
                      .data[[d_missing_criteria$field[i]]] == "NA")
         }
 
@@ -569,10 +566,10 @@ viewer_server <- function(id) {
       table_rows_selected <- input$table_rows_selected
 
       selected_row_data = values$d_mcdr_filtered %>%
-        slice(table_rows_selected)
+         slice(table_rows_selected)
 
       categories <- values$categories %>%
-        list_modify("notes" = zap())
+         list_modify("notes" = zap())
 
       tags_text <- ""
       for(i in 1:length(categories)){
@@ -591,7 +588,7 @@ viewer_server <- function(id) {
       }
 
       notes_variables <- values$categories$notes %>%
-        pull("notes")
+         pull("notes")
 
       notes_text <- ""
       for(i in 1:length(notes_variables)){
@@ -638,10 +635,10 @@ viewer_server <- function(id) {
 
       ### Exclude N/A or missing from x-axis? -------
       d <- d %>%
-        filter(!(!is.na(.data[[input$plot_x_var]]) &
+         filter(!(!is.na(.data[[input$plot_x_var]]) &
                    "Not applicable x-axis" %in% input$plot_remove &
                    .data[[input$plot_x_var]] == "not_applicable")) %>%
-        filter(!("Missing x-axis" %in% input$plot_remove &
+         filter(!("Missing x-axis" %in% input$plot_remove &
                    is.na(.data[[input$plot_x_var]])))
 
       ### Max character x var -----------
@@ -663,7 +660,7 @@ viewer_server <- function(id) {
 
         #if the x-axis mutli-select is combined
         d_plot <- d %>%
-          select(input$plot_x_var)
+           select(input$plot_x_var)
         if(!("Combine x-axis" %in% input$combine_multi)){
           d_plot <- d_plot %>%
             separate_longer_delim(input$plot_x_var, delim = ";")
@@ -671,15 +668,13 @@ viewer_server <- function(id) {
 
         # the x-axis only plot
         d_plot_2 <- d_plot %>%
-          mutate(!!input$plot_x_var :=
+           mutate(!!input$plot_x_var :=
                    if_else(rep(input$plot_x_var == "author", nrow(.)),
                            author_format(!!as.name(input$plot_x_var)),
                            !!as.name(input$plot_x_var))) %>%
-          # mutate(!!input$plot_x_var :=
-          #          str_sub(!! as.name(input$plot_x_var), 1, max_x_char)) %>%
           tabyl(input$plot_x_var) %>%
-          mutate(percent = paste(round(percent * 100), "%", sep = "")) %>%
-          mutate(!!input$plot_x_var :=
+           mutate(percent = paste(round(percent * 100), "%", sep = "")) %>%
+           mutate(!!input$plot_x_var :=
                    str_replace_all(!!as.name(input$plot_x_var), ";", ", "))
 
         n_total_paper <- sum(d_plot_2$n)
@@ -712,15 +707,15 @@ viewer_server <- function(id) {
         }
         #### Exclude N/A or missing from stacked? -------
         d <- d %>%
-          filter(!(!is.na(.data[[input$plot_stack_var]]) &
+           filter(!(!is.na(.data[[input$plot_stack_var]]) &
                      "Not applicable stacked" %in% input$plot_remove &
                      .data[[input$plot_stack_var]] == "not_applicable")) %>%
-          filter(!("Missing stacked" %in% input$plot_remove &
+           filter(!("Missing stacked" %in% input$plot_remove &
                      is.na(.data[[input$plot_stack_var]])))
 
         #if the x-axis mutli-select is combined
         d_plot <- d %>%
-          select(input$plot_x_var)
+           select(input$plot_x_var)
         if(!("Combine x-axis" %in% input$combine_multi)){
           d_plot <- d_plot %>%
             separate_longer_delim(input$plot_x_var, delim = ";")
@@ -729,20 +724,20 @@ viewer_server <- function(id) {
         #### d_z for multi-select stack ---------------
 
         d_x_expand <- d_plot %>%
-          mutate(!!input$plot_x_var :=
+           mutate(!!input$plot_x_var :=
                    if_else(rep(input$plot_x_var == "author", nrow(.)),
                            author_format(!!as.name(input$plot_x_var)),
                            !!as.name(input$plot_x_var))) %>%
           tabyl(input$plot_x_var) %>%
-          mutate(percent = paste(round(percent * 100), "%", sep = ""))
+           mutate(percent = paste(round(percent * 100), "%", sep = ""))
 
         d_x_expand_n <- d_x_expand %>%
-          select(any_of(input$plot_x_var), n)
+           select(any_of(input$plot_x_var), n)
 
         n_total_paper = sum(d_x_expand_n$n)
 
         d_both_expand_f_1 <- d %>%
-          select(all_of(c(input$plot_x_var, input$plot_stack_var)))
+           select(all_of(c(input$plot_x_var, input$plot_stack_var)))
 
 
         #if the x-axis mutli-select is combined
@@ -752,7 +747,7 @@ viewer_server <- function(id) {
         }
 
         d_both_expand_f_2 <- d_both_expand_f_1 %>%
-          mutate(!!input$plot_x_var :=
+           mutate(!!input$plot_x_var :=
                    if_else(rep(input$plot_x_var == "author", nrow(.)),
                            author_format(!!as.name(input$plot_x_var)),
                            !!as.name(input$plot_x_var)))
@@ -763,7 +758,7 @@ viewer_server <- function(id) {
         }
 
         d_both_expand_f_3 <- d_both_expand_f_2  %>%
-          mutate(!!input$plot_stack_var :=
+           mutate(!!input$plot_stack_var :=
                    if_else(rep(input$plot_stack_var == "author", nrow(.)),
                            author_format(!!as.name(input$plot_stack_var)),
                            !!as.name(input$plot_stack_var))) %>%
@@ -772,16 +767,16 @@ viewer_server <- function(id) {
 
         d_z <- d_x_expand_n %>%
           left_join(d_both_expand_f_3, join_by(!!as.name(input$plot_x_var))) %>%
-          mutate(across(-any_of(c(input$plot_x_var, "n")), ~ .x * n)) %>%
-          select(-n) %>%
+           mutate(across(-any_of(c(input$plot_x_var, "n")), ~ .x * n)) %>%
+           select(-n) %>%
           pivot_longer(where(is.numeric), names_to = "stack_var", values_to = "n")
 
         #### plot stacked ---------------------------
 
         p <- d_z %>%
-          mutate(!!input$plot_x_var :=
+           mutate(!!input$plot_x_var :=
                    str_replace_all(!!as.name(input$plot_x_var), ";", ", ")) %>%
-          mutate(stack_var = str_replace_all(stack_var, ";", ", ")) %>%
+           mutate(stack_var = str_replace_all(stack_var, ";", ", ")) %>%
           ggplot(aes(x = .data[[input$plot_x_var]], y = n,
                      fill = stack_var)) +
           geom_col() +
@@ -807,8 +802,8 @@ viewer_server <- function(id) {
         if(input$show_bar_data != "None"){
           p <- p +
             geom_text(data = d_x_expand %>%
-                        mutate(stack_var = NA) %>%
-                        mutate(!!input$plot_x_var :=
+                         mutate(stack_var = NA) %>%
+                         mutate(!!input$plot_x_var :=
                                  str_replace_all(!!as.name(input$plot_x_var), ";", ", ")),
                       aes(label = .data[[bar_data]]), vjust = -1, color = "black",
                       size = 8) +
@@ -836,7 +831,7 @@ viewer_server <- function(id) {
 
       if(!is.null(d)){
         d <- d %>%
-          select(input$summary_var)
+           select(input$summary_var)
       }
 
       output$summary_table <- renderDT(d, selection = "none",
@@ -876,10 +871,10 @@ viewer_server <- function(id) {
         # if the order has changed, select user specifier order
         if(is.null(input$colOrder)){
           d <- d %>%
-            select(input$summary_var)
+             select(input$summary_var)
         } else{
           d <- d %>%
-            select(input$colOrder)
+             select(input$colOrder)
         }
 
         write.csv(d, file, row.names = FALSE)
@@ -909,11 +904,11 @@ viewer_server <- function(id) {
         replace(is.na(.), "NA")
 
       categories <- values$categories %>%
-        list_modify("notes" = zap())
+         list_modify("notes" = rlang::zap())
 
       # make data frame of categories and tag names for quarto report
       max_tag_per_cat <- names(categories) %>%
-        purrr::map(\(x) length(categories[[x]])) %>%
+         map(\(x) length(categories[[x]])) %>%
         unlist() %>%
         max()
 

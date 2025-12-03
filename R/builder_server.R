@@ -12,6 +12,12 @@
 #' @import readxl
 #' @import magrittr
 #' @import xml2
+#' @import stringr
+#' @import purrr
+#' @import lubridate
+#' @import readr
+#' @import dplyr
+#' @import tidyr
 #' @noRd
 
 
@@ -28,8 +34,8 @@ builder_server <- function(id) {
       d_meta <- d[1,] %>%
         t() %>%
         as.data.frame() %>%
-        rownames_to_column("cat_label") %>%
-        rename(select_type = V1) %>%
+        tibble::rownames_to_column("cat_label") %>%
+         rename(select_type = V1) %>%
         set_rownames(names(d %>% clean_names()))
 
       return(d_meta)
@@ -37,11 +43,12 @@ builder_server <- function(id) {
 
     # function to remove the category meta data
     category_remove_meta_fun <- function(d){
+
       d_cat <- d %>%
         clean_names() %>%
-        rowid_to_column() %>%
-        filter(rowid > 1) %>%
-        select(-rowid)
+         mutate(row_id = 1:nrow(.)) %>%
+         filter(row_id > 1) %>%
+         select(-row_id)
 
       return(d_cat)
     }
@@ -56,7 +63,7 @@ builder_server <- function(id) {
       if(meta[y,"select_type"] %in% c("check_box_single", "check_box_multiple")){
         choice_opts <- cat %>%
           pluck(x) %>%
-          pull(y) %>%
+           pull(y) %>%
           sort() %>%
           na.omit()
         if("not_applicable" %in% choice_opts){
@@ -68,11 +75,6 @@ builder_server <- function(id) {
       if(meta[y,"select_type"] == "check_box_single"){
         box <- radioButtons(inputId = ns(y),
                             label = meta[y,"cat_label"],
-                            # choices = cat %>%
-                            #   pluck(x) %>%
-                            #   pull(y) %>%
-                            #   sort() %>%
-                            #   na.omit(),
                             choices = choice_opts,
                             selected = character(0))
       }
@@ -80,11 +82,6 @@ builder_server <- function(id) {
       if(meta[y,"select_type"] == "check_box_multiple"){
         box <- checkboxGroupInput(inputId = ns(y),
                                   label = meta[y,"cat_label"],
-                                  # choices = cat %>%
-                                  #   pluck(x) %>%
-                                  #   pull(y) %>%
-                                  #   sort() %>%
-                                  #   na.omit()
                                   choices = choice_opts
         )
       }
@@ -105,9 +102,9 @@ builder_server <- function(id) {
 
     remove_leading_special_char <- function(x){
       x_no_leading_special_char <- data.frame(x = x) %>%
-        mutate(x = if_else(str_sub(x, 1, 1) %in% c("-", "+", "="),
+         mutate(x = if_else(str_sub(x, 1, 1) %in% c("-", "+", "="),
                            str_sub(x, 2, -1), x)) %>%
-        pull(x)
+         pull(x)
 
       return(x_no_leading_special_char)
     }
@@ -127,8 +124,8 @@ builder_server <- function(id) {
   ## Render paper info function ----------------------------
   render_paper_info <- function(label, paper_var){
     return(renderText(paste(label, values$d_mcdr_filtered %>%
-                              slice(input$table_rows_selected) %>%
-                              pull(paper_var))))
+                               slice(input$table_rows_selected) %>%
+                               pull(paper_var))))
   }
 
   ## Load data button ---------------------------------------
@@ -146,27 +143,27 @@ builder_server <- function(id) {
       #local drive excel file version
       values$categories_with_meta <- input$categories_excel$datapath %>%
         excel_sheets() %>%
-        purrr::set_names() %>%
-        purrr::map(\(x) read_excel(input$categories_excel$datapath, sheet = x))
+         set_names() %>%
+         map(\(x) read_excel(input$categories_excel$datapath, sheet = x))
 
 
       values$d_category_meta <- values$categories_with_meta %>%
-        purrr::map(\(x) category_meta_fun(x)) %>%
-        list_rbind()
+         map(\(x) category_meta_fun(x)) %>%
+         list_rbind()
 
       # create a list of data frames with the categories and response
       values$categories <- values$categories_with_meta %>%
-        purrr::map(\(x) category_remove_meta_fun(x))
+         map(\(x) category_remove_meta_fun(x))
 
       #vector of tag variables
       tag_variables <- c( row.names(values$d_category_meta) %>%
-                            str_subset("notes", negate = TRUE),
+                            stringr::str_subset("notes", negate = TRUE),
                           values$categories$notes %>%
-                            pull("notes"))
+                             pull("notes"))
 
       # vector fo notes variables
       notes_variables <- values$categories$notes %>%
-        pull("notes")
+         pull("notes")
 
 
       categories_with_meta <- values$categories_with_meta
@@ -175,7 +172,7 @@ builder_server <- function(id) {
 
       # vector of date tags
       date_fields <- d_category_meta %>%
-        filter(select_type == "date") %>%
+         filter(select_type == "date") %>%
         row.names()
 
       incProgress(2/4)
@@ -183,8 +180,8 @@ builder_server <- function(id) {
       ### Load database ----------------------------------------------
 
       # the d_mcdr_tagged dataframe always keeps all data
-      values$d_mcdr_tagged <- read_csv(input$database_csv$datapath) %>%
-        mutate(across(everything(), as.character))
+      values$d_mcdr_tagged <-  read_csv(input$database_csv$datapath) %>%
+         mutate(across(everything(), as.character))
 
       # if there is no "notes" column in the original zotero file, it needs added
       # this is a bit of hack to deal with the fact that oned of the category tabs is named "notes"
@@ -208,7 +205,7 @@ builder_server <- function(id) {
       ### Filter database --------
       # the d_mcdr_filtered dataframe is the filtered data shown in table
       values$d_mcdr_filtered <- values$d_mcdr_tagged %>%
-        filter(if(input$exclude_obsolete &
+         filter(if(input$exclude_obsolete &
                   "date_time_obsolete_db" %in% names(.))
           (is.na(date_time_obsolete_db) | date_time_obsolete_db == "NA") else
             TRUE)
@@ -218,31 +215,34 @@ builder_server <- function(id) {
       ### Add notes input to ui  ------------------------------------
       output$notes  <- renderUI({
         notes_variables %>%
-           purrr::map(\(x)
+            map(\(x)
               textAreaInput(ns(x), x, width = 600, height = 200))
       })
 
       ### Add tag input to ui --------------------------------------
       #insert tag panels
       names(values$categories) %>%
-        str_subset("notes", negate = TRUE) %>%
-         purrr::map(\(x)
+        stringr::str_subset("notes", negate = TRUE) %>%
+          map(\(x)
             nav_insert(id = "tag_tabs",
                        nav_panel(x,
                                  card(card_header(x),
                                       card_body(fluidRow(names(values$categories %>%
-                                                                 pluck(x)) %>%
-                                                            purrr::map(\(y)
+                                                                  pluck(x)) %>%
+                                                             map(\(y)
                                                                select_box_fun(x, y, cat = values$categories,
                                                                               meta = values$d_category_meta)
                                                            )))))))
       ### Bibliography table -----------------------------------------
-      output$table <- renderDT(values$d_mcdr_filtered %>%
-                                 select(first_author, publication_year, title),
-                               selection = list(mode ="single"),
-                               options = list(dom = "t",
-                                              pageLength = 10000),
-                               rownames = FALSE, server = FALSE)
+      if(all(c("first_author", "publication_year", "title") %in%
+             names(values$d_mcdr_filtered))){
+        output$table <- renderDT(values$d_mcdr_filtered %>%
+                                    select(first_author, publication_year, title),
+                                 selection = list(mode ="single"),
+                                 options = list(dom = "t",
+                                                pageLength = 10000),
+                                 rownames = FALSE, server = FALSE)
+      }
 
       ### Show selected paper info -------------------------------------
       output$selected_year <- render_paper_info("Year:", "publication_year")
@@ -262,19 +262,19 @@ builder_server <- function(id) {
       paper_fields <- c("item_type", "publication_year", "first_author")
 
       cat_without_notes <- values$categories %>%
-        list_modify(notes = zap())
+         list_modify(notes = rlang::zap())
 
       plot_opt_list <- names(cat_without_notes) %>%
-        purrr::set_names() %>%
-         purrr::map(\(x) names(cat_without_notes[[x]])) %>%
-        list_assign(paper_fields = paper_fields)
+         set_names() %>%
+          map(\(x) names(cat_without_notes[[x]])) %>%
+         list_assign(paper_fields = paper_fields)
 
       opt_list_name_order <- c("paper_fields",
                                names(plot_opt_list)[1:length(plot_opt_list)-1])
 
       filter_opt_list_sorted <- opt_list_name_order %>%
-        purrr::set_names() %>%
-         purrr::map(\(x) plot_opt_list[[x]])
+         set_names() %>%
+          map(\(x) plot_opt_list[[x]])
 
 
       default_filter_var <- character(0)
@@ -301,15 +301,12 @@ builder_server <- function(id) {
     ### Render UI of filters -----------------------------
     output$filters  <- renderUI({
       input$filter_var %>%
-         purrr::map(\(x) checkboxGroupInput(ns(paste("filter", x, sep = "_")),
+          map(\(x) checkboxGroupInput(ns(paste("filter", x, sep = "_")),
                                     paste("filter", x, sep = "_"),
                                     unique(values$d_mcdr_tagged %>%
-                                             pull(x) %>%
+                                              pull(x) %>%
                                              replace_na("NA")) %>%
                                       sort(),
-                                    # selected = unique(values$d_mcdr_tagged %>%
-                                    #                     pull(x) %>%
-                                    #                     replace_na("NA")),
                                     inline = TRUE))
     })
 
@@ -318,7 +315,7 @@ builder_server <- function(id) {
 
   observeEvent(input$filter_db,{
     values$d_mcdr_filtered <-  values$d_mcdr_tagged %>%
-      filter(if(input$exclude_obsolete) (is.na(date_time_obsolete_db) |
+       filter(if(input$exclude_obsolete) (is.na(date_time_obsolete_db) |
                                            date_time_obsolete_db == "NA") else TRUE)
 
 
@@ -327,15 +324,15 @@ builder_server <- function(id) {
       selected_val <- input[[paste("filter", y, sep = "_")]]
 
       var_with_na_sting <- values$d_mcdr_filtered %>%
-        pull(y) %>%
+         pull(y) %>%
         replace_na("NA")
 
       values$d_mcdr_filtered <-  values$d_mcdr_filtered %>%
-        filter(var_with_na_sting %in% selected_val)
+         filter(var_with_na_sting %in% selected_val)
     }
 
     input$filter_var %>%
-       purrr::map(\(x) filter_fun(x))
+        map(\(x) filter_fun(x))
 
   })
 
@@ -348,7 +345,7 @@ builder_server <- function(id) {
   ## Observe unselect filters button ------------------------
   observeEvent(input$unselect_filters, {
     input$filter_var %>%
-       purrr::map(\(x) updateCheckboxGroupInput(inputId =
+        map(\(x) updateCheckboxGroupInput(inputId =
                                           paste("filter", x, sep = "_"),
                                         selected = character(0)))
   })
@@ -358,11 +355,11 @@ builder_server <- function(id) {
   observeEvent(input$show_abstract, {
     showModal(modalDialog(
       title = values$d_mcdr_filtered %>%
-        slice(input$table_rows_selected) %>%
-        pull("title"),
+         slice(input$table_rows_selected) %>%
+         pull("title"),
       values$d_mcdr_filtered %>%
-        slice(input$table_rows_selected) %>%
-        pull("abstract_note"),
+         slice(input$table_rows_selected) %>%
+         pull("abstract_note"),
       size = "l"
     ))
   })
@@ -389,11 +386,11 @@ builder_server <- function(id) {
     if(!is.null(key)){
 
       rownames(d_category_meta) %>%
-         purrr::map(\(x) save_tag_value(key, x))
+          map(\(x) save_tag_value(key, x))
 
       d_notes %>%
-        pull("notes") %>%
-         purrr::map(\(x) save_tag_value(key, x))
+         pull("notes") %>%
+          map(\(x) save_tag_value(key, x))
 
 
       values$d_mcdr_filtered[values$d_mcdr_filtered$key == key,] <-
@@ -408,8 +405,8 @@ builder_server <- function(id) {
     #save_last_row(values$last_key)
 
     row_val <- values$d_mcdr_filtered %>%
-      slice(table_rows_selected) %>%
-      pull(x)
+       slice(table_rows_selected) %>%
+       pull(x)
 
     if(d_category_meta[x, "select_type"] == "check_box_single"){
       if(is.na(row_val) | row_val == "NA" | row_val == "" |
@@ -453,8 +450,8 @@ builder_server <- function(id) {
     table_rows_selected <- input$table_rows_selected
 
     current_key <- values$d_mcdr_filtered %>%
-      slice(table_rows_selected) %>%
-      pull(key)
+       slice(table_rows_selected) %>%
+       pull(key)
 
     last_key <- values$last_key
     d_category_meta <- values$d_category_meta
@@ -467,15 +464,15 @@ builder_server <- function(id) {
       last_key <- current_key
       # load selected row tags
       tags %>%
-         purrr::map(\(x) load_row_tags_fun(x, d_category_meta, table_rows_selected))
+          map(\(x) load_row_tags_fun(x, d_category_meta, table_rows_selected))
 
       #load selected row notes
       d_notes %>%
-        pull("notes") %>%
-         purrr::map(\(x) updateTextAreaInput(inputId = x,
+         pull("notes") %>%
+          map(\(x) updateTextAreaInput(inputId = x,
                                      value = values$d_mcdr_filtered %>%
-                                       slice(table_rows_selected) %>%
-                                       pull(x)))
+                                        slice(table_rows_selected) %>%
+                                        pull(x)))
 
       values$last_key <- current_key
     }
@@ -487,15 +484,15 @@ builder_server <- function(id) {
 
       # load selected row tags
       tags %>%
-         purrr::map(\(x) load_row_tags_fun(x, d_category_meta, table_rows_selected))
+          map(\(x) load_row_tags_fun(x, d_category_meta, table_rows_selected))
 
       #load selected row notes
       d_notes %>%
-        pull("notes") %>%
-         purrr::map(\(x) updateTextAreaInput(inputId = x,
+         pull("notes") %>%
+          map(\(x) updateTextAreaInput(inputId = x,
                                      value = values$d_mcdr_filtered %>%
-                                       slice(table_rows_selected) %>%
-                                       pull(x)))
+                                        slice(table_rows_selected) %>%
+                                        pull(x)))
 
       # change the last key to the current row
       # this will be used to save any data changes when a new row is selected
@@ -519,8 +516,8 @@ builder_server <- function(id) {
     content = function(file) {
 
       values$last_key <- values$d_mcdr_filtered %>%
-        slice(input$table_rows_selected) %>%
-        pull(key)
+         slice(input$table_rows_selected) %>%
+         pull(key)
 
       save_last_row(values$last_key, values$d_category_meta,
                     values$categories$notes)
@@ -529,8 +526,8 @@ builder_server <- function(id) {
       # the are no leading characters in any of the data that
       # will cause "#NAME?" errors if the file is opened in excel
       values$d_mcdr_tagged %>%
-        mutate(across(everything(), as.character)) %>%
-        mutate(across(everything(), ~ remove_leading_special_char(.x))) %>%
+         mutate(across(everything(), as.character)) %>%
+         mutate(across(everything(), ~ remove_leading_special_char(.x))) %>%
         write_csv(file)
 
     })
@@ -551,12 +548,12 @@ builder_server <- function(id) {
         #browser()
         ### Read zotero --------------------------------------
 
-        d_zotero <- read_csv(input$zotero_csv$datapath) %>%
+        d_zotero <-  read_csv(input$zotero_csv$datapath) %>%
           clean_names() %>%
           remove_empty() %>%
-          mutate(first_author = word(author, sep = ",")) %>%
+           mutate(first_author = word(author, sep = ",")) %>%
           arrange(first_author) %>%
-          mutate(across(everything(), as.character))
+           mutate(across(everything(), as.character))
 
         incProgress(1/4)
 
@@ -564,9 +561,9 @@ builder_server <- function(id) {
 
         # Tag variables
         tag_variables <- c( row.names(values$d_category_meta) %>%
-                              str_subset("notes", negate = TRUE),
+                              stringr::str_subset("notes", negate = TRUE),
                             values$categories$notes %>%
-                              pull("notes"))
+                               pull("notes"))
 
 
         incProgress(2/4)
@@ -606,33 +603,33 @@ builder_server <- function(id) {
         # else append to new papers to existing db
         if(!("key" %in% names(d_database))){
           d_updated_db <- d_zotero %>%
-            mutate(date_time_added_db = current_datetime,
+             mutate(date_time_added_db = current_datetime,
                    date_time_obsolete_db = NA)
           d_updated_db[tag_variables] <- "NA"
         } else{
           d_new_zotero <- d_zotero %>%
-            filter(key %in% new_keys) %>%
-            mutate(date_time_added_db = current_datetime,
+             filter(key %in% new_keys) %>%
+             mutate(date_time_added_db = current_datetime,
                    date_time_obsolete_db = NA)
           d_new_db <- d_new_zotero %>%
-            mutate(across(everything(), as.character))
+             mutate(across(everything(), as.character))
           d_new_db[tag_variables] <- "NA"
 
 
           # papers in oringial db and the new zotero
           # update the db with any edits to the zotero variable
           d_updated_z_db <- d_database %>%
-            filter(!(key %in% old_keys_not_in_zotero)) %>%
+             filter(!(key %in% old_keys_not_in_zotero)) %>%
             left_join(d_zotero, join_by("key")) %>%
-            select(-contains(".x")) %>%
+             select(-contains(".x")) %>%
             set_names(str_remove(names(.), "\\.y")) %>%
-            mutate(across(everything(), as.character))
+             mutate(across(everything(), as.character))
 
           # papers in original db but no in the new zotero
           d_obsolete_db <- d_database %>%
-            filter(key %in% old_keys_not_in_zotero) %>%
-            mutate(date_time_obsolete_db = current_datetime) %>%
-            mutate(across(everything(), as.character))
+             filter(key %in% old_keys_not_in_zotero) %>%
+             mutate(date_time_obsolete_db = current_datetime) %>%
+             mutate(across(everything(), as.character))
 
           # combine all types of papers in one new db
           d_updated_db <- bind_rows(d_obsolete_db, d_updated_z_db, d_new_db) %>%
@@ -651,26 +648,26 @@ builder_server <- function(id) {
   ### Database content ------------------------------
 
   tag_values_in_db <- function(d){
-    zotero_fields <- read_csv("data/zotero_fields.csv")$zotero_fields
+    zotero_fields <-  read_csv("data/zotero_fields.csv")$zotero_fields
     db_names <- names(d)
     tags_notes <- db_names[!(db_names %in% zotero_fields)]
     db_tags <- tags_notes[!str_detect(tags_notes, "notes")]
     db_notes <- tags_notes[str_detect(tags_notes, "notes")]
 
     tag_options <- db_tags %>%
-      purrr::set_names() %>%
-       purrr::map(\(x) as.character(unique(d[[x]])))
+       set_names() %>%
+        map(\(x) as.character(unique(d[[x]])))
 
     tag_options_unique <- names(tag_options) %>%
-      purrr::set_names() %>%
-       purrr::map(\(x) unique(str_trim(unlist(unlist(str_split(tag_options[[x]], ";"))))))
+       set_names() %>%
+        map(\(x) unique(str_trim(unlist(unlist(str_split(tag_options[[x]], ";"))))))
 
     tag_option_length <- tag_options_unique %>%
-       purrr::map(\(x) length(x)) %>%
+        map(\(x) length(x)) %>%
       unlist()
 
     d_tag <- data.frame(n_option = tag_option_length) %>%
-      rownames_to_column("tags") %>%
+      tibble::rownames_to_column("tags") %>%
       arrange(tags)
 
     return(list(d_tag = d_tag, tag_options_unique = tag_options_unique,
@@ -678,7 +675,7 @@ builder_server <- function(id) {
   }
 
   observeEvent(input$content_db,{
-    values$d_content_db <-  read_csv(input$content_db$datapath)
+    values$d_content_db <-   read_csv(input$content_db$datapath)
 
     output$n_papers <- renderText(HTML(paste("Number of papers in database: ",
                                              nrow(values$d_content_db), sep = "")))
@@ -711,7 +708,7 @@ builder_server <- function(id) {
                               collapse = ";")
 
     count_unique <- tag_unique %>%
-       purrr::map(\(x) str_count(tag_value_string, fixed(x))) %>%
+        map(\(x) str_count(tag_value_string, fixed(x))) %>%
       unlist()
 
     tag_unique_with_count <- paste(tag_unique, " (", count_unique, ")",
@@ -730,13 +727,13 @@ builder_server <- function(id) {
   ### Compare databases --------------------------------
 
   observeEvent(input$compare_db, {
-    d_compare_1 <-  read_csv(input$compare_db_1$datapath)
-    d_compare_2 <-  read_csv(input$compare_db_2$datapath)
+    d_compare_1 <-   read_csv(input$compare_db_1$datapath)
+    d_compare_2 <-   read_csv(input$compare_db_2$datapath)
 
     output$papers_in_1_not_2 <- renderDT(
       d_compare_1 %>%
-        filter(!(key %in% d_compare_2$key)) %>%
-        select(key, first_author, publication_year, title),
+         filter(!(key %in% d_compare_2$key)) %>%
+         select(key, first_author, publication_year, title),
       options = list(dom = "t",
                      pageLength = 10000),
       rownames = FALSE, server = FALSE,
@@ -745,8 +742,8 @@ builder_server <- function(id) {
 
     output$papers_in_2_not_1 <- renderDT(
       d_compare_2 %>%
-        filter(!(key %in% d_compare_1$key)) %>%
-        select(key, first_author, publication_year, title),
+         filter(!(key %in% d_compare_1$key)) %>%
+         select(key, first_author, publication_year, title),
       options = list(dom = "t",
                      pageLength = 10000),
       rownames = FALSE, server = FALSE,
@@ -767,7 +764,7 @@ builder_server <- function(id) {
   replace_tag_option <- function(d, tag, option, value){
 
     dr <- d %>%
-      mutate(!!sym(tag) := str_replace(.[[tag]], fixed(option), value))
+       mutate(!!sym(tag) := str_replace(.[[tag]], fixed(option), value))
 
     return(dr)
   }
@@ -780,11 +777,11 @@ builder_server <- function(id) {
     },
     content = function(file) {
 
-      d_edit_db <- read_csv(input$edit_db$datapath)
+      d_edit_db <-  read_csv(input$edit_db$datapath)
       old_name <- input$old_tag_name
       new_name <- input$new_tag_name
       d_edit_complete <- d_edit_db %>%
-        rename(!!sym(new_name) := old_name)
+         rename(!!sym(new_name) := old_name)
 
       write_csv(d_edit_complete, file)
 
@@ -800,7 +797,7 @@ builder_server <- function(id) {
     },
     content = function(file) {
 
-      d_edit_db <- read_csv(input$edit_db$datapath)
+      d_edit_db <-  read_csv(input$edit_db$datapath)
 
       t_name <- input$tag_name
       old_opt_name <- input$old_option_name
@@ -825,10 +822,10 @@ builder_server <- function(id) {
     },
     content = function(file) {
 
-      d_edit_db <- read_csv(input$edit_db$datapath)
+      d_edit_db <-  read_csv(input$edit_db$datapath)
       delete_tags <- str_trim(str_split_1(input$delete_tags, ","))
       d_edit_complete <- d_edit_db %>%
-        select(!delete_tags)
+         select(!delete_tags)
 
       write_csv(d_edit_complete, file)
 
@@ -844,7 +841,7 @@ builder_server <- function(id) {
     },
     content = function(file) {
 
-      d_edit_db <- read_csv(input$edit_db$datapath)
+      d_edit_db <-  read_csv(input$edit_db$datapath)
       delete_tag_options <- str_trim(str_split_1(input$delete_tag_options, ","))
 
       tags <- word(delete_tag_options, sep = "/")
@@ -871,13 +868,13 @@ builder_server <- function(id) {
     },
     content = function(file) {
 
-      d_edit_db <- read_csv(input$edit_db$datapath)
-      zotero_keys <- read_csv(input$zotero_for_delete$datapath) %>%
+      d_edit_db <-  read_csv(input$edit_db$datapath)
+      zotero_keys <-  read_csv(input$zotero_for_delete$datapath) %>%
         clean_names() %>%
-        pull(key)
+         pull(key)
 
       d_edit_complete <- d_edit_db %>%
-        filter(key %in% zotero_keys)
+         filter(key %in% zotero_keys)
 
       write_csv(d_edit_complete, file)
 
@@ -893,7 +890,7 @@ builder_server <- function(id) {
     content = function(file) {
 
       #browser()
-      d_edit_db <- read_csv(input$edit_db$datapath)
+      d_edit_db <-  read_csv(input$edit_db$datapath)
       delete_papers_tag_options <-
         str_trim(str_split_1(input$delete_papers_with_tag_options, ","))
 
@@ -904,7 +901,7 @@ builder_server <- function(id) {
 
       for(i in 1:length(tags)){
         d_edit_complete <- d_edit_complete %>%
-          filter(!!sym(tags[i]) != options[i])
+           filter(!!sym(tags[i]) != options[i])
       }
 
       write_csv(d_edit_complete, file)
@@ -921,7 +918,7 @@ builder_server <- function(id) {
     content = function(file) {
       withProgress(message = "Generating RIS file", value = 0, {
         # read the original lit-tag db file that has old zotero key values
-        d_nz <- read_csv(input$database_nz_csv$datapath)
+        d_nz <-  read_csv(input$database_nz_csv$datapath)
 
         incProgress(1/4)
         output$n_old_key_db <- renderText(HTML(paste("Number of papers in original (old keys) database: ",
@@ -960,13 +957,13 @@ builder_server <- function(id) {
           # Zotero strips htlm code from ris imports
           # To prserve html rags, replace "<" and ">" with text codes
           paper <- paper %>%
-            mutate(title = str_replace_all(title, "<", "&lt"),
+             mutate(title = str_replace_all(title, "<", "&lt"),
                    title = str_replace_all(title, ">", "&gt"),
                    title = str_replace_all(title, "\"", "&quot")) %>%
-            mutate(abstract_note = str_replace_all(abstract_note, "<", "&lt"),
+             mutate(abstract_note = str_replace_all(abstract_note, "<", "&lt"),
                    abstract_note = str_replace_all(abstract_note, ">", "&gt"),
                    abstract_note = str_replace_all(abstract_note, "\"", "&quot")) %>%
-            mutate(publication_year = as.character(publication_year))
+             mutate(publication_year = as.character(publication_year))
 
           ris_tag_map <- c(
             PY = "publication_year",
@@ -987,7 +984,7 @@ builder_server <- function(id) {
           )
 
           ris_tag_fun <- function(tag){
-            value <-  pull(paper, ris_tag_map[tag])
+            value <-   pull(paper, ris_tag_map[tag])
             value_tag <- NULL
             if(!is.na(value)){
               value_tag <- paste(tag, "-", value, sep = "  ")
@@ -996,7 +993,7 @@ builder_server <- function(id) {
           }
 
           tag_value <- names(ris_tag_map) %>%
-             purrr::map(\(x) ris_tag_fun(x)) %>%
+              map(\(x) ris_tag_fun(x)) %>%
             unlist()
 
           general_tags <- data.frame(tag_value)
@@ -1026,8 +1023,8 @@ builder_server <- function(id) {
         incProgress(2/4)
 
         d_ris <- 1:nrow(d_nz) %>%
-           purrr::map(\(x) ris_fun(d_nz[x,])) %>%
-          list_rbind()
+            map(\(x) ris_fun(d_nz[x,])) %>%
+           list_rbind()
 
         incProgress(3/4)
 
@@ -1049,9 +1046,9 @@ builder_server <- function(id) {
     content = function(file) {
 
       #export file made by zotero from RIS import
-      d_nkz <- read_csv(input$database_knz_csv$datapath) %>%
+      d_nkz <-  read_csv(input$database_knz_csv$datapath) %>%
         clean_names() %>%
-        select(key, publication_year, author, title)
+         select(key, publication_year, author, title)
 
       output$n_new_key_zotero <- renderText(
         HTML(paste("Number of papers in zotero file with new keys:",
@@ -1059,7 +1056,7 @@ builder_server <- function(id) {
 
       #copy the old key db file replace they keys from new zotero export by matching year, author and title
       d_new_key_db <- values$d_old_key_db %>%
-        select(-key) %>%
+         select(-key) %>%
         left_join(d_nkz, join_by(publication_year, author, title)) %>%
         relocate(key)
 

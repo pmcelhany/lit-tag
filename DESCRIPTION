@@ -3,26 +3,36 @@ Title: Lit-tag: an app for custom annotation of a citation database
 Version: 0.0.0.9000
 Authors@R: 
     person("Paul", "McElhany", , "paul.mcelhany@noaa.gov", role = c("aut", "cre"))
-Description: Starting with a citation library exported from Zotero, the lit-tag builder interface allows the creation custom annotation tags and notes. The lit-tag view module provides options to search the annotated database, generate custom reports, create summary graphics.
+Description: Starting with a citation library exported from Zotero, the
+    lit-tag builder interface allows the creation custom annotation tags
+    and notes. The lit-tag view module provides options to search the
+    annotated database, generate custom reports, create summary graphics.
 License: MIT + file LICENSE
+URL: https://github.com/pmcelhany/lit-tag
+BugReports: https://github.com/pmcelhany/lit-tag/issues
 Imports: 
+    bslib,
     config,
+    DT,
     golem,
+    janitor,
+    magrittr,
+    purrr,
+    quarto,
+    readxl,
+    rlang,
+    scales,
     shiny,
     shinyWidgets,
-    DT,
-    waiter,
-    bslib,
     tidyverse,
-    janitor,
-    readxl,
-    magrittr,
+    waiter,
+    writexl,
     xml2,
-    quarto,
-    scales,
-    writexl
+    dplyr,
+    lubridate,
+    readr,
+    tidyr,
+    ggplot2
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2
-URL: https://github.com/pmcelhany/lit-tag
-BugReports: https://github.com/pmcelhany/lit-tag/issues

@@ -20,6 +20,7 @@ app_server <- function(input, output, session) {
         h3("Select the module for this lit-tag session."),
          h3("Use lit-tag-builder to create or modify a lit-tag database."),
          h3("Use lit-tag-viewer to search, create reports, and generate graphics from an existing lit-tag database."),
+         h3("You can open a seperate lit-tag window on your browser for simultaneous builder and viewer sessions."),
         shinyWidgets::radioGroupButtons("lit_tag_module", label = "",
                                       choices = c("lit-tag-builder",
                                                   "lit-tag-viewer"),
