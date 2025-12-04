@@ -12,7 +12,7 @@
 #' @import readxl
 #' @import magrittr
 #' @import quarto
-#' @import scales
+#' @importFrom scales label_wrap
 #' @import writexl
 #' @import stringr
 #' @import purrr
@@ -161,7 +161,7 @@ viewer_server <- function(id) {
 
         values$categories_with_meta <- category_file_path %>%
           excel_sheets() %>%
-           set_names() %>%
+           purrr::set_names() %>%
            map(\(x) read_excel(category_file_path, sheet = x))
 
         values$d_category_meta <- values$categories_with_meta %>%
@@ -265,7 +265,7 @@ viewer_server <- function(id) {
            list_modify(notes = zap())
 
         plot_opt_list <- names(cat_without_notes) %>%
-           set_names() %>%
+           purrr::set_names() %>%
            map(\(x) names(cat_without_notes[[x]])) %>%
            list_assign(paper_fields = plot_paper_fields)
 
@@ -273,7 +273,7 @@ viewer_server <- function(id) {
                                  names(plot_opt_list)[1:length(plot_opt_list)-1])
 
         plot_opt_list_sorted <- opt_list_name_order %>%
-           set_names() %>%
+           purrr::set_names() %>%
            map(\(x) plot_opt_list[[x]])
 
         updateVirtualSelect(inputId = "plot_x_var",
@@ -297,7 +297,7 @@ viewer_server <- function(id) {
         summary_tbl_paper_fields <- c(plot_paper_fields, "doi", "url")
 
         summary_opt_list <- names(cat_without_notes) %>%
-           set_names() %>%
+           purrr::set_names() %>%
            map(\(x) names(cat_without_notes[[x]])) %>%
           list_assign(notes = notes_variables) %>%
           list_assign(paper_fields = summary_tbl_paper_fields)
@@ -307,7 +307,7 @@ viewer_server <- function(id) {
                                          names(summary_opt_list)[1:length(summary_opt_list)-1])
 
         summary_opt_list_sorted <- summary_opt_list_name_order %>%
-           set_names() %>%
+           purrr::set_names() %>%
            map(\(x) summary_opt_list[[x]])
 
         updateVirtualSelect(inputId = "summary_var",

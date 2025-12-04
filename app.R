@@ -11,6 +11,7 @@ Sys.setenv(QUARTO_PATH="/opt/quarto/latest/bin/quarto")
 # if it get accidentally set for the server
 # Sys.setenv(QUARTO_PATH="/usr/local/bin/quarto")
 
-pkgload::load_all(export_all = FALSE,helpers = FALSE,attach_testthat = FALSE)
+
+pkgload::load_all(export_all = TRUE,helpers = FALSE,attach_testthat = FALSE)
 options( "golem.app.prod" = TRUE)
 run_app() # add parameters here (if any)

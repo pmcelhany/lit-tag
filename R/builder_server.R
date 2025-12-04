@@ -143,7 +143,7 @@ builder_server <- function(id) {
       #local drive excel file version
       values$categories_with_meta <- input$categories_excel$datapath %>%
         excel_sheets() %>%
-         set_names() %>%
+         purrr::set_names() %>%
          map(\(x) read_excel(input$categories_excel$datapath, sheet = x))
 
 
@@ -265,7 +265,7 @@ builder_server <- function(id) {
          list_modify(notes = rlang::zap())
 
       plot_opt_list <- names(cat_without_notes) %>%
-         set_names() %>%
+         purrr::set_names() %>%
           map(\(x) names(cat_without_notes[[x]])) %>%
          list_assign(paper_fields = paper_fields)
 
@@ -273,7 +273,7 @@ builder_server <- function(id) {
                                names(plot_opt_list)[1:length(plot_opt_list)-1])
 
       filter_opt_list_sorted <- opt_list_name_order %>%
-         set_names() %>%
+         purrr::set_names() %>%
           map(\(x) plot_opt_list[[x]])
 
 
@@ -622,7 +622,7 @@ builder_server <- function(id) {
              filter(!(key %in% old_keys_not_in_zotero)) %>%
             left_join(d_zotero, join_by("key")) %>%
              select(-contains(".x")) %>%
-            set_names(str_remove(names(.), "\\.y")) %>%
+            purrr::set_names(str_remove(names(.), "\\.y")) %>%
              mutate(across(everything(), as.character))
 
           # papers in original db but no in the new zotero
@@ -655,11 +655,11 @@ builder_server <- function(id) {
     db_notes <- tags_notes[str_detect(tags_notes, "notes")]
 
     tag_options <- db_tags %>%
-       set_names() %>%
+       purrr::set_names() %>%
         map(\(x) as.character(unique(d[[x]])))
 
     tag_options_unique <- names(tag_options) %>%
-       set_names() %>%
+       purrr::set_names() %>%
         map(\(x) unique(str_trim(unlist(unlist(str_split(tag_options[[x]], ";"))))))
 
     tag_option_length <- tag_options_unique %>%

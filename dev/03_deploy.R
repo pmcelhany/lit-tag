@@ -11,6 +11,9 @@
 #### CURRENT FILE: DEPLOY SCRIPT #####
 ######################################
 
+# update docs and namespace
+devtools::document()
+
 # Test your app
 
 ## Run checks ----

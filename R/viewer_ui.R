@@ -226,17 +226,6 @@ viewer_ui <- function(id){
     ),
     ## Help panel ------------------------
     nav_panel(h2("Help"),
-              # uiOutput(ns("help_tabs"))
-              # # navset_pill(
-              # #   nav_panel(h3("Lit-tag-viewer"),
-              # #             tags$iframe(style="height:100vh; width:100%; scrolling=yes",
-              # #                         src="LitTag viewer guide.pdf")),
-              # #   uiOutput("mcdr_metadata_help")
-              # #   # nav_panel(h3("mCDR tag metadata"),
-              # #   #           tags$iframe(style="height:100vh; width:100%; scrolling=yes",
-              # #   #                       src="Tagging Guidance.pdf"))
-              # # )
-
               navset_pill(
                 nav_panel("lit-tag-viewer",
                           tags$iframe(style="height:100vh; width:100%; scrolling=yes",
