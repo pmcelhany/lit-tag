@@ -5,7 +5,7 @@
 # QUARTO_PATH !!!! -----------------------
 # QUARTO_PATH must be set for reports
 # This is not an issue on the local machine, but is not globally set on the server
-# This is the path on the NWFSC Posit server for hosting shiny apps
+# This is the path on the NFMS Posit server for hosting shiny apps
 Sys.setenv(QUARTO_PATH="/opt/quarto/latest/bin/quarto")
 # This is the path on Paul's mac and can be used to reset the env variable
 # if it get accidentally set for the server
