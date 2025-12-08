@@ -26,12 +26,11 @@ affiliations:
   name: Dalhousie University
 - index: 3
   name: NOAA Ocean Acidification Progam
-
 ---
 
 # Summary
 
-To facilitate the review, evaluation and analysis of scientific literature, the lit-tag shiny app provides a convenient interface for users to generate a citation database with custom, user-defined tags and notes. Lit-tag is not subject-specific and is useful for any field of research. Starting with a table of citations exported from a Zotero library and a user-generated Excel file describing a set of tags and notes fields, lit-tag provides tools for assigning tags and notes to papers (“lit-tag-builder” module) and for exporting, graphing, and generating reports from the resulting database (“lit-tag-viewer” module). The application has been used in several scientific reviews related to marine carbon dioxide removal @grabb.; @mcelhany.
+To facilitate the review, evaluation and analysis of scientific literature, the lit-tag Shiny application provides a convenient interface for users to generate a citation database with custom, user-defined tags and notes. Lit-tag is not subject-specific and is useful for any field of research. Starting with a table of citations exported from a Zotero library and a user-generated Excel file describing a set of tags and notes fields, lit-tag provides tools for assigning tags and notes to papers (“lit-tag-builder” module) and for exporting, graphing, and generating reports from the resulting database (“lit-tag-viewer” module). The application has been used in several scientific reviews related to marine carbon dioxide removal @grabb.; @mcelhany; @gurney-smith.
 
 # Statement of need
 
@@ -43,17 +42,16 @@ The lit-tag app has two modules: 1) lit-tag-builder for generating, editing and 
 
 ![Relationship between Zotero, lit-tag-builder module, lit-tag-viewer module and imported/exported files.\label{fig:overview}](images/lit_tag_overview.png)
 
-The main editing tab in the builder module contains panels for paper selection, viewing paper details, notes and tagging \autoref{fig:builder}. Other tabs in the builder module have tools for syncing with the Zotero database when adding new papers, database maintenance for global edits of the database (e.g., renaming a tag option), creating and linking to a new Zotero database and the module user guide.
+The main editing tab in the builder module contains panels for selecting papers, viewing paper details and notes, and assigning tags to papers \autoref{fig:builder}. Other tabs in the builder module have tools for syncing with the Zotero database when adding new papers, database maintenance for global edits of the database (e.g., renaming a tag option, deleting categories), creating and linking to a new Zotero database and viewing the module user guide.
 
-The viewer module contains options for searching and filtering the database (including custom searches using R syntax), plotting summary tables using any tag variable \autoref{fig:viewer}, and generating custom tables (csv files) and reports (html, pdf or word). 
+The viewer module contains options for searching and filtering the database (including custom searches using R syntax), plotting summary tables using any two tag variables for full and filtered datasets (Fig. 3), and generating custom tables (csv files) and reports (html, pdf or word). 
 
-![Example screen shot of the “Tag edit” tab of  lit-tag-builder module user interface.\label{fig:builder}](images/builder.png)
+![Example screen shot of the “Tag edit” tab of lit-tag-builder module user interface.\label{fig:builder}](images/builder.png)
 
 ![Example screen shot of the “Summary plots” tab of the lit-tag-viewer module.\label{fig:viewer}](images/viewer.png)
 
 # Acknowledgements
+
 Madison Wood’s work on this project was supported by a Sea Grant Knauss Fellowship. We would also like to thank the International Council for the Exploration of the Sea (ICES) mCDR x Fisheries Workshop group for inspiration and app testing.
-
-
 
 # References
