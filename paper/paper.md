@@ -52,6 +52,6 @@ The viewer module contains options for searching and filtering the database (inc
 
 # Acknowledgements
 
-Madison Wood’s work on this project was supported by a Sea Grant Knauss Fellowship. We would also like to thank the International Council for the Exploration of the Sea (ICES) mCDR x Fisheries Workshop group for inspiration and app testing.
+Madison Wood’s work on this project was supported by a Sea Grant Knauss Fellowship. Kalina Grabb’s work on this project was supported by funding from NOAA Ocean Acidification Program and NOAA Northeast Fisheries Science Center through IBSS. We would also like to thank the International Council for the Exploration of the Sea (ICES) mCDR x Fisheries Workshop group for inspiration and app testing.
 
 # References
