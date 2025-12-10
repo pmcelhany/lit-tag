@@ -119,7 +119,7 @@ builder_server <- function(id) {
                            default_filter_var = character(0),
                            last_key = NULL, inspire_quotes = NULL,
                            inspire_images = NULL, d_content_db = NULL,
-                           d_old_key_db = NULL)
+                           d_old_key_db = NULL, d_split_db = NULL)
 
   ## Render paper info function ----------------------------
   render_paper_info <- function(label, paper_var){
@@ -183,6 +183,12 @@ builder_server <- function(id) {
       values$d_mcdr_tagged <-  read_csv(input$database_csv$datapath) %>%
          mutate(across(everything(), as.character))
 
+      #add "extra" column if it does not already exist
+      if(!("extra" %in% names(values$d_mcdr_tagged))){
+        values$d_mcdr_tagged <-  values$d_mcdr_tagged %>%
+          mutate(extra = "")
+      }
+
       # if there is no "notes" column in the original zotero file, it needs added
       # this is a bit of hack to deal with the fact that oned of the category tabs is named "notes"
       # which is also a potential field in zotero.
@@ -234,10 +240,10 @@ builder_server <- function(id) {
                                                                               meta = values$d_category_meta)
                                                            )))))))
       ### Bibliography table -----------------------------------------
-      if(all(c("first_author", "publication_year", "title") %in%
+      if(all(c("first_author", "publication_year", "title", "extra") %in%
              names(values$d_mcdr_filtered))){
         output$table <- renderDT(values$d_mcdr_filtered %>%
-                                    select(first_author, publication_year, title),
+                                    select(first_author, publication_year, title, extra),
                                  selection = list(mode ="single"),
                                  options = list(dom = "t",
                                                 pageLength = 10000),
@@ -250,6 +256,8 @@ builder_server <- function(id) {
       output$selected_title <- render_paper_info("Title:", "title")
       output$selected_journal <- render_paper_info("Journal:",
                                                    "publication_title")
+      output$selected_extra <- render_paper_info("Extra:",
+                                                   "extra")
 
 
       ### Select filter variables dropdown  -------------------------------
@@ -908,6 +916,46 @@ builder_server <- function(id) {
 
     }
   )
+
+  # ### Split papers --------------------------------------
+  #
+  # #### Render split--paper info function ----------------------------
+  # render_split_paper_info <- function(label, paper_var){
+  #   return(renderText(paste(label, values$d_split_db %>%
+  #                             slice(input$split_table_rows_selected) %>%
+  #                             pull(paper_var))))
+  # }
+  # #### Load split database -------------------------------------
+  # observeEvent(input$load_data_split, {
+  #   values$d_split_db <- read_csv(input$split_database_csv$datapath)
+  #
+  #   if(all(c("first_author", "publication_year", "title") %in%
+  #          names(values$d_split_db))){
+  #     output$split_table <- renderDT(values$d_split_db %>%
+  #                                select(first_author, publication_year, title),
+  #                              selection = list(mode ="single"),
+  #                              options = list(dom = "t",
+  #                                             pageLength = 10000),
+  #                              rownames = FALSE, server = FALSE)
+  #
+  #     output$selected_year_split <- render_split_paper_info("Year:", "publication_year")
+  #     output$selected_author_split <- render_split_paper_info("Authors:", "author")
+  #     output$selected_title_split <- render_split_paper_info("Title:", "title")
+  #     output$selected_journal_split <- render_split_paper_info("Journal:",
+  #                                                  "publication_title")
+  #   }
+  # })
+  #
+  # #### Create split
+  # observeEvent(input$split_paper,{
+  #   browser()
+  #   split_names <- str_trim(str_split_1(input$split_names, ";"))
+  #
+  #   split_paper <- values$d_split_db %>%
+  #     slice(input$split_table_rows_selected)
+  #
+  #
+  # })
 
   ## New Zotero ------------------------
   ### Generate RIS ---------------------
