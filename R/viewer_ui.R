@@ -148,13 +148,17 @@ viewer_ui <- function(id){
                                           choices = c("None", "Percent",
                                                       "Number of papers"),
                                           selected = "None"),
+                             downloadButton(ns("download_plot_data"),
+                                            "Download plot data"),
+                             HTML("<br>"),
+                             HTML("<br>"),
                              card(card_header("Selection criteria"),
                                   DTOutput(ns("criteria_table_plot")))
-
                 ),
                 mainPanel(width = 9,
-                          h3("Plot"),
-                          plotOutput(ns("plot")))
+                            h3("Plot"),
+                            plotOutput(ns("plot"))
+                )
               )),
     ## Summary table panel ---------------------------
     nav_panel(h2("Summary table"),

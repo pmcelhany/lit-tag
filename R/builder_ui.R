@@ -184,35 +184,6 @@ builder_ui <- function(id){
                                                               "Download database with paper deletion based on tag options"))
                                    )
                           ),
-                          ### Split papers
-                          # tabPanel("Split paper",
-                          #          layout_columns(
-                          #            col_widths = c(4,4,4),
-                          #            #### Left panel: split database ---------------------
-                          #            card(card_header(h3("Paper table")),
-                          #                 style = "border",
-                          #                 fileInput(ns("split_database_csv"), h4("Database to split"),
-                          #                           multiple = FALSE, accept = c(".csv")),
-                          #
-                          #                 input_task_button(ns("load_data_split"), "Load database"),
-                          #                 DT::DTOutput(ns('split_table'))),
-                          #
-                          #            ### Center panel: split paper -----------------------------------
-                          #            card(card_header(h3("Paper info and notes")),
-                          #                 textOutput(ns("selected_author_split")),
-                          #                 textOutput(ns("selected_year_split")),
-                          #                 textOutput(ns("selected_title_split")),
-                          #                 textOutput(ns("selected_journal_split")),
-                          #                 textInput(ns("split_names"), "Split names"),
-                          #                 checkboxInput("copy_split", "Copy data",
-                          #                               value = FALSE),
-                          #                 input_task_button(ns("split_paper"),
-                          #                                   "Split paper"),
-                          #                 input_task_button(ns("save_split_db"),
-                          #                                   "Save splits")),
-                          #            ),
-                          #
-                          #          )
               )),
 
     ## New zotero panel ---------------------

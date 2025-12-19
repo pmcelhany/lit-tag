@@ -118,7 +118,8 @@ viewer_server <- function(id) {
     values <- reactiveValues(d_mcdr_tagged = NULL, categories_with_meta = NULL,
                              categories = NULL,
                              tag_variables = NULL,
-                             d_category_meta = NULL, d_mcdr_filtered = NULL)
+                             d_category_meta = NULL, d_mcdr_filtered = NULL,
+                             d_plot = NULL)
 
     ## render database chooser
     output$db_chooser <- renderUI({
@@ -679,6 +680,9 @@ viewer_server <- function(id) {
 
         n_total_paper <- sum(d_plot_2$n)
 
+        # plot data to download for non-stacked plot
+        values$d_plot <- d_plot_2
+
         p <- d_plot_2 %>%
           ggplot(aes(.data[[input$plot_x_var]], n, label = .data[[bar_data]])) +
           geom_col(fill = "blue") +
@@ -810,10 +814,23 @@ viewer_server <- function(id) {
             coord_cartesian(clip = "off")
 
         }
+        # plot data to download for stacked plot
+        values$d_plot <- d_z
         p
       }
 
     }, height = 800)
+
+    ### download plot data -----------------------
+
+    output$download_plot_data <- downloadHandler(
+      filename = function() {
+        paste("lit_tag_plot_data_", format(now("UTC"), "%Y_%m_%d_%H%M_UTC"),
+              ".csv", sep = "")
+      },
+      content = function(file) {
+        write_csv(values$d_plot, file)
+      })
 
     ## Summary table ---------------------------------------------
 

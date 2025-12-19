@@ -435,11 +435,6 @@ builder_server <- function(id) {
       updateCheckboxGroupInput(inputId = x, selected = s)
     }
 
-    # if(d_category_meta[x, "select_type"] == "date" &
-    #    !is.na(as.Date(row_val, "%m/%d/%y", optional = true))){
-    #   updateDateInput(inputId = x, value = as.Date(row_val, "%m/%d/%y"))
-    # }
-
     if(d_category_meta[x, "select_type"] == "text_box"){
       updateTextInput(inputId = x, value = row_val)
     }
@@ -727,10 +722,6 @@ builder_server <- function(id) {
       HTML(paste(tag_unique_with_count, collapse = "<br>")),
       easyClose = TRUE))
 
-    # showModal(modalDialog(
-    #   title = selected_tag,
-    #   HTML(paste(tag_unique, collapse = "<br>")),
-    #   easyClose = TRUE))
   })
   ### Compare databases --------------------------------
 
@@ -818,8 +809,6 @@ builder_server <- function(id) {
 
     }
   )
-
-
 
   #### delete tags download  ----------------------------
 
@@ -917,46 +906,6 @@ builder_server <- function(id) {
     }
   )
 
-  # ### Split papers --------------------------------------
-  #
-  # #### Render split--paper info function ----------------------------
-  # render_split_paper_info <- function(label, paper_var){
-  #   return(renderText(paste(label, values$d_split_db %>%
-  #                             slice(input$split_table_rows_selected) %>%
-  #                             pull(paper_var))))
-  # }
-  # #### Load split database -------------------------------------
-  # observeEvent(input$load_data_split, {
-  #   values$d_split_db <- read_csv(input$split_database_csv$datapath)
-  #
-  #   if(all(c("first_author", "publication_year", "title") %in%
-  #          names(values$d_split_db))){
-  #     output$split_table <- renderDT(values$d_split_db %>%
-  #                                select(first_author, publication_year, title),
-  #                              selection = list(mode ="single"),
-  #                              options = list(dom = "t",
-  #                                             pageLength = 10000),
-  #                              rownames = FALSE, server = FALSE)
-  #
-  #     output$selected_year_split <- render_split_paper_info("Year:", "publication_year")
-  #     output$selected_author_split <- render_split_paper_info("Authors:", "author")
-  #     output$selected_title_split <- render_split_paper_info("Title:", "title")
-  #     output$selected_journal_split <- render_split_paper_info("Journal:",
-  #                                                  "publication_title")
-  #   }
-  # })
-  #
-  # #### Create split
-  # observeEvent(input$split_paper,{
-  #   browser()
-  #   split_names <- str_trim(str_split_1(input$split_names, ";"))
-  #
-  #   split_paper <- values$d_split_db %>%
-  #     slice(input$split_table_rows_selected)
-  #
-  #
-  # })
-
   ## New Zotero ------------------------
   ### Generate RIS ---------------------
   output$generate_ris <- downloadHandler(
@@ -974,7 +923,7 @@ builder_server <- function(id) {
 
 
         # sometimes, the title in the original db file might have html escape code (e.g. "&lt;")
-        # if these escape characters are included as-is in the RIS file, we will file to get a proper match
+        # if these escape characters are included as-is in the RIS file, we will fail to get a proper match
         # when creating the final new keys lit tag database
         # to fix this problem, escape codes are coverted to text (e.g. "&lt;" = "<")
         unescape_html <- function(str){
