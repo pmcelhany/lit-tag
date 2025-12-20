@@ -247,7 +247,7 @@ builder_ui <- function(id){
               navset_pill(
                 nav_panel("lit-tag-builder",
                           tags$iframe(style="height:100vh; width:100%; scrolling=yes",
-                                      src="www/lit-tag-builder user guide.pdf")),
+                                      src="www/lit_tag_builder_guide.pdf")),
                 nav_panel("example files",
                           sidebarLayout(
                             sidebarPanel(width = 3,

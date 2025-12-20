@@ -45,7 +45,7 @@ builder_server <- function(id) {
     category_remove_meta_fun <- function(d){
 
       d_cat <- d %>%
-        clean_names() %>%
+         clean_names() %>%
          mutate(row_id = 1:nrow(.)) %>%
          filter(row_id > 1) %>%
          select(-row_id)
@@ -120,7 +120,7 @@ builder_server <- function(id) {
                            last_key = NULL, inspire_quotes = NULL,
                            inspire_images = NULL, d_content_db = NULL,
                            d_old_key_db = NULL, d_split_db = NULL,
-                           tag_variables = NULL)
+                           tag_variables = NULL, bib_table_col = NULL)
 
   ## Render paper info function ----------------------------
   render_paper_info <- function(label, paper_var){
@@ -246,10 +246,10 @@ builder_server <- function(id) {
                                                                               meta = values$d_category_meta)
                                                            )))))))
       ### Bibliography table -----------------------------------------
-      if(all(c("first_author", "publication_year", "title", "extra") %in%
+      if(all(values$bib_table_col %in%
              names(values$d_mcdr_filtered))){
         output$table <- renderDT(values$d_mcdr_filtered %>%
-                                    select(first_author, publication_year, title, extra),
+                                    select(values$bib_table_col),
                                  selection = list(mode ="single"),
                                  options = list(dom = "t",
                                                 pageLength = 10000),
@@ -262,8 +262,8 @@ builder_server <- function(id) {
       output$selected_title <- render_paper_info("Title:", "title")
       output$selected_journal <- render_paper_info("Journal:",
                                                    "publication_title")
-      output$selected_extra <- render_paper_info("Extra:",
-                                                   "extra")
+      # output$selected_extra <- render_paper_info("Extra:",
+      #                                              "extra")
 
 
       ### Select filter variables dropdown  -------------------------------
@@ -308,6 +308,17 @@ builder_server <- function(id) {
 
   ## Proxy for the papers table ------------------------------
   dt_proxy <- DT::dataTableProxy("table")
+
+  ## Observe show extra --------------------------------
+  observeEvent(input$show_extra,{
+    if(input$show_extra){
+      values$bib_table_col <- c("first_author", "publication_year", "title", "extra")
+      output$selected_extra <- render_paper_info("Extra:", "extra")
+    } else{
+      values$bib_table_col <- c("first_author", "publication_year", "title")
+      output$selected_extra <- NULL
+    }
+  })
 
   ## Observe select filter fields  -------------------------------
   observeEvent(input$filter_var, {
