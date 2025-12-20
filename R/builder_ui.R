@@ -41,6 +41,8 @@ builder_ui <- function(id){
                      #input_task_button("unselect_filters", "Unselect all filters"),
                      checkboxInput(ns("exclude_obsolete"), "Exclude obsolete papers",
                                    value = TRUE),
+                     checkboxInput(ns("show_extra"), "Show Zotero \"extra\" field",
+                                   value = FALSE),
                      virtualSelectInput(
                        inputId = ns("filter_var"),
                        label = "Filter variables",
@@ -73,21 +75,49 @@ builder_ui <- function(id){
               )
     ),
 
+    ## New database panel -------------------------
+    nav_panel(h2("New database"),
+              sidebarLayout(
+                sidebarPanel(width = 3,
+                             h3("Create a new lit-tag database"),
+                             HTML("<br>"),
+                             HTML("<br>"),
+                             fileInput(ns("new_zotero_csv"), h4("Zotero CSV File"),
+                                       multiple = FALSE, accept = c(".csv")),
+                             fileInput(ns("cat_new_db"), h4("Categories for new db"),
+                                       multiple = FALSE, accept = c(".xlsx")),
+                             textInput(ns("new_db_name"), "New database name",
+                                       value = "Untitled"),
+                             downloadButton(ns("new_database"),
+                                            "Download new database")
+                ),
+                mainPanel(width = 9,
+                          h3(textOutput(ns("nrow_new_db"))),
+                          h3(textOutput(ns("n_new_tags")))
+                )
+
+              )
+    ),
+
     ## Sync zotero panel ---------------------
     nav_panel(h2("Sync Zotero"),
               sidebarLayout(
                 sidebarPanel(width = 3,
-                             fileInput(ns("zotero_csv"), h4("Zotero CSV File"),
+                             fileInput(ns("sync_database_csv"), h4("Database to sync"),
+                                       multiple = FALSE, accept = c(".csv")),
+                             fileInput(ns("sync_categories_excel"), h4("Categories file for sync"),
+                                       multiple = FALSE, accept = c(".xls", ".xlsx")),
+                             fileInput(ns("sync_zotero_csv"), h4("Zotero csv file for sync"),
                                        multiple = FALSE, accept = c(".csv")),
                              downloadButton(ns("update_from_zotero"),
                                             "Update database from Zotero")
                 ),
                 mainPanel(width = 9,
-                          textOutput(ns("n_init_db")),
-                          textOutput(ns("n_zotero")),
-                          textOutput(ns("n_new_keys")),
-                          textOutput(ns("n_old_key")),
-                          textOutput(ns("n_new_db"))
+                          h4(textOutput(ns("n_init_db"))),
+                          h4(textOutput(ns("n_zotero"))),
+                          h4(textOutput(ns("n_new_keys"))),
+                          h4(textOutput(ns("n_old_key"))),
+                          h4(textOutput(ns("n_new_db")))
                 )
 
               )

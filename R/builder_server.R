@@ -119,13 +119,38 @@ builder_server <- function(id) {
                            default_filter_var = character(0),
                            last_key = NULL, inspire_quotes = NULL,
                            inspire_images = NULL, d_content_db = NULL,
-                           d_old_key_db = NULL, d_split_db = NULL)
+                           d_old_key_db = NULL, d_split_db = NULL,
+                           tag_variables = NULL)
 
   ## Render paper info function ----------------------------
   render_paper_info <- function(label, paper_var){
     return(renderText(paste(label, values$d_mcdr_filtered %>%
                                slice(input$table_rows_selected) %>%
                                pull(paper_var))))
+  }
+
+  ## load categories function -----------------
+  load_categories <- function(filepath){
+
+    values$categories_with_meta <- filepath %>%
+      excel_sheets() %>%
+      purrr::set_names() %>%
+      map(\(x) read_excel(filepath, sheet = x))
+
+    values$d_category_meta <- values$categories_with_meta %>%
+      map(\(x) category_meta_fun(x)) %>%
+      list_rbind()
+
+    # create a list of data frames with the categories and response
+    values$categories <- values$categories_with_meta %>%
+      map(\(x) category_remove_meta_fun(x))
+
+    #vector of tag variables
+    values$tag_variables <- c( row.names(values$d_category_meta) %>%
+                          stringr::str_subset("notes", negate = TRUE),
+                        values$categories$notes %>%
+                          pull("notes"))
+
   }
 
   ## Load data button ---------------------------------------
@@ -140,32 +165,13 @@ builder_server <- function(id) {
       ### Load category data ---------------------------------------
       incProgress(1/4)
 
-      #local drive excel file version
-      values$categories_with_meta <- input$categories_excel$datapath %>%
-        excel_sheets() %>%
-         purrr::set_names() %>%
-         map(\(x) read_excel(input$categories_excel$datapath, sheet = x))
+      load_categories(input$categories_excel$datapath)
 
-
-      values$d_category_meta <- values$categories_with_meta %>%
-         map(\(x) category_meta_fun(x)) %>%
-         list_rbind()
-
-      # create a list of data frames with the categories and response
-      values$categories <- values$categories_with_meta %>%
-         map(\(x) category_remove_meta_fun(x))
-
-      #vector of tag variables
-      tag_variables <- c( row.names(values$d_category_meta) %>%
-                            stringr::str_subset("notes", negate = TRUE),
-                          values$categories$notes %>%
-                             pull("notes"))
-
-      # vector fo notes variables
+      #vector of notes variables
       notes_variables <- values$categories$notes %>%
          pull("notes")
 
-
+      tag_variables <- values$tag_variables
       categories_with_meta <- values$categories_with_meta
       d_category_meta <- values$d_category_meta
       categories <- values$categories
@@ -385,8 +391,6 @@ builder_server <- function(id) {
 
     values$d_mcdr_tagged[values$d_mcdr_tagged$key == key, tag] <-
       tag_value
-
-    #print(values$d_mcdr_tagged[values$d_mcdr_tagged$key == key, tag])
   }
 
   ### Save last row function -----------------------
@@ -525,7 +529,7 @@ builder_server <- function(id) {
       save_last_row(values$last_key, values$d_category_meta,
                     values$categories$notes)
 
-      # the remove_leading_special_char funciton makes sure that
+      # the remove_leading_special_char function makes sure that
       # the are no leading characters in any of the data that
       # will cause "#NAME?" errors if the file is opened in excel
       values$d_mcdr_tagged %>%
@@ -535,44 +539,73 @@ builder_server <- function(id) {
 
     })
 
-  ## Update database button --------------------------
+    ## Read Zotero function -------------
+    read_zotero <- function(filepath){
+      d <-  read_csv(filepath) %>%
+        clean_names() %>%
+        remove_empty() %>%
+        mutate(first_author = word(author, sep = ",")) %>%
+        arrange(first_author) %>%
+        mutate(across(everything(), as.character))
 
-  #observeEvent(input$update_from_zotero, {
+      return(d)
+    }
+
+  ## New database button ---------------------------
+  output$new_database <- downloadHandler(
+    filename = function() {
+      paste(input$new_db_name, ".csv", sep = "")
+    },
+    content = function(file) {
+      d_zotero <- read_zotero(input$new_zotero_csv$datapath)
+      load_categories(input$cat_new_db$datapath)
+      d_new_db <- d_zotero
+      d_new_db[values$tag_variables] <- NA
+
+      output$nrow_new_db <- renderText(paste("Number of papers in new db:",
+                                           nrow(d_new_db)))
+      output$n_new_tags <-
+        renderText(paste("Number of tags (including notes) in new db:",
+                         length(values$tag_variables)))
+
+      write_csv(d_new_db, file)
+    }
+  )
+
+  ## Sync zotero button --------------------------
 
   output$update_from_zotero <- downloadHandler(
     filename = function() {
-      paste(str_remove(input$database_csv$name, ".csv"), "_",
+      paste(str_remove(input$sync_database_csv$name, ".csv"), "_",
             format(now("UTC"), "%Y_%m_%d_%H%M_UTC"), ".csv", sep = "")
     },
     content = function(file) {
 
       withProgress(message = "Updating from Zotero", value = 0, {
 
-        #browser()
         ### Read zotero --------------------------------------
 
-        d_zotero <-  read_csv(input$zotero_csv$datapath) %>%
-          clean_names() %>%
-          remove_empty() %>%
-           mutate(first_author = word(author, sep = ",")) %>%
-          arrange(first_author) %>%
-           mutate(across(everything(), as.character))
+        d_zotero <-  read_zotero(input$sync_zotero_csv$datapath)
 
         incProgress(1/4)
 
         ### Tag variables -------------------------------------------------
 
         # Tag variables
-        tag_variables <- c( row.names(values$d_category_meta) %>%
-                              stringr::str_subset("notes", negate = TRUE),
-                            values$categories$notes %>%
-                               pull("notes"))
+        # tag_variables <- c( row.names(values$d_category_meta) %>%
+        #                       stringr::str_subset("notes", negate = TRUE),
+        #                     values$categories$notes %>%
+        #                        pull("notes"))
+
+        load_categories(input$sync_categories_excel$datapath)
+        tag_variables <- values$tag_variables
 
 
         incProgress(2/4)
 
         ### Set init database ------------------------------------------------
-        d_database <- values$d_mcdr_tagged
+        #d_database <- values$d_mcdr_tagged
+        d_database <- read_csv(input$sync_database_csv$datapath)
 
 
         ### Set Keys -----------------------------------------------
@@ -1075,7 +1108,7 @@ builder_server <- function(id) {
       "unicorn_example.zip"
     },
     content = function(file) {
-      file.copy("docs/unicorn_example.zip", file)
+      file.copy("data/unicorn_example.zip", file)
     },
     contentType = "application/zip")
 
@@ -1085,7 +1118,7 @@ builder_server <- function(id) {
       "mcdr_example.zip"
     },
     content = function(file) {
-      file.copy("docs/mcdr_example.zip", file)
+      file.copy("data/mcdr_example.zip", file)
     },
     contentType = "application/zip")
 })
