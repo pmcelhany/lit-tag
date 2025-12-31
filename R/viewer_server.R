@@ -251,7 +251,7 @@ viewer_server <- function(id) {
         output$table_full <- DT::renderDataTable(values$d_mcdr_tagged %>%
                                                    select(author,
                                                           publication_year,
-                                                          title, extra),
+                                                          title),
                                              selection = "none",
                                              options =
                                                list(dom = "t",
