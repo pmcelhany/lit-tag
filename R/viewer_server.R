@@ -229,9 +229,14 @@ viewer_server <- function(id) {
 
         incProgress(3/4)
 
+
+        table_vars <- c("author", "publication_year", "title")
+        if(input$show_extra){
+          table_vars <- c("author", "publication_year", "title", "extra")
+        }
         ### Filter  table -----------------------------------------
         output$table <- renderDT(values$d_mcdr_filtered %>%
-                                    select(author, publication_year, title),
+                                    select(table_vars),
                                  selection = "single",
                                  options = list(dom = "t",
                                                 pageLength = 10000,
@@ -244,7 +249,9 @@ viewer_server <- function(id) {
 
         ### Full  table -----------------------------------------
         output$table_full <- DT::renderDataTable(values$d_mcdr_tagged %>%
-                                                    select(author, publication_year, title),
+                                                   select(author,
+                                                          publication_year,
+                                                          title, extra),
                                              selection = "none",
                                              options =
                                                list(dom = "t",
@@ -346,6 +353,27 @@ viewer_server <- function(id) {
         incProgress(4/4)
       })
       }
+    })
+
+    ## Observe show extra -------------------
+    observeEvent(input$show_extra,{
+      if(input$show_extra){
+        table_vars <- c("author", "publication_year", "title", "extra")
+      } else{
+        table_vars <- c("author", "publication_year", "title")
+      }
+      ### Filter  table -----------------------------------------
+      output$table <- renderDT(values$d_mcdr_filtered %>%
+                                 select(table_vars),
+                               selection = "single",
+                               options = list(dom = "t",
+                                              pageLength = 10000,
+                                              #autoWidth = TRUE,
+                                              columnDefs =
+                                                list(list(width =
+                                                            '200px',
+                                                          targets = "_all"))),
+                               rownames = FALSE, server = FALSE)
     })
 
     ## Download database, tag cat, and ris file --------------

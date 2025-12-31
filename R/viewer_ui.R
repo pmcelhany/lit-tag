@@ -54,13 +54,16 @@ viewer_ui <- function(id){
                           DTOutput(ns("table_full")))
               )
     ),
-    ## Tag edit panel ---------------------
+    ## Search db panel ---------------------
     nav_panel(h2("Search database"),
               #useWaiter(),
               layout_columns(
                 col_widths = c(4,4,4),
                 ### Left panel: table of papers ---------------------
                 card(card_header(h3("Paper table (filtered)")),
+                     checkboxInput(ns("show_extra"),
+                                   "Show \"extra\" field",
+                                   value = FALSE),
                      DTOutput(ns('table'))),
 
                 ### Center panel: search criteria ---------------------------
