@@ -28,6 +28,16 @@ builder_server <- function(id) {
     ns <- session$ns
 
     ## Misc functions -----------------------------------
+
+    # function to add columns to a df if the columns do not already exist
+    add_cols_if_missing <- function(df, cols_to_add) {
+      missing_cols <- cols_to_add[!cols_to_add %in% names(df)]
+      if(length(missing_cols) > 0) {
+        df[missing_cols] <- NA_character_
+      }
+      return(df)
+    }
+
     # function to pull out the category label and selection type metadata
     category_meta_fun <- function(d){
 
@@ -947,6 +957,68 @@ builder_server <- function(id) {
 
       write_csv(d_edit_complete, file)
 
+    }
+  )
+
+  ### Combine databases ---------------------------
+  output$download_combined <- downloadHandler(
+    filename = function() {
+      paste0(input$combined_filename, "_",
+             format(now("UTC"), "%Y_%m_%d_%H%M_UTC"), ".csv")
+    },
+    content = function(file) {
+      withProgress(message = "Generating combined database", value = 0, {
+
+      # read vector of all possible zotero fields
+      zotero_fields <-  read_csv("data/zotero_fields.csv")$zotero_fields
+      incProgress(1/4)
+
+      load_categories(input$combine_cat$datapath)
+
+      read_as_char <- function(path){
+        d <- read_csv(path) %>%
+          mutate(across(everything(), as.character))
+
+        all_var <- c(zotero_fields, values$tag_variables, "date_time_added_db",
+                     "date_time_obsolete_db")
+
+        d_all_var <- add_cols_if_missing(d, all_var)
+
+        d_complete <- d_all_var %>%
+          select(-(setdiff(all_var, names(.))))
+
+        return(d_complete)
+      }
+
+      d_comb_db <- input$combine_dbs$datapath %>%
+        map(\(x) read_as_char(x)) %>%
+        list_rbind() %>%
+        select(where(~!all(is.na(.x))))
+
+      incProgress(3/4)
+
+      write_csv(d_comb_db, file)
+
+      # for output text of number of papers
+      np <- input$combine_dbs$datapath %>%
+        map(\(x) nrow(read_csv(x))) %>%
+        unlist()
+
+      n_papers <- input$combine_dbs %>%
+        mutate(n = np) %>%
+        mutate(n_papers_text =
+                 paste0("Number of references in ", name, ": ", n)) %>%
+        pull(n_papers_text) %>%
+        c(paste("Number of references in summed files:", sum(np))) %>%
+        c(paste("Number of references in combined db:", nrow(d_comb_db)))
+
+      output$n_combined <- renderUI({
+        HTML(paste(n_papers, collapse = "<br>"))
+      })
+
+      incProgress(4/4)
+
+      })
     }
   )
 

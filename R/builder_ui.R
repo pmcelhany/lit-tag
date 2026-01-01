@@ -214,6 +214,29 @@ builder_ui <- function(id){
                                                               "Download database with paper deletion based on tag options"))
                                    )
                           ),
+                          ### Combine databases -----------------
+                          tabPanel("Combine databases",
+                                   sidebarLayout(
+                                     sidebarPanel(width = 3,
+                                                  fileInput(ns("combine_dbs"),
+                                                            h4("Databases to combine"),
+                                                            multiple = TRUE,
+                                                            accept = c(".csv")),
+                                                  fileInput(ns("combine_cat"),
+                                                            h4("Categories for combined database"),
+                                                            multiple = FALSE,
+                                                            accept = c(".xlsx")),
+                                                  textInput(ns("combined_filename"),
+                                                            h4("Name for combined database"),
+                                                            value = "Untitled"),
+                                                  downloadButton(ns("download_combined"),
+                                                                 "Download combined database")
+                                                  ),
+                                     mainPanel(width = 9,
+                                               h3(htmlOutput(ns("n_combined")))
+                                               )
+                                     )
+                                   )
               )),
 
     ## New zotero panel ---------------------
