@@ -538,8 +538,14 @@ builder_server <- function(id) {
   ## Download edits button ------------------
   output$download_edits <- downloadHandler(
     filename = function() {
-      paste(str_remove(input$database_csv$name, ".csv"), "_",
-            format(now("UTC"), "%Y_%m_%d_%H%M_UTC"), ".csv", sep = "")
+      base_name <- str_remove(input$database_csv$name, ".csv")
+      if(input$remove_timestamps & str_detect(base_name, "_UTC")){
+        n_ts_words <- (5 * str_count(base_name, "_UTC")) + 1
+        base_name <- word(base_name, 1, -n_ts_words, sep = "_")
+      }
+      file_name <- paste(base_name, "_",
+                     format(now("UTC"), "%Y_%m_%d_%H%M_UTC"), ".csv", sep = "")
+      return(file_name)
     },
     content = function(file) {
 

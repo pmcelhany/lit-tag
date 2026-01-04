@@ -58,10 +58,11 @@ builder_ui <- function(id){
 
                 ### Center panel: paper info and notes -----------------------------------
                 card(card_header(h3("Paper info and notes")),
-                     #input_task_button("save_edits", "Save Edits"),
+                     checkboxInput(ns("remove_timestamps"),
+                                   "Remove timestamps from original file name",
+                                   value = TRUE, width = "100%"),
                      downloadButton(ns("download_edits"),
                                     "Save edits"),
-                     #bsButton("save_edits", "Save Edits", style = "primary"),
                      textOutput(ns("selected_author")),
                      textOutput(ns("selected_year")),
                      textOutput(ns("selected_title")),
