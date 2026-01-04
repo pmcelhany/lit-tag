@@ -549,12 +549,15 @@ builder_server <- function(id) {
     },
     content = function(file) {
 
-      values$last_key <- values$d_mcdr_filtered %>%
-         slice(input$table_rows_selected) %>%
-         pull(key)
+      if(!is.null(input$table_rows_selected)){
 
-      save_last_row(values$last_key, values$d_category_meta,
-                    values$categories$notes)
+        values$last_key <- values$d_mcdr_filtered %>%
+           slice(input$table_rows_selected) %>%
+           pull(key)
+
+        save_last_row(values$last_key, values$d_category_meta,
+                      values$categories$notes)
+      }
 
       # the remove_leading_special_char function makes sure that
       # the are no leading characters in any of the data that
@@ -617,12 +620,6 @@ builder_server <- function(id) {
         incProgress(1/4)
 
         ### Tag variables -------------------------------------------------
-
-        # Tag variables
-        # tag_variables <- c( row.names(values$d_category_meta) %>%
-        #                       stringr::str_subset("notes", negate = TRUE),
-        #                     values$categories$notes %>%
-        #                        pull("notes"))
 
         load_categories(input$sync_categories_excel$datapath)
         tag_variables <- values$tag_variables
