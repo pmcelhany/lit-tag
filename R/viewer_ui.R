@@ -101,11 +101,13 @@ viewer_ui <- function(id){
                 ### Right panel: selected papers summary --------------------
                 card(card_header(h3("Paper selection summary")),
                      input_task_button(ns("select_papers"), "Select papers"),
+                     textOutput(ns("n_papers_db")),
+                     textOutput(ns("n_papers_selected")),
                      card(card_header(h4("Selection criteria")),
                           DTOutput(ns("criteria_table"))),
-                     card(card_header(h4("Selection summary")),
-                          textOutput(ns("n_papers_db")),
-                          textOutput(ns("n_papers_selected")))
+                     # card(card_header(h4("Selection summary")),
+                     #      textOutput(ns("n_papers_db")),
+                     #      textOutput(ns("n_papers_selected")))
                 )
               )
     ),
