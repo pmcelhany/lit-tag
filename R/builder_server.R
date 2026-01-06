@@ -567,6 +567,11 @@ builder_server <- function(id) {
          mutate(across(everything(), ~ remove_leading_special_char(.x))) %>%
         write_csv(file)
 
+      #return selection to most recent row of paper table
+      if(!is.null(input$table_rows_selected)){
+        selectRows(dt_proxy, input$table_rows_selected)
+      }
+
     })
 
     ## Read Zotero function -------------
