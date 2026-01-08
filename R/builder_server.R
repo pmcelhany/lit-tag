@@ -130,7 +130,8 @@ builder_server <- function(id) {
                            last_key = NULL, inspire_quotes = NULL,
                            inspire_images = NULL, d_content_db = NULL,
                            d_old_key_db = NULL, d_split_db = NULL,
-                           tag_variables = NULL, bib_table_col = NULL)
+                           tag_variables = NULL, bib_table_col = NULL,
+                           active_cat_tabs = character(0))
 
   ## Render paper info function ----------------------------
   render_paper_info <- function(label, paper_var){
@@ -205,6 +206,12 @@ builder_server <- function(id) {
           mutate(extra = "")
       }
 
+      #add "date_time_obsolete_db" column if it does not already exist
+      if(!("date_time_obsolete_db" %in% names(values$d_mcdr_tagged))){
+        values$d_mcdr_tagged <-  values$d_mcdr_tagged %>%
+          mutate(date_time_obsolete_db = NA_character_)
+      }
+
       # if there is no "notes" column in the original zotero file, it needs added
       # this is a bit of hack to deal with the fact that oned of the category tabs is named "notes"
       # which is also a potential field in zotero.
@@ -272,8 +279,6 @@ builder_server <- function(id) {
       output$selected_title <- render_paper_info("Title:", "title")
       output$selected_journal <- render_paper_info("Journal:",
                                                    "publication_title")
-      # output$selected_extra <- render_paper_info("Extra:",
-      #                                              "extra")
 
 
       ### Select filter variables dropdown  -------------------------------
@@ -349,6 +354,7 @@ builder_server <- function(id) {
   ## Observe filter button ----------------------------
 
   observeEvent(input$filter_db,{
+
     values$d_mcdr_filtered <-  values$d_mcdr_tagged %>%
        filter(if(input$exclude_obsolete) (is.na(date_time_obsolete_db) |
                                            date_time_obsolete_db == "NA") else TRUE)
