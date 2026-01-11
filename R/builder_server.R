@@ -131,7 +131,11 @@ builder_server <- function(id) {
                            inspire_images = NULL, d_content_db = NULL,
                            d_old_key_db = NULL, d_split_db = NULL,
                            tag_variables = NULL, bib_table_col = NULL,
-                           active_cat_tabs = character(0))
+                           active_cat_tabs = character(0),
+                           active_tag_ui = character(0))
+
+    ## Proxy for the papers table ------------------------------
+    dt_proxy <- DT::dataTableProxy("table")
 
   ## Render paper info function ----------------------------
   render_paper_info <- function(label, paper_var){
@@ -167,6 +171,14 @@ builder_server <- function(id) {
   ## Load data button ---------------------------------------
   observeEvent(input$load_data, {
 
+    values$d_mcdr_tagged <- NULL
+    values$categories <- NULL
+    values$d_category_meta <- NULL
+    values$d_mcdr_filtered <- NULL
+    values$default_filter_var <- character(0)
+    values$last_key <- NULL
+    selectRows(dt_proxy, selected = NULL)
+
     #show dialog if database or category file missing
     if(is.null(input$database_csv$datapath) |
        is.null(input$categories_excel$datapath)){
@@ -199,6 +211,11 @@ builder_server <- function(id) {
       # the d_mcdr_tagged dataframe always keeps all data
       values$d_mcdr_tagged <-  read_csv(input$database_csv$datapath) %>%
          mutate(across(everything(), as.character))
+
+      z <- values$d_mcdr_tagged %>%
+        filter(key == "URI2BKWG") %>%
+        pull("reviewers")
+
 
       #add "extra" column if it does not already exist
       if(!("extra" %in% names(values$d_mcdr_tagged))){
@@ -249,6 +266,13 @@ builder_server <- function(id) {
       })
 
       ### Add tag input to ui --------------------------------------
+      # remove old tag ui
+      # if you don't do this and press the load button after a db is already loaded,
+      # you will just add another set of tags to  UI, which is not good
+
+      walk(values$active_cat_tabs, ~ nav_remove(id = "tag_tabs", target = .x))
+      #walk(values$active_tag_ui, ~ nav_remove(id = "my_navset", target = .x))
+
       #insert tag panels
       names(values$categories) %>%
         stringr::str_subset("notes", negate = TRUE) %>%
@@ -262,6 +286,13 @@ builder_server <- function(id) {
                                                                select_box_fun(x, y, cat = values$categories,
                                                                               meta = values$d_category_meta)
                                                            )))))))
+      # Reset vector of active categories and tag UI elements
+
+      values$active_cat_tabs <-
+        names(values$categories)[names(values$categories) != "notes"]
+      # values$active_tag_ui <-
+      #   values$tag_variables[!(values$tag_variables %in% notes_variables)]
+
       ### Bibliography table -----------------------------------------
       if(all(values$bib_table_col %in%
              names(values$d_mcdr_filtered))){
@@ -320,9 +351,6 @@ builder_server <- function(id) {
     })
     }
   })
-
-  ## Proxy for the papers table ------------------------------
-  dt_proxy <- DT::dataTableProxy("table")
 
   ## Observe show extra --------------------------------
   observeEvent(input$show_extra,{
@@ -440,8 +468,6 @@ builder_server <- function(id) {
 
   ### Observe changes to row function ------------------
   load_row_tags_fun <- function(x, d_category_meta, table_rows_selected){
-
-    #save_last_row(values$last_key)
 
     row_val <- values$d_mcdr_filtered %>%
        slice(table_rows_selected) %>%
