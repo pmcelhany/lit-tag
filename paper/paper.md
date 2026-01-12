@@ -6,8 +6,6 @@ tags:
 - annotation
 - citation database
 - shiny
-date: "04 December 2025"
-output: pdf_document
 authors:
 - name: Paul McElhany
   orcid: "0000-0002-9826-755X"
@@ -18,29 +16,30 @@ authors:
 - name: Madison Wood
   orchid: "0009-0006-2511-3441"
   affiliation: '3'
-bibliography: paper.bib
 affiliations:
 - index: 1
-  name: NOAA Northwest Fisheries Science Center
+  name: Conservation Biology Division, Northwest Fisheries Science Center, National Marine Fisheries Service, National Oceanic and Atmospheric Administration, Seattle, Washington, USA
 - index: 2
-  name: Dalhousie University
+  name: Dalhousie University Department of Oceanography, Halifax NS, Canada
 - index: 3
-  name: NOAA Ocean Acidification Progam
+  name: NOAA Ocean Acidification Program, Silver Spring, MD USA
+date: "12 January 2026"
+bibliography: paper.bib
 ---
 
 # Summary
 
-To facilitate the review, evaluation and analysis of scientific literature, the lit-tag Shiny application provides a convenient interface for users to generate a citation database with custom, user-defined tags and notes. Lit-tag is not subject-specific and is useful for any field of research. Starting with a table of citations exported from a Zotero library and a user-generated Excel file describing a set of tags and notes fields, lit-tag provides tools for assigning tags and notes to papers (“lit-tag-builder” module) and for exporting, graphing, and generating reports from the resulting database (“lit-tag-viewer” module). The application has been used in several scientific reviews related to marine carbon dioxide removal @grabb.; @mcelhany; @gurney-smith.
+To facilitate the review, evaluation and analysis of scientific literature, the lit-tag R Shiny @rcoreteam2024; @chang2026 application provides a convenient interface for users to generate a citation database with custom, user-defined tags and notes. Lit-tag is not subject-specific and is useful for any field of research. Starting with a table of citations exported from a Zotero library and a user-generated Excel file describing a set of tags and notes fields, lit-tag provides tools for assigning tags and notes to papers (“lit-tag-builder” module) and for exporting, graphing, and generating reports from the resulting database (“lit-tag-viewer” module). The application has been used in several scientific reviews related to marine carbon dioxide removal @grabb.; @mcelhany; @gurney-smith.
 
 # Statement of need
 
-Scientific literature review and meta-analysis projects often involve summarizing the contents of many, often hundreds, of papers @snyder2019. During the review, data are collected on many different attributes of the study (e.g., experiment type, treatment conditions, location, results, etc.). Although literature review projects may start out collecting this information in a spreadsheet, the approach quickly becomes unwieldy as the number of papers and attributes increases. At the same time researchers are compiling data on the contents of papers, they need to conveniently collect and use the full citation information for each paper. The lit-tag app links the contents of a library generated with Zotero @digitalscholar2025a, an open-source reference management software which has tools for easily downloading citation information and adding references to documents, with a database of user-defined paper attributes and notes.
+Scientific literature review and meta-analysis projects often involve summarizing the contents of many, often hundreds, of papers @snyder2019. During the review, data are collected on many different attributes of the study (e.g., experiment type, treatment conditions, location, results, etc.). Although literature review projects may start out collecting this information in a spreadsheet, the approach quickly becomes unwieldy as the number of papers and attributes increases. Dedicated citation tools, such as Zotero, have very limited tag and notes capability that is insufficient for projects requiring a complex hierarchical tag structure with managed input options. At the same time researchers are compiling data on the contents of papers, they need to conveniently collect and use the full citation information for each paper. The lit-tag app links the contents of a library generated with Zotero @digitalscholar2025a, an open-source reference management software which has tools for easily downloading citation information and adding references to documents, with a database of user-defined paper attributes and notes.
 
 # Design
 
 The lit-tag app has two modules: 1) lit-tag-builder for generating, editing and updating the database and 2) lit-tag-viewer for generating tables, graphs and reports from the database \autoref{fig:overview}.
 
-![Relationship between Zotero, lit-tag-builder module, lit-tag-viewer module and imported/exported files.\label{fig:overview}](images/lit_tag_overview.png)
+![Relationship between Zotero, lit-tag-builder module, lit-tag-viewer module and imported/exported files. The lit-tag database is stored as a .csv file on a local computer, so it is not designed for simultaneous edits by multiple users. Sequential editing by multiple users can be accomplished by sharing the database on a platform such as Google Drive. \label{fig:overview}](images/lit_tag_overview.png)
 
 The main editing tab in the builder module contains panels for selecting papers, viewing paper details and notes, and assigning tags to papers \autoref{fig:builder}. Other tabs in the builder module have tools for syncing with the Zotero database when adding new papers, database maintenance for global edits of the database (e.g., renaming a tag option, deleting categories), creating and linking to a new Zotero database and viewing the module user guide.
 

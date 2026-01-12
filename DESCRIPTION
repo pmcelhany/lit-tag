@@ -1,6 +1,6 @@
 Package: littag
 Title: Lit-tag: an app for custom annotation of a citation database
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: 
     person("Paul", "McElhany", , "paul.mcelhany@noaa.gov", role = c("aut", "cre"))
 Description: Starting with a citation library exported from Zotero, the
