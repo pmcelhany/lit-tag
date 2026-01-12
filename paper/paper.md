@@ -6,6 +6,18 @@ tags:
 - annotation
 - citation database
 - shiny
+date: "12 January 2026"
+output: pdf_document
+bibliography: paper.bib
+affiliations:
+- index: 1
+  name: Conservation Biology Division, Northwest Fisheries Science Center, National
+    Marine Fisheries Service, National Oceanic and Atmospheric Administration, Seattle,
+    Washington, USA
+- index: 2
+  name: Dalhousie University Department of Oceanography, Halifax NS, Canada
+- index: 3
+  name: NOAA Ocean Acidification Program, Silver Spring, MD USA
 authors:
 - name: Paul McElhany
   orcid: "0000-0002-9826-755X"
@@ -16,15 +28,6 @@ authors:
 - name: Madison Wood
   orchid: "0009-0006-2511-3441"
   affiliation: '3'
-affiliations:
-- index: 1
-  name: Conservation Biology Division, Northwest Fisheries Science Center, National Marine Fisheries Service, National Oceanic and Atmospheric Administration, Seattle, Washington, USA
-- index: 2
-  name: Dalhousie University Department of Oceanography, Halifax NS, Canada
-- index: 3
-  name: NOAA Ocean Acidification Program, Silver Spring, MD USA
-date: "12 January 2026"
-bibliography: paper.bib
 ---
 
 # Summary
@@ -37,20 +40,25 @@ Scientific literature review and meta-analysis projects often involve summarizin
 
 # Design
 
-The lit-tag app has two modules: 1) lit-tag-builder for generating, editing and updating the database and 2) lit-tag-viewer for generating tables, graphs and reports from the database \autoref{fig:overview}.
+The lit-tag app has two modules: 1) lit-tag-builder for generating, editing and updating the database and 2) lit-tag-viewer for generating tables, graphs and reports from the database (\autoref{fig:overview}).
 
 ![Relationship between Zotero, lit-tag-builder module, lit-tag-viewer module and imported/exported files. The lit-tag database is stored as a .csv file on a local computer, so it is not designed for simultaneous edits by multiple users. Sequential editing by multiple users can be accomplished by sharing the database on a platform such as Google Drive. \label{fig:overview}](images/lit_tag_overview.png)
 
-The main editing tab in the builder module contains panels for selecting papers, viewing paper details and notes, and assigning tags to papers \autoref{fig:builder}. Other tabs in the builder module have tools for syncing with the Zotero database when adding new papers, database maintenance for global edits of the database (e.g., renaming a tag option, deleting categories), creating and linking to a new Zotero database and viewing the module user guide.
 
-The viewer module contains options for searching and filtering the database (including custom searches using R syntax), plotting summary tables using any two tag variables for full and filtered datasets (Fig. 3), and generating custom tables (csv files) and reports (html, pdf or word). 
+The main editing tab in the builder module contains panels for selecting papers, viewing paper details and notes, and assigning tags to papers (\autoref{fig:builder}). Other tabs in the builder module have tools for syncing with the Zotero database when adding new papers, database maintenance for global edits of the database (e.g., renaming a tag option, deleting categories), creating and linking to a new Zotero database and viewing the module user guide.
+
+The viewer module contains options for searching and filtering the database (including custom searches using R syntax), plotting summary tables using any two tag variables for full and filtered datasets (\autoref{fig:viewer}), and generating custom tables (csv files) and reports (html, pdf or word).
+
 
 ![Example screen shot of the “Tag edit” tab of lit-tag-builder module user interface.\label{fig:builder}](images/builder.png)
 
+
 ![Example screen shot of the “Summary plots” tab of the lit-tag-viewer module.\label{fig:viewer}](images/viewer.png)
+
 
 # Acknowledgements
 
 Madison Wood’s work on this project was supported by a Sea Grant Knauss Fellowship. Kalina Grabb’s work on this project was supported by funding from NOAA Ocean Acidification Program and NOAA Northeast Fisheries Science Center through IBSS. We would also like to thank the International Council for the Exploration of the Sea (ICES) mCDR x Fisheries Workshop group for inspiration and app testing.
 
 # References
+
