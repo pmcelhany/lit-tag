@@ -1070,8 +1070,14 @@ builder_server <- function(id) {
     },
     content = function(file) {
       withProgress(message = "Generating RIS file", value = 0, {
+
         # read the original lit-tag db file that has old zotero key values
         d_nz <-  read_csv(input$database_nz_csv$datapath)
+
+        if(input$all_or_unique_ris == "Unique titles"){
+          d_nz <- d_nz %>%
+            distinct(title, .keep_all = TRUE)
+        }
 
         incProgress(1/4)
         output$n_old_key_db <- renderText(HTML(paste("Number of papers in original (old keys) database: ",
@@ -1137,7 +1143,10 @@ builder_server <- function(id) {
           )
 
           ris_tag_fun <- function(tag){
-            value <-   pull(paper, ris_tag_map[tag])
+            value <- NA
+            if(hasName(paper, ris_tag_map[tag])){
+              value <-  pull(paper, ris_tag_map[tag])
+            }
             value_tag <- NULL
             if(!is.na(value)){
               value_tag <- paste(tag, "-", value, sep = "  ")
