@@ -212,11 +212,6 @@ builder_server <- function(id) {
       values$d_mcdr_tagged <-  read_csv(input$database_csv$datapath) %>%
          mutate(across(everything(), as.character))
 
-      z <- values$d_mcdr_tagged %>%
-        filter(key == "URI2BKWG") %>%
-        pull("reviewers")
-
-
       #add "extra" column if it does not already exist
       if(!("extra" %in% names(values$d_mcdr_tagged))){
         values$d_mcdr_tagged <-  values$d_mcdr_tagged %>%
