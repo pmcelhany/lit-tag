@@ -722,7 +722,8 @@ viewer_server <- function(id) {
         #### If show percent -------------------
         if(input$show_bar_data != "None"){
           p +  geom_text(vjust = -1, color = "black", size = 8) +
-            coord_cartesian(clip = "off")
+            coord_cartesian(clip = "off") +
+            scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
         } else{
           p
         }
@@ -839,7 +840,8 @@ viewer_server <- function(id) {
                                  str_replace_all(!!as.name(input$plot_x_var), ";", ", ")),
                       aes(label = .data[[bar_data]]), vjust = -1, color = "black",
                       size = 8) +
-            coord_cartesian(clip = "off")
+            coord_cartesian(clip = "off") +
+            scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
 
         }
         # plot data to download for stacked plot
