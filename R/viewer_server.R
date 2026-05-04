@@ -240,6 +240,8 @@ viewer_server <- function(id) {
                                  selection = "single",
                                  options = list(dom = "t",
                                                 pageLength = 10000,
+                                                stateSave = TRUE,
+                                                stateDuration = 0,
                                                 #autoWidth = TRUE,
                                                 columnDefs =
                                                   list(list(width =
@@ -368,6 +370,8 @@ viewer_server <- function(id) {
                                selection = "single",
                                options = list(dom = "t",
                                               pageLength = 10000,
+                                              stateSave = TRUE,
+                                              stateDuration = 0,
                                               #autoWidth = TRUE,
                                               columnDefs =
                                                 list(list(width =
@@ -886,6 +890,8 @@ viewer_server <- function(id) {
                                        callback = JS(newjs),
                                        options = list(dom = "t",
                                                       pageLength = 10000,
+                                                      stateSave = TRUE,
+                                                      stateDuration = 0,
                                                       #autoWidth = TRUE,
                                                       columnDefs =
                                                         list(list(width =
