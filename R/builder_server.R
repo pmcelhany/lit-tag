@@ -173,7 +173,7 @@ builder_server <- function(id) {
                      setTimeout(function() {
                        var row = table.row('.selected', { modifier: { page: 'all' } });
                        if (row.node()) {
-                         row.node().scrollIntoView({ block: 'nearest', behavior: 'instant' });
+                         row.node().scrollIntoView({ block: 'center', behavior: 'instant' });
                        }
                      }, 0);
                    }"),
