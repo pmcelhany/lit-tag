@@ -121,6 +121,33 @@ viewer_server <- function(id) {
                              d_category_meta = NULL, d_mcdr_filtered = NULL,
                              d_plot = NULL)
 
+    dt_proxy <- DT::dataTableProxy("table")
+    dt_summary_proxy <- DT::dataTableProxy("summary_table")
+
+    ### Table variables -----------------------------------------
+    table_vars <- reactive({
+      vars <- c("author", "publication_year", "title")
+      if (!is.null(input$show_extra) && input$show_extra) {
+        vars <- c("author", "publication_year", "title", "extra")
+      }
+      return(vars)
+    })
+
+    ### Bibliography table -----------------------------------------
+    output$table <- renderDT({
+      req(values$d_mcdr_filtered)
+      values$d_mcdr_filtered %>%
+        select(all_of(table_vars()))
+    },
+    selection = "single",
+    options = list(dom = "t",
+                   pageLength = 10000,
+                   stateSave = TRUE,
+                   stateDuration = 0,
+                   order = list(),
+                   columnDefs = list(list(width = '200px', targets = "_all"))),
+    rownames = FALSE, server = FALSE)
+
     ## render database chooser
     output$db_chooser <- renderUI({
       fileInput(ns("database_csv"), h4("Database File"),
@@ -230,39 +257,22 @@ viewer_server <- function(id) {
         incProgress(3/4)
 
 
-        table_vars <- c("author", "publication_year", "title")
-        if(input$show_extra){
-          table_vars <- c("author", "publication_year", "title", "extra")
-        }
-        ### Filter  table -----------------------------------------
-        output$table <- renderDT(values$d_mcdr_filtered %>%
-                                    select(table_vars),
-                                 selection = "single",
-                                 options = list(dom = "t",
-                                                pageLength = 10000,
-                                                #autoWidth = TRUE,
-                                                columnDefs =
-                                                  list(list(width =
-                                                              '200px',
-                                                            targets = "_all"))),
-                                 rownames = FALSE, server = FALSE)
-
         ### Full  table -----------------------------------------
-        output$table_full <- DT::renderDataTable(values$d_mcdr_tagged %>%
-                                                   select(author,
-                                                          publication_year,
-                                                          title),
-                                             selection = "none",
-                                             options =
-                                               list(dom = "t",
-                                                    pageLength = 10000,
-                                                    #autoWidth = TRUE
-                                                    list(width =
-                                                           '20px',
-                                                         targets = "_all"),
-                                                    scrollX = TRUE,
-                                                    scrollY = TRUE),
-                                             rownames = FALSE, server = FALSE)
+        output$table_full <- DT::renderDataTable({
+          req(values$d_mcdr_tagged)
+          values$d_mcdr_tagged %>%
+            select(author, publication_year, title)
+        },
+        selection = "none",
+        options = list(dom = "t",
+                       pageLength = 10000,
+                       stateSave = TRUE,
+                       stateDuration = 0,
+                       order = list(),
+                       list(width = '20px', targets = "_all"),
+                       scrollX = TRUE,
+                       scrollY = TRUE),
+        rownames = FALSE, server = FALSE)
 
         ### Plot x variables dropdown -----------------
 
@@ -355,26 +365,6 @@ viewer_server <- function(id) {
       }
     })
 
-    ## Observe show extra -------------------
-    observeEvent(input$show_extra,{
-      if(input$show_extra){
-        table_vars <- c("author", "publication_year", "title", "extra")
-      } else{
-        table_vars <- c("author", "publication_year", "title")
-      }
-      ### Filter  table -----------------------------------------
-      output$table <- renderDT(values$d_mcdr_filtered %>%
-                                 select(table_vars),
-                               selection = "single",
-                               options = list(dom = "t",
-                                              pageLength = 10000,
-                                              #autoWidth = TRUE,
-                                              columnDefs =
-                                                list(list(width =
-                                                            '200px',
-                                                          targets = "_all"))),
-                               rownames = FALSE, server = FALSE)
-    })
 
     ## Download database, tag cat, and ris file --------------
     output$download_db <- downloadHandler(
@@ -582,6 +572,7 @@ viewer_server <- function(id) {
       }
 
       values$d_mcdr_filtered <- d_filtered
+
 
       ### render filter summary ----------------------------
       output$n_papers_selected <- renderText(paste("Number of papers selected:",
@@ -881,22 +872,23 @@ viewer_server <- function(id) {
            select(input$summary_var)
       }
 
-      output$summary_table <- renderDT(d, selection = "none",
-                                       extensions = 'ColReorder',
-                                       callback = JS(newjs),
-                                       options = list(dom = "t",
-                                                      pageLength = 10000,
-                                                      #autoWidth = TRUE,
-                                                      columnDefs =
-                                                        list(list(width =
-                                                                    '200px',
-                                                                  targets = "_all")),
-                                                      scrollX = TRUE,
-                                                      scrollY = TRUE,
-                                                      colReorder = TRUE),
-                                       rownames = FALSE, server = FALSE,
-      )
-
+      output$summary_table <- renderDT({
+        req(d)
+        d
+      },
+      selection = "none",
+      extensions = 'ColReorder',
+      callback = JS(newjs),
+      options = list(dom = "t",
+                     pageLength = 10000,
+                     stateSave = TRUE,
+                     stateDuration = 0,
+                     order = list(),
+                     columnDefs = list(list(width = '200px', targets = "_all")),
+                     scrollX = TRUE,
+                     scrollY = TRUE,
+                     colReorder = TRUE),
+      rownames = FALSE, server = FALSE)
 
     }, ignoreInit = TRUE)
 
