@@ -130,17 +130,59 @@ builder_server <- function(id) {
                            last_key = NULL, inspire_quotes = NULL,
                            inspire_images = NULL, d_content_db = NULL,
                            d_old_key_db = NULL, d_split_db = NULL,
-                           tag_variables = NULL, bib_table_col = NULL,
+                           tag_variables = NULL,
+                           bib_table_col = c("first_author", "publication_year", "title"),
                            active_cat_tabs = character(0),
-                           active_tag_ui = character(0))
+                           active_tag_ui = character(0),
+                           table_trigger = 0)
 
     ## Proxy for the papers table ------------------------------
     dt_proxy <- DT::dataTableProxy("table")
 
+    ### Bibliography table -----------------------------------------
+    output$table <- renderDT({
+      # trigger update when data is initially loaded or when show_extra changes
+      values$table_trigger
+      req(values$d_mcdr_filtered)
+      req(all(values$bib_table_col %in% names(values$d_mcdr_filtered)))
+
+      isolate(values$d_mcdr_filtered) %>%
+        select(all_of(values$bib_table_col))
+    },
+    selection = list(mode = "single"),
+    options = list(dom = "t",
+                   pageLength = 10000,
+                   stateSave = TRUE,
+                   stateDuration = 0,
+                   order = list(),
+                   scrollY = "600px",
+                   scrollCollapse = TRUE,
+                   preDrawCallback = JS("function(settings) {
+                     if (settings.nTable) {
+                       var scrollBody = $(settings.nTable).closest('.dataTables_scrollBody');
+                       this._savedScrollTop = scrollBody.scrollTop();
+                     }
+                   }"),
+                   drawCallback = JS("function(settings) {
+                     var table = this.api();
+                     var scrollBody = $(table.table().node()).closest('.dataTables_scrollBody');
+                     if (this._savedScrollTop !== undefined) {
+                       scrollBody.scrollTop(this._savedScrollTop);
+                     }
+                     // Use setTimeout to ensure selection classes are applied by Shiny
+                     setTimeout(function() {
+                       var row = table.row('.selected', { modifier: { page: 'all' } });
+                       if (row.node()) {
+                         row.node().scrollIntoView({ block: 'center', behavior: 'instant' });
+                       }
+                     }, 0);
+                   }"),
+                   columnDefs = list(list(visible = FALSE, targets = 0))),
+    rownames = TRUE, server = TRUE)
+
   ## Render paper info function ----------------------------
   render_paper_info <- function(label, paper_var){
-    return(renderText(paste(label, values$d_mcdr_filtered %>%
-                               slice(input$table_rows_selected) %>%
+    return(renderText(paste(label, values$d_mcdr_filtered[input$table_rows_selected, ] %>%
                                pull(paper_var))))
   }
 
@@ -251,6 +293,9 @@ builder_server <- function(id) {
           (is.na(date_time_obsolete_db) | date_time_obsolete_db == "NA") else
             TRUE)
 
+      # trigger table render on initial load
+      values$table_trigger <- values$table_trigger + 1
+
       incProgress(3/4)
 
       ### Add notes input to ui  ------------------------------------
@@ -288,16 +333,6 @@ builder_server <- function(id) {
       # values$active_tag_ui <-
       #   values$tag_variables[!(values$tag_variables %in% notes_variables)]
 
-      ### Bibliography table -----------------------------------------
-      if(all(values$bib_table_col %in%
-             names(values$d_mcdr_filtered))){
-        output$table <- renderDT(values$d_mcdr_filtered %>%
-                                    select(values$bib_table_col),
-                                 selection = list(mode ="single"),
-                                 options = list(dom = "t",
-                                                pageLength = 10000),
-                                 rownames = FALSE, server = FALSE)
-      }
 
       ### Show selected paper info -------------------------------------
       output$selected_year <- render_paper_info("Year:", "publication_year")
@@ -356,6 +391,8 @@ builder_server <- function(id) {
       values$bib_table_col <- c("first_author", "publication_year", "title")
       output$selected_extra <- NULL
     }
+    # trigger table update as the column structure has changed
+    values$table_trigger <- values$table_trigger + 1
   })
 
   ## Observe select filter fields  -------------------------------
@@ -398,12 +435,21 @@ builder_server <- function(id) {
     input$filter_var %>%
         map(\(x) filter_fun(x))
 
+    # surgically update the data without re-rendering the whole widget
+    replaceData(dt_proxy, values$d_mcdr_filtered %>%
+                  select(all_of(values$bib_table_col)),
+                resetPaging = FALSE, rownames = TRUE)
   })
 
   ## Observe show all button  -------------------------
 
   observeEvent(input$show_all_db, {
     values$d_mcdr_filtered <-  values$d_mcdr_tagged
+
+    # surgically update the data without re-rendering the whole widget
+    replaceData(dt_proxy, values$d_mcdr_filtered %>%
+                  select(all_of(values$bib_table_col)),
+                resetPaging = FALSE, rownames = TRUE)
   })
 
   ## Observe unselect filters button ------------------------
@@ -418,11 +464,9 @@ builder_server <- function(id) {
   ## Show abstract button -------------------------------
   observeEvent(input$show_abstract, {
     showModal(modalDialog(
-      title = values$d_mcdr_filtered %>%
-         slice(input$table_rows_selected) %>%
+      title = values$d_mcdr_filtered[input$table_rows_selected, ] %>%
          pull("title"),
-      values$d_mcdr_filtered %>%
-         slice(input$table_rows_selected) %>%
+      values$d_mcdr_filtered[input$table_rows_selected, ] %>%
          pull("abstract_note"),
       size = "l"
     ))
@@ -458,14 +502,18 @@ builder_server <- function(id) {
       values$d_mcdr_filtered[values$d_mcdr_filtered$key == key,] <-
         values$d_mcdr_tagged[values$d_mcdr_tagged$key == key, ]
 
+      # Use replaceData to surgically update the table content without re-rendering the whole widget.
+      # This preserves the user's current sort order and pagination.
+      replaceData(dt_proxy, values$d_mcdr_filtered %>%
+                    select(all_of(values$bib_table_col)),
+                  resetPaging = FALSE, rownames = TRUE)
     }
   }
 
   ### Observe changes to row function ------------------
   load_row_tags_fun <- function(x, d_category_meta, table_rows_selected){
 
-    row_val <- values$d_mcdr_filtered %>%
-       slice(table_rows_selected) %>%
+    row_val <- values$d_mcdr_filtered[table_rows_selected, ] %>%
        pull(x)
 
     if(d_category_meta[x, "select_type"] == "check_box_single"){
@@ -504,8 +552,9 @@ builder_server <- function(id) {
 
     table_rows_selected <- input$table_rows_selected
 
-    current_key <- values$d_mcdr_filtered %>%
-       slice(table_rows_selected) %>%
+    # When server = TRUE and rownames = TRUE, selection indices are strings matching row names.
+    # d_mcdr_filtered also has these as row names.
+    current_key <- values$d_mcdr_filtered[table_rows_selected, ] %>%
        pull(key)
 
     last_key <- values$last_key
@@ -525,8 +574,7 @@ builder_server <- function(id) {
       d_notes %>%
          pull("notes") %>%
           map(\(x) updateTextAreaInput(inputId = x,
-                                     value = values$d_mcdr_filtered %>%
-                                        slice(table_rows_selected) %>%
+                                     value = values$d_mcdr_filtered[table_rows_selected, ] %>%
                                         pull(x)))
 
       values$last_key <- current_key
@@ -545,8 +593,7 @@ builder_server <- function(id) {
       d_notes %>%
          pull("notes") %>%
           map(\(x) updateTextAreaInput(inputId = x,
-                                     value = values$d_mcdr_filtered %>%
-                                        slice(table_rows_selected) %>%
+                                     value = values$d_mcdr_filtered[table_rows_selected, ] %>%
                                         pull(x)))
 
       # change the last key to the current row
@@ -578,8 +625,7 @@ builder_server <- function(id) {
 
       if(!is.null(input$table_rows_selected)){
 
-        values$last_key <- values$d_mcdr_filtered %>%
-           slice(input$table_rows_selected) %>%
+        values$last_key <- values$d_mcdr_filtered[input$table_rows_selected, ] %>%
            pull(key)
 
         save_last_row(values$last_key, values$d_category_meta,
