@@ -157,12 +157,25 @@ builder_server <- function(id) {
                    order = list(),
                    scrollY = "600px",
                    scrollCollapse = TRUE,
+                   preDrawCallback = JS("function(settings) {
+                     if (settings.nTable) {
+                       var scrollBody = $(settings.nTable).closest('.dataTables_scrollBody');
+                       this._savedScrollTop = scrollBody.scrollTop();
+                     }
+                   }"),
                    drawCallback = JS("function(settings) {
                      var table = this.api();
-                     var row = table.row('.selected', { modifier: { page: 'all' } });
-                     if (row.node()) {
-                       row.node().scrollIntoView({ block: 'nearest' });
+                     var scrollBody = $(table.table().node()).closest('.dataTables_scrollBody');
+                     if (this._savedScrollTop !== undefined) {
+                       scrollBody.scrollTop(this._savedScrollTop);
                      }
+                     // Use setTimeout to ensure selection classes are applied by Shiny
+                     setTimeout(function() {
+                       var row = table.row('.selected', { modifier: { page: 'all' } });
+                       if (row.node()) {
+                         row.node().scrollIntoView({ block: 'nearest', behavior: 'instant' });
+                       }
+                     }, 0);
                    }"),
                    columnDefs = list(list(visible = FALSE, targets = 0))),
     rownames = TRUE, server = TRUE)
