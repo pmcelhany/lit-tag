@@ -130,12 +130,29 @@ builder_server <- function(id) {
                            last_key = NULL, inspire_quotes = NULL,
                            inspire_images = NULL, d_content_db = NULL,
                            d_old_key_db = NULL, d_split_db = NULL,
-                           tag_variables = NULL, bib_table_col = NULL,
+                           tag_variables = NULL,
+                           bib_table_col = c("first_author", "publication_year", "title"),
                            active_cat_tabs = character(0),
                            active_tag_ui = character(0))
 
     ## Proxy for the papers table ------------------------------
     dt_proxy <- DT::dataTableProxy("table")
+
+    ### Bibliography table -----------------------------------------
+    output$table <- renderDT({
+      req(values$d_mcdr_filtered)
+      req(all(values$bib_table_col %in% names(values$d_mcdr_filtered)))
+
+      values$d_mcdr_filtered %>%
+        select(all_of(values$bib_table_col))
+    },
+    selection = list(mode = "single"),
+    options = list(dom = "t",
+                   pageLength = 10000,
+                   stateSave = TRUE,
+                   stateDuration = 0,
+                   order = list()),
+    rownames = FALSE, server = FALSE)
 
   ## Render paper info function ----------------------------
   render_paper_info <- function(label, paper_var){
@@ -288,19 +305,6 @@ builder_server <- function(id) {
       # values$active_tag_ui <-
       #   values$tag_variables[!(values$tag_variables %in% notes_variables)]
 
-      ### Bibliography table -----------------------------------------
-      if(all(values$bib_table_col %in%
-             names(values$d_mcdr_filtered))){
-        output$table <- renderDT(values$d_mcdr_filtered %>%
-                                    select(values$bib_table_col),
-                                 selection = list(mode ="single"),
-                                 options = list(dom = "t",
-                                                pageLength = 10000,
-                                                stateSave = TRUE,
-                                                stateDuration = 0,
-                                                order = list()),
-                                 rownames = FALSE, server = TRUE)
-      }
 
       ### Show selected paper info -------------------------------------
       output$selected_year <- render_paper_info("Year:", "publication_year")
