@@ -119,7 +119,41 @@ viewer_server <- function(id) {
                              categories = NULL,
                              tag_variables = NULL,
                              d_category_meta = NULL, d_mcdr_filtered = NULL,
-                             d_plot = NULL)
+                             d_plot = NULL,
+                             table_trigger = 0)
+
+    dt_proxy <- DT::dataTableProxy("table")
+    dt_summary_proxy <- DT::dataTableProxy("summary_table")
+
+    # trigger table re-render when columns change
+    observeEvent(input$show_extra, {
+      values$table_trigger <- values$table_trigger + 1
+    })
+
+    ### Table variables -----------------------------------------
+    table_vars <- reactive({
+      vars <- c("author", "publication_year", "title")
+      if (!is.null(input$show_extra) && input$show_extra) {
+        vars <- c("author", "publication_year", "title", "extra")
+      }
+      return(vars)
+    })
+
+    ### Bibliography table -----------------------------------------
+    output$table <- renderDT({
+      values$table_trigger
+      req(values$d_mcdr_filtered)
+      isolate(values$d_mcdr_filtered) %>%
+        select(all_of(table_vars()))
+    },
+    selection = "single",
+    options = list(dom = "t",
+                   pageLength = 10000,
+                   stateSave = TRUE,
+                   stateDuration = 0,
+                   order = list(),
+                   columnDefs = list(list(width = '200px', targets = "_all"))),
+    rownames = FALSE, server = TRUE)
 
     dt_proxy <- DT::dataTableProxy("table")
     dt_summary_proxy <- DT::dataTableProxy("summary_table")
@@ -221,6 +255,7 @@ viewer_server <- function(id) {
           return(a)
         }
 
+
         values$d_mcdr_tagged <-  read_csv(database_file_path) %>%
            mutate(across(everything(), as.character)) %>%
           remove_empty(which = "rows") %>%
@@ -272,7 +307,7 @@ viewer_server <- function(id) {
                        list(width = '20px', targets = "_all"),
                        scrollX = TRUE,
                        scrollY = TRUE),
-        rownames = FALSE, server = FALSE)
+        rownames = FALSE, server = TRUE)
 
         ### Plot x variables dropdown -----------------
 
@@ -361,6 +396,7 @@ viewer_server <- function(id) {
 
 
         incProgress(4/4)
+        values$table_trigger <- values$table_trigger + 1
       })
       }
     })
@@ -573,6 +609,10 @@ viewer_server <- function(id) {
 
       values$d_mcdr_filtered <- d_filtered
 
+      # surgically update the data without re-rendering the whole widget
+      replaceData(dt_proxy, values$d_mcdr_filtered %>%
+                    select(all_of(table_vars())),
+                  resetPaging = FALSE, rownames = FALSE)
 
       ### render filter summary ----------------------------
       output$n_papers_selected <- renderText(paste("Number of papers selected:",
@@ -874,7 +914,7 @@ viewer_server <- function(id) {
 
       output$summary_table <- renderDT({
         req(d)
-        d
+        isolate(d)
       },
       selection = "none",
       extensions = 'ColReorder',
@@ -888,7 +928,10 @@ viewer_server <- function(id) {
                      scrollX = TRUE,
                      scrollY = TRUE,
                      colReorder = TRUE),
-      rownames = FALSE, server = FALSE)
+      rownames = FALSE, server = TRUE)
+
+      replaceData(dt_summary_proxy, d, resetPaging = FALSE,
+                  rownames = FALSE)
 
     }, ignoreInit = TRUE)
 
