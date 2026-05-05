@@ -240,12 +240,15 @@ viewer_server <- function(id) {
                                  selection = "single",
                                  options = list(dom = "t",
                                                 pageLength = 10000,
+                                                stateSave = TRUE,
+                                                stateDuration = 0,
+                                                order = list(),
                                                 #autoWidth = TRUE,
                                                 columnDefs =
                                                   list(list(width =
                                                               '200px',
                                                             targets = "_all"))),
-                                 rownames = FALSE, server = FALSE)
+                                 rownames = FALSE, server = TRUE)
 
         ### Full  table -----------------------------------------
         output$table_full <- DT::renderDataTable(values$d_mcdr_tagged %>%
@@ -256,13 +259,16 @@ viewer_server <- function(id) {
                                              options =
                                                list(dom = "t",
                                                     pageLength = 10000,
+                                                    stateSave = TRUE,
+                                                    stateDuration = 0,
+                                                    order = list(),
                                                     #autoWidth = TRUE
                                                     list(width =
                                                            '20px',
                                                          targets = "_all"),
                                                     scrollX = TRUE,
                                                     scrollY = TRUE),
-                                             rownames = FALSE, server = FALSE)
+                                             rownames = FALSE, server = TRUE)
 
         ### Plot x variables dropdown -----------------
 
@@ -368,12 +374,15 @@ viewer_server <- function(id) {
                                selection = "single",
                                options = list(dom = "t",
                                               pageLength = 10000,
+                                              stateSave = TRUE,
+                                              stateDuration = 0,
+                                              order = list(),
                                               #autoWidth = TRUE,
                                               columnDefs =
                                                 list(list(width =
                                                             '200px',
                                                           targets = "_all"))),
-                               rownames = FALSE, server = FALSE)
+                               rownames = FALSE, server = TRUE)
     })
 
     ## Download database, tag cat, and ris file --------------
@@ -886,6 +895,9 @@ viewer_server <- function(id) {
                                        callback = JS(newjs),
                                        options = list(dom = "t",
                                                       pageLength = 10000,
+                                                      stateSave = TRUE,
+                                                      stateDuration = 0,
+                                                      order = list(),
                                                       #autoWidth = TRUE,
                                                       columnDefs =
                                                         list(list(width =
@@ -894,7 +906,7 @@ viewer_server <- function(id) {
                                                       scrollX = TRUE,
                                                       scrollY = TRUE,
                                                       colReorder = TRUE),
-                                       rownames = FALSE, server = FALSE,
+                                       rownames = FALSE, server = TRUE,
       )
 
 

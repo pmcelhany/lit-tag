@@ -295,8 +295,11 @@ builder_server <- function(id) {
                                     select(values$bib_table_col),
                                  selection = list(mode ="single"),
                                  options = list(dom = "t",
-                                                pageLength = 10000),
-                                 rownames = FALSE, server = FALSE)
+                                                pageLength = 10000,
+                                                stateSave = TRUE,
+                                                stateDuration = 0,
+                                                order = list()),
+                                 rownames = FALSE, server = TRUE)
       }
 
       ### Show selected paper info -------------------------------------
