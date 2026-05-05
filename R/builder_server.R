@@ -297,8 +297,9 @@ builder_server <- function(id) {
                                  options = list(dom = "t",
                                                 pageLength = 10000,
                                                 stateSave = TRUE,
-                                                stateDuration = 0),
-                                 rownames = FALSE, server = FALSE)
+                                                stateDuration = 0,
+                                                order = list()),
+                                 rownames = FALSE, server = TRUE)
       }
 
       ### Show selected paper info -------------------------------------
