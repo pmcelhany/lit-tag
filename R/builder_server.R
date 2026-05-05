@@ -141,7 +141,7 @@ builder_server <- function(id) {
 
     ### Bibliography table -----------------------------------------
     output$table <- renderDT({
-      # trigger update when data is initially loaded or filtered or when show_extra changes
+      # trigger update when data is initially loaded or when show_extra changes
       values$table_trigger
       req(values$d_mcdr_filtered)
       req(all(values$bib_table_col %in% names(values$d_mcdr_filtered)))
@@ -159,7 +159,7 @@ builder_server <- function(id) {
                    scrollCollapse = TRUE,
                    drawCallback = JS("function(settings) {
                      var table = this.api();
-                     var row = table.row('.selected');
+                     var row = table.row('.selected', { modifier: { page: 'all' } });
                      if (row.node()) {
                        row.node().scrollIntoView({ block: 'nearest' });
                      }
@@ -169,8 +169,7 @@ builder_server <- function(id) {
 
   ## Render paper info function ----------------------------
   render_paper_info <- function(label, paper_var){
-    return(renderText(paste(label, values$d_mcdr_filtered %>%
-                               slice(input$table_rows_selected) %>%
+    return(renderText(paste(label, values$d_mcdr_filtered[input$table_rows_selected, ] %>%
                                pull(paper_var))))
   }
 
@@ -281,6 +280,9 @@ builder_server <- function(id) {
                   "date_time_obsolete_db" %in% names(.))
           (is.na(date_time_obsolete_db) | date_time_obsolete_db == "NA") else
             TRUE)
+
+      # trigger table render on initial load
+      values$table_trigger <- values$table_trigger + 1
 
       incProgress(3/4)
 
@@ -425,7 +427,6 @@ builder_server <- function(id) {
     replaceData(dt_proxy, values$d_mcdr_filtered %>%
                   select(all_of(values$bib_table_col)),
                 resetPaging = FALSE, rownames = TRUE)
-
   })
 
   ## Observe show all button  -------------------------
@@ -451,11 +452,9 @@ builder_server <- function(id) {
   ## Show abstract button -------------------------------
   observeEvent(input$show_abstract, {
     showModal(modalDialog(
-      title = values$d_mcdr_filtered %>%
-         slice(input$table_rows_selected) %>%
+      title = values$d_mcdr_filtered[input$table_rows_selected, ] %>%
          pull("title"),
-      values$d_mcdr_filtered %>%
-         slice(input$table_rows_selected) %>%
+      values$d_mcdr_filtered[input$table_rows_selected, ] %>%
          pull("abstract_note"),
       size = "l"
     ))
@@ -502,8 +501,7 @@ builder_server <- function(id) {
   ### Observe changes to row function ------------------
   load_row_tags_fun <- function(x, d_category_meta, table_rows_selected){
 
-    row_val <- values$d_mcdr_filtered %>%
-       slice(table_rows_selected) %>%
+    row_val <- values$d_mcdr_filtered[table_rows_selected, ] %>%
        pull(x)
 
     if(d_category_meta[x, "select_type"] == "check_box_single"){
@@ -542,8 +540,9 @@ builder_server <- function(id) {
 
     table_rows_selected <- input$table_rows_selected
 
-    current_key <- values$d_mcdr_filtered %>%
-       slice(table_rows_selected) %>%
+    # When server = TRUE and rownames = TRUE, selection indices are strings matching row names.
+    # d_mcdr_filtered also has these as row names.
+    current_key <- values$d_mcdr_filtered[table_rows_selected, ] %>%
        pull(key)
 
     last_key <- values$last_key
@@ -563,8 +562,7 @@ builder_server <- function(id) {
       d_notes %>%
          pull("notes") %>%
           map(\(x) updateTextAreaInput(inputId = x,
-                                     value = values$d_mcdr_filtered %>%
-                                        slice(table_rows_selected) %>%
+                                     value = values$d_mcdr_filtered[table_rows_selected, ] %>%
                                         pull(x)))
 
       values$last_key <- current_key
@@ -583,8 +581,7 @@ builder_server <- function(id) {
       d_notes %>%
          pull("notes") %>%
           map(\(x) updateTextAreaInput(inputId = x,
-                                     value = values$d_mcdr_filtered %>%
-                                        slice(table_rows_selected) %>%
+                                     value = values$d_mcdr_filtered[table_rows_selected, ] %>%
                                         pull(x)))
 
       # change the last key to the current row
@@ -616,8 +613,7 @@ builder_server <- function(id) {
 
       if(!is.null(input$table_rows_selected)){
 
-        values$last_key <- values$d_mcdr_filtered %>%
-           slice(input$table_rows_selected) %>%
+        values$last_key <- values$d_mcdr_filtered[input$table_rows_selected, ] %>%
            pull(key)
 
         save_last_row(values$last_key, values$d_category_meta,
