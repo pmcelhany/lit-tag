@@ -119,7 +119,51 @@ viewer_server <- function(id) {
                              categories = NULL,
                              tag_variables = NULL,
                              d_category_meta = NULL, d_mcdr_filtered = NULL,
-                             d_plot = NULL)
+                             d_plot = NULL,
+                             table_trigger = 0)
+
+    dt_proxy <- DT::dataTableProxy("table")
+    dt_summary_proxy <- DT::dataTableProxy("summary_table")
+
+    # trigger table re-render when columns change
+    observeEvent(input$show_extra, {
+      values$table_trigger <- values$table_trigger + 1
+    })
+
+    ### Table variables -----------------------------------------
+    table_vars <- reactive({
+      vars <- c("author", "publication_year", "title")
+      if (!is.null(input$show_extra) && input$show_extra) {
+        vars <- c("author", "publication_year", "title", "extra")
+      }
+      return(vars)
+    })
+
+    ### Bibliography table -----------------------------------------
+    output$table <- renderDT({
+      values$table_trigger
+      req(values$d_mcdr_filtered)
+      isolate(values$d_mcdr_filtered) %>%
+        select(all_of(table_vars()))
+    },
+    selection = "single",
+    options = list(dom = "t",
+                   pageLength = 10000,
+                   stateSave = TRUE,
+                   stateDuration = 0,
+                   order = list(),
+                   scrollY = "600px",
+                   scrollCollapse = TRUE,
+                   drawCallback = JS("function(settings) {
+                     var table = this.api();
+                     var row = table.row('.selected');
+                     if (row.node()) {
+                       row.node().scrollIntoView({ block: 'nearest' });
+                     }
+                   }"),
+                   columnDefs = list(list(visible = FALSE, targets = 0),
+                                     list(width = '200px', targets = "_all"))),
+    rownames = TRUE, server = TRUE)
 
     ## render database chooser
     output$db_chooser <- renderUI({
@@ -194,6 +238,7 @@ viewer_server <- function(id) {
           return(a)
         }
 
+
         values$d_mcdr_tagged <-  read_csv(database_file_path) %>%
            mutate(across(everything(), as.character)) %>%
           remove_empty(which = "rows") %>%
@@ -230,39 +275,23 @@ viewer_server <- function(id) {
         incProgress(3/4)
 
 
-        table_vars <- c("author", "publication_year", "title")
-        if(input$show_extra){
-          table_vars <- c("author", "publication_year", "title", "extra")
-        }
-        ### Filter  table -----------------------------------------
-        output$table <- renderDT(values$d_mcdr_filtered %>%
-                                    select(table_vars),
-                                 selection = "single",
-                                 options = list(dom = "t",
-                                                pageLength = 10000,
-                                                #autoWidth = TRUE,
-                                                columnDefs =
-                                                  list(list(width =
-                                                              '200px',
-                                                            targets = "_all"))),
-                                 rownames = FALSE, server = FALSE)
-
         ### Full  table -----------------------------------------
-        output$table_full <- DT::renderDataTable(values$d_mcdr_tagged %>%
-                                                   select(author,
-                                                          publication_year,
-                                                          title),
-                                             selection = "none",
-                                             options =
-                                               list(dom = "t",
-                                                    pageLength = 10000,
-                                                    #autoWidth = TRUE
-                                                    list(width =
-                                                           '20px',
-                                                         targets = "_all"),
-                                                    scrollX = TRUE,
-                                                    scrollY = TRUE),
-                                             rownames = FALSE, server = FALSE)
+        output$table_full <- DT::renderDataTable({
+          req(values$d_mcdr_tagged)
+          values$d_mcdr_tagged %>%
+            select(author, publication_year, title)
+        },
+        selection = "none",
+        options = list(dom = "t",
+                       pageLength = 10000,
+                       stateSave = TRUE,
+                       stateDuration = 0,
+                       order = list(),
+                       columnDefs = list(list(visible = FALSE, targets = 0),
+                                         list(width = '20px', targets = "_all")),
+                       scrollX = TRUE,
+                       scrollY = TRUE),
+        rownames = TRUE, server = TRUE)
 
         ### Plot x variables dropdown -----------------
 
@@ -351,30 +380,11 @@ viewer_server <- function(id) {
 
 
         incProgress(4/4)
+        values$table_trigger <- values$table_trigger + 1
       })
       }
     })
 
-    ## Observe show extra -------------------
-    observeEvent(input$show_extra,{
-      if(input$show_extra){
-        table_vars <- c("author", "publication_year", "title", "extra")
-      } else{
-        table_vars <- c("author", "publication_year", "title")
-      }
-      ### Filter  table -----------------------------------------
-      output$table <- renderDT(values$d_mcdr_filtered %>%
-                                 select(table_vars),
-                               selection = "single",
-                               options = list(dom = "t",
-                                              pageLength = 10000,
-                                              #autoWidth = TRUE,
-                                              columnDefs =
-                                                list(list(width =
-                                                            '200px',
-                                                          targets = "_all"))),
-                               rownames = FALSE, server = FALSE)
-    })
 
     ## Download database, tag cat, and ris file --------------
     output$download_db <- downloadHandler(
@@ -582,6 +592,11 @@ viewer_server <- function(id) {
       }
 
       values$d_mcdr_filtered <- d_filtered
+
+      # surgically update the data without re-rendering the whole widget
+      replaceData(dt_proxy, values$d_mcdr_filtered %>%
+                    select(all_of(table_vars())),
+                  resetPaging = FALSE, rownames = TRUE)
 
       ### render filter summary ----------------------------
       output$n_papers_selected <- renderText(paste("Number of papers selected:",
@@ -881,22 +896,27 @@ viewer_server <- function(id) {
            select(input$summary_var)
       }
 
-      output$summary_table <- renderDT(d, selection = "none",
-                                       extensions = 'ColReorder',
-                                       callback = JS(newjs),
-                                       options = list(dom = "t",
-                                                      pageLength = 10000,
-                                                      #autoWidth = TRUE,
-                                                      columnDefs =
-                                                        list(list(width =
-                                                                    '200px',
-                                                                  targets = "_all")),
-                                                      scrollX = TRUE,
-                                                      scrollY = TRUE,
-                                                      colReorder = TRUE),
-                                       rownames = FALSE, server = FALSE,
-      )
+      output$summary_table <- renderDT({
+        req(d)
+        isolate(d)
+      },
+      selection = "none",
+      extensions = 'ColReorder',
+      callback = JS(newjs),
+      options = list(dom = "t",
+                     pageLength = 10000,
+                     stateSave = TRUE,
+                     stateDuration = 0,
+                     order = list(),
+                     columnDefs = list(list(visible = FALSE, targets = 0),
+                                       list(width = '200px', targets = "_all")),
+                     scrollX = TRUE,
+                     scrollY = TRUE,
+                     colReorder = TRUE),
+      rownames = TRUE, server = TRUE)
 
+      replaceData(dt_summary_proxy, d, resetPaging = FALSE,
+                  rownames = TRUE)
 
     }, ignoreInit = TRUE)
 
