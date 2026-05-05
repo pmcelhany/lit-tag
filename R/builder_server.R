@@ -154,8 +154,18 @@ builder_server <- function(id) {
                    pageLength = 10000,
                    stateSave = TRUE,
                    stateDuration = 0,
-                   order = list()),
-    rownames = FALSE, server = TRUE)
+                   order = list(),
+                   scrollY = "600px",
+                   scrollCollapse = TRUE,
+                   drawCallback = JS("function(settings) {
+                     var table = this.api();
+                     var row = table.row('.selected');
+                     if (row.node()) {
+                       row.node().scrollIntoView({ block: 'nearest' });
+                     }
+                   }"),
+                   columnDefs = list(list(visible = FALSE, targets = 0))),
+    rownames = TRUE, server = TRUE)
 
   ## Render paper info function ----------------------------
   render_paper_info <- function(label, paper_var){
@@ -414,7 +424,7 @@ builder_server <- function(id) {
     # surgically update the data without re-rendering the whole widget
     replaceData(dt_proxy, values$d_mcdr_filtered %>%
                   select(all_of(values$bib_table_col)),
-                resetPaging = FALSE, rownames = FALSE)
+                resetPaging = FALSE, rownames = TRUE)
 
   })
 
@@ -426,7 +436,7 @@ builder_server <- function(id) {
     # surgically update the data without re-rendering the whole widget
     replaceData(dt_proxy, values$d_mcdr_filtered %>%
                   select(all_of(values$bib_table_col)),
-                resetPaging = FALSE, rownames = FALSE)
+                resetPaging = FALSE, rownames = TRUE)
   })
 
   ## Observe unselect filters button ------------------------
@@ -485,7 +495,7 @@ builder_server <- function(id) {
       # This preserves the user's current sort order and pagination.
       replaceData(dt_proxy, values$d_mcdr_filtered %>%
                     select(all_of(values$bib_table_col)),
-                  resetPaging = FALSE, rownames = FALSE)
+                  resetPaging = FALSE, rownames = TRUE)
     }
   }
 

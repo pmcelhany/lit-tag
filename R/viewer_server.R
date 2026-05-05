@@ -152,35 +152,18 @@ viewer_server <- function(id) {
                    stateSave = TRUE,
                    stateDuration = 0,
                    order = list(),
-                   columnDefs = list(list(width = '200px', targets = "_all"))),
-    rownames = FALSE, server = TRUE)
-
-    dt_proxy <- DT::dataTableProxy("table")
-    dt_summary_proxy <- DT::dataTableProxy("summary_table")
-
-    ### Table variables -----------------------------------------
-    table_vars <- reactive({
-      vars <- c("author", "publication_year", "title")
-      if (!is.null(input$show_extra) && input$show_extra) {
-        vars <- c("author", "publication_year", "title", "extra")
-      }
-      return(vars)
-    })
-
-    ### Bibliography table -----------------------------------------
-    output$table <- renderDT({
-      req(values$d_mcdr_filtered)
-      values$d_mcdr_filtered %>%
-        select(all_of(table_vars()))
-    },
-    selection = "single",
-    options = list(dom = "t",
-                   pageLength = 10000,
-                   stateSave = TRUE,
-                   stateDuration = 0,
-                   order = list(),
-                   columnDefs = list(list(width = '200px', targets = "_all"))),
-    rownames = FALSE, server = FALSE)
+                   scrollY = "600px",
+                   scrollCollapse = TRUE,
+                   drawCallback = JS("function(settings) {
+                     var table = this.api();
+                     var row = table.row('.selected');
+                     if (row.node()) {
+                       row.node().scrollIntoView({ block: 'nearest' });
+                     }
+                   }"),
+                   columnDefs = list(list(visible = FALSE, targets = 0),
+                                     list(width = '200px', targets = "_all"))),
+    rownames = TRUE, server = TRUE)
 
     ## render database chooser
     output$db_chooser <- renderUI({
@@ -304,10 +287,11 @@ viewer_server <- function(id) {
                        stateSave = TRUE,
                        stateDuration = 0,
                        order = list(),
-                       list(width = '20px', targets = "_all"),
+                       columnDefs = list(list(visible = FALSE, targets = 0),
+                                         list(width = '20px', targets = "_all")),
                        scrollX = TRUE,
                        scrollY = TRUE),
-        rownames = FALSE, server = TRUE)
+        rownames = TRUE, server = TRUE)
 
         ### Plot x variables dropdown -----------------
 
@@ -612,7 +596,7 @@ viewer_server <- function(id) {
       # surgically update the data without re-rendering the whole widget
       replaceData(dt_proxy, values$d_mcdr_filtered %>%
                     select(all_of(table_vars())),
-                  resetPaging = FALSE, rownames = FALSE)
+                  resetPaging = FALSE, rownames = TRUE)
 
       ### render filter summary ----------------------------
       output$n_papers_selected <- renderText(paste("Number of papers selected:",
@@ -924,14 +908,15 @@ viewer_server <- function(id) {
                      stateSave = TRUE,
                      stateDuration = 0,
                      order = list(),
-                     columnDefs = list(list(width = '200px', targets = "_all")),
+                     columnDefs = list(list(visible = FALSE, targets = 0),
+                                       list(width = '200px', targets = "_all")),
                      scrollX = TRUE,
                      scrollY = TRUE,
                      colReorder = TRUE),
-      rownames = FALSE, server = TRUE)
+      rownames = TRUE, server = TRUE)
 
       replaceData(dt_summary_proxy, d, resetPaging = FALSE,
-                  rownames = FALSE)
+                  rownames = TRUE)
 
     }, ignoreInit = TRUE)
 
