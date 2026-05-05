@@ -155,6 +155,33 @@ viewer_server <- function(id) {
                    columnDefs = list(list(width = '200px', targets = "_all"))),
     rownames = FALSE, server = TRUE)
 
+    dt_proxy <- DT::dataTableProxy("table")
+    dt_summary_proxy <- DT::dataTableProxy("summary_table")
+
+    ### Table variables -----------------------------------------
+    table_vars <- reactive({
+      vars <- c("author", "publication_year", "title")
+      if (!is.null(input$show_extra) && input$show_extra) {
+        vars <- c("author", "publication_year", "title", "extra")
+      }
+      return(vars)
+    })
+
+    ### Bibliography table -----------------------------------------
+    output$table <- renderDT({
+      req(values$d_mcdr_filtered)
+      values$d_mcdr_filtered %>%
+        select(all_of(table_vars()))
+    },
+    selection = "single",
+    options = list(dom = "t",
+                   pageLength = 10000,
+                   stateSave = TRUE,
+                   stateDuration = 0,
+                   order = list(),
+                   columnDefs = list(list(width = '200px', targets = "_all"))),
+    rownames = FALSE, server = FALSE)
+
     ## render database chooser
     output$db_chooser <- renderUI({
       fileInput(ns("database_csv"), h4("Database File"),
