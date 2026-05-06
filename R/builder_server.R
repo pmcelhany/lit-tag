@@ -142,6 +142,8 @@ builder_server <- function(id) {
     ### Bibliography table -----------------------------------------
     output$table <- renderDT({
       req(values$d_mcdr_filtered)
+      req(all(values$bib_table_col %in% names(values$d_mcdr_filtered)))
+
       values$d_mcdr_filtered %>%
         select(all_of(values$bib_table_col))
     },
@@ -155,10 +157,12 @@ builder_server <- function(id) {
                    scrollCollapse = TRUE,
                    drawCallback = JS("function(settings) {
                      var table = this.api();
-                     var row = table.row('.selected');
-                     if (row.node()) {
-                       row.node().scrollIntoView({ block: 'center', behavior: 'instant' });
-                     }
+                     setTimeout(function() {
+                       var row = table.row('.selected');
+                       if (row.node()) {
+                         row.node().scrollIntoView({ block: 'center', behavior: 'instant' });
+                       }
+                     }, 100);
                    }")),
     rownames = FALSE, server = FALSE)
 
