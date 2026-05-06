@@ -286,6 +286,7 @@ builder_server <- function(id) {
 
       ### Filter database --------
       # the d_mcdr_filtered dataframe is the filtered data shown in table
+      values$table_trigger <- values$table_trigger + 1
       values$d_mcdr_filtered <- values$d_mcdr_tagged %>%
          filter(if(input$exclude_obsolete &
                   "date_time_obsolete_db" %in% names(.))
