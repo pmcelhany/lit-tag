@@ -176,12 +176,13 @@ builder_server <- function(id) {
                          row.node().scrollIntoView({ block: 'center', behavior: 'instant' });
                        }
                      }, 100);
-                   }")),
-    rownames = FALSE, server = FALSE)
+                   }"),
+                   columnDefs = list(list(visible = FALSE, targets = 0))),
+    rownames = TRUE, server = TRUE)
 
   ## Render paper info function ----------------------------
   render_paper_info <- function(label, paper_var){
-    return(renderText(paste(label, values$d_mcdr_filtered %>% slice(input$table_rows_selected) %>%
+    return(renderText(paste(label, values$d_mcdr_filtered[input$table_rows_selected, ] %>%
                                pull(paper_var))))
   }
 
@@ -438,7 +439,7 @@ builder_server <- function(id) {
     # surgically update the data without re-rendering the whole widget
     replaceData(dt_proxy, values$d_mcdr_filtered %>%
                   select(all_of(values$bib_table_col)),
-                resetPaging = FALSE, rownames = FALSE)
+                resetPaging = FALSE, rownames = TRUE)
   })
 
   ## Observe show all button  -------------------------
@@ -449,7 +450,7 @@ builder_server <- function(id) {
     # surgically update the data without re-rendering the whole widget
     replaceData(dt_proxy, values$d_mcdr_filtered %>%
                   select(all_of(values$bib_table_col)),
-                resetPaging = FALSE, rownames = FALSE)
+                resetPaging = FALSE, rownames = TRUE)
   })
 
   ## Observe unselect filters button ------------------------
@@ -464,9 +465,9 @@ builder_server <- function(id) {
   ## Show abstract button -------------------------------
   observeEvent(input$show_abstract, {
     showModal(modalDialog(
-      title = values$d_mcdr_filtered %>% slice(input$table_rows_selected) %>%
+      title = values$d_mcdr_filtered[input$table_rows_selected, ] %>%
          pull("title"),
-      values$d_mcdr_filtered %>% slice(input$table_rows_selected) %>%
+      values$d_mcdr_filtered[input$table_rows_selected, ] %>%
          pull("abstract_note"),
       size = "l"
     ))
@@ -506,14 +507,14 @@ builder_server <- function(id) {
       # This preserves the user's current sort order and pagination.
       replaceData(dt_proxy, values$d_mcdr_filtered %>%
                     select(all_of(values$bib_table_col)),
-                  resetPaging = FALSE, rownames = FALSE)
+                  resetPaging = FALSE, rownames = TRUE)
     }
   }
 
   ### Observe changes to row function ------------------
   load_row_tags_fun <- function(x, d_category_meta, table_rows_selected){
 
-    row_val <- values$d_mcdr_filtered %>% slice(table_rows_selected) %>%
+    row_val <- values$d_mcdr_filtered[table_rows_selected, ] %>%
        pull(x)
 
     if(d_category_meta[x, "select_type"] == "check_box_single"){
@@ -552,7 +553,7 @@ builder_server <- function(id) {
 
     table_rows_selected <- input$table_rows_selected
 
-    current_key <- values$d_mcdr_filtered %>% slice(table_rows_selected) %>%
+    current_key <- values$d_mcdr_filtered[table_rows_selected, ] %>%
        pull(key)
 
     last_key <- values$last_key
@@ -572,7 +573,7 @@ builder_server <- function(id) {
       d_notes %>%
          pull("notes") %>%
           map(\(x) updateTextAreaInput(inputId = x,
-                                     value = values$d_mcdr_filtered %>% slice(table_rows_selected) %>%
+                                     value = values$d_mcdr_filtered[table_rows_selected, ] %>%
                                         pull(x)))
 
       values$last_key <- current_key
@@ -591,7 +592,7 @@ builder_server <- function(id) {
       d_notes %>%
          pull("notes") %>%
           map(\(x) updateTextAreaInput(inputId = x,
-                                     value = values$d_mcdr_filtered %>% slice(table_rows_selected) %>%
+                                     value = values$d_mcdr_filtered[table_rows_selected, ] %>%
                                         pull(x)))
 
       # change the last key to the current row
@@ -623,7 +624,7 @@ builder_server <- function(id) {
 
       if(!is.null(input$table_rows_selected)){
 
-        values$last_key <- values$d_mcdr_filtered %>% slice(input$table_rows_selected) %>%
+        values$last_key <- values$d_mcdr_filtered[input$table_rows_selected, ] %>%
            pull(key)
 
         save_last_row(values$last_key, values$d_category_meta,
