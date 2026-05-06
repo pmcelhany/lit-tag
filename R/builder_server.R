@@ -141,12 +141,8 @@ builder_server <- function(id) {
 
     ### Bibliography table -----------------------------------------
     output$table <- renderDT({
-      # trigger update when data is initially loaded or when show_extra changes
-      values$table_trigger
       req(values$d_mcdr_filtered)
-      req(all(values$bib_table_col %in% names(values$d_mcdr_filtered)))
-
-      isolate(values$d_mcdr_filtered) %>%
+      values$d_mcdr_filtered %>%
         select(all_of(values$bib_table_col))
     },
     selection = list(mode = "single"),
@@ -157,25 +153,12 @@ builder_server <- function(id) {
                    order = list(),
                    scrollY = "600px",
                    scrollCollapse = TRUE,
-                   preDrawCallback = JS("function(settings) {
-                     if (settings.nTable) {
-                       var scrollBody = $(settings.nTable).closest('.dataTables_scrollBody');
-                       this._savedScrollTop = scrollBody.scrollTop();
-                     }
-                   }"),
                    drawCallback = JS("function(settings) {
                      var table = this.api();
-                     var scrollBody = $(table.table().node()).closest('.dataTables_scrollBody');
-                     if (this._savedScrollTop !== undefined) {
-                       scrollBody.scrollTop(this._savedScrollTop);
+                     var row = table.row('.selected');
+                     if (row.node()) {
+                       row.node().scrollIntoView({ block: 'center', behavior: 'instant' });
                      }
-                     // Use setTimeout to ensure selection classes are applied by Shiny
-                     setTimeout(function() {
-                       var row = table.row('.selected', { modifier: { page: 'all' } });
-                       if (row.node()) {
-                         row.node().scrollIntoView({ block: 'center', behavior: 'instant' });
-                       }
-                     }, 100);
                    }")),
     rownames = FALSE, server = FALSE)
 
@@ -333,28 +316,6 @@ builder_server <- function(id) {
       # values$active_tag_ui <-
       #   values$tag_variables[!(values$tag_variables %in% notes_variables)]
 
-      ### Bibliography table -----------------------------------------
-      if(all(values$bib_table_col %in%
-             names(values$d_mcdr_filtered))){
-        output$table <- renderDT(values$d_mcdr_filtered %>%
-                                    select(values$bib_table_col),
-                                 selection = list(mode ="single"),
-                                 options = list(dom = "t",
-                                                pageLength = 10000,
-                                                stateSave = TRUE,
-                                                stateDuration = 0,
-                                                order = list(),
-                                                scrollY = "600px",
-                                                scrollCollapse = TRUE,
-                                                drawCallback = JS("function(settings) {
-                                                  var table = this.api();
-                                                  var row = table.row('.selected');
-                                                  if (row.node()) {
-                                                    row.node().scrollIntoView({ block: 'center', behavior: 'instant' });
-                                                  }
-                                                }")),
-                                 rownames = FALSE, server = FALSE)
-      }
 
       ### Show selected paper info -------------------------------------
       output$selected_year <- render_paper_info("Year:", "publication_year")
