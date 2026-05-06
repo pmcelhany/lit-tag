@@ -181,8 +181,7 @@ builder_server <- function(id) {
 
   ## Render paper info function ----------------------------
   render_paper_info <- function(label, paper_var){
-    return(renderText(paste(label, values$d_mcdr_filtered %>%
-                               slice(input$table_rows_selected) %>%
+    return(renderText(paste(label, values$d_mcdr_filtered[input$table_rows_selected, ] %>%
                                pull(paper_var))))
   }
 
@@ -287,6 +286,7 @@ builder_server <- function(id) {
 
       ### Filter database --------
       # the d_mcdr_filtered dataframe is the filtered data shown in table
+      values$table_trigger <- values$table_trigger + 1
       values$d_mcdr_filtered <- values$d_mcdr_tagged %>%
          filter(if(input$exclude_obsolete &
                   "date_time_obsolete_db" %in% names(.))
