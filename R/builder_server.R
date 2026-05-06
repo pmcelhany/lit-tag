@@ -333,6 +333,28 @@ builder_server <- function(id) {
       # values$active_tag_ui <-
       #   values$tag_variables[!(values$tag_variables %in% notes_variables)]
 
+      ### Bibliography table -----------------------------------------
+      if(all(values$bib_table_col %in%
+             names(values$d_mcdr_filtered))){
+        output$table <- renderDT(values$d_mcdr_filtered %>%
+                                    select(values$bib_table_col),
+                                 selection = list(mode ="single"),
+                                 options = list(dom = "t",
+                                                pageLength = 10000,
+                                                stateSave = TRUE,
+                                                stateDuration = 0,
+                                                order = list(),
+                                                scrollY = "600px",
+                                                scrollCollapse = TRUE,
+                                                drawCallback = JS("function(settings) {
+                                                  var table = this.api();
+                                                  var row = table.row('.selected');
+                                                  if (row.node()) {
+                                                    row.node().scrollIntoView({ block: 'center', behavior: 'instant' });
+                                                  }
+                                                }")),
+                                 rownames = FALSE, server = FALSE)
+      }
 
       ### Show selected paper info -------------------------------------
       output$selected_year <- render_paper_info("Year:", "publication_year")
