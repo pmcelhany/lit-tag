@@ -151,42 +151,22 @@ builder_server <- function(id) {
     },
     selection = list(mode = "single"),
     callback = JS("
-      function centerRow(row, animate) {
-        if (!row) return;
-        var $row = $(row);
-        var $scrollBody = $row.closest('.dataTables_scrollBody');
-        if ($scrollBody.length) {
-          var currentScroll = $scrollBody.scrollTop();
-          var rowTop = $row.position().top;
-          var rowHeight = $row.outerHeight();
-          var bodyHeight = $scrollBody.height();
-          var target = currentScroll + rowTop - (bodyHeight / 2) + (rowHeight / 2);
-          if (animate) {
+      var centerTimer;
+      function centerRow() {
+        clearTimeout(centerTimer);
+        centerTimer = setTimeout(function() {
+          var row = table.row('.selected').node();
+          if (!row) return;
+          var $scrollBody = $(row).closest('.dataTables_scrollBody');
+          if ($scrollBody.length) {
+            var container = $scrollBody[0];
+            var target = row.offsetTop - (container.offsetHeight / 2) + (row.offsetHeight / 2);
             $scrollBody.stop().animate({ scrollTop: target }, 200);
-          } else {
-            $scrollBody.scrollTop(target);
           }
-        }
+        }, 150);
       }
-      table.on('select', function(e, dt, type, indexes) {
-        if (type === 'row') {
-          centerRow(table.row(indexes).node(), true);
-        }
-      });
-      table.on('draw', function() {
-        centerRow(table.row('.selected').node(), false);
-      });
-      table.on('draw', function() {
-        var selected = table.rows({selected: true}).indexes();
-        if (selected.length > 0) {
-          var row = table.row(selected[selected.length - 1]).node();
-          if (row) {
-            setTimeout(function() {
-              row.scrollIntoView({ block: 'center', behavior: 'smooth' });
-            }, 100);
-          }
-        }
-      });
+      table.on('select', centerRow);
+      table.on('draw', centerRow);
     "),
     options = list(dom = "t",
                    pageLength = 10000,
