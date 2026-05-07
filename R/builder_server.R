@@ -141,10 +141,12 @@ builder_server <- function(id) {
 
     ### Bibliography table -----------------------------------------
     output$table <- renderDT({
+      # trigger update when data is initially loaded or filtered or when show_extra changes
+      values$table_trigger
       req(values$d_mcdr_filtered)
       req(all(values$bib_table_col %in% names(values$d_mcdr_filtered)))
 
-      values$d_mcdr_filtered %>%
+      isolate(values$d_mcdr_filtered) %>%
         select(all_of(values$bib_table_col))
     },
     selection = list(mode = "single"),
@@ -157,12 +159,10 @@ builder_server <- function(id) {
                    scrollCollapse = TRUE,
                    drawCallback = JS("function(settings) {
                      var table = this.api();
-                     setTimeout(function() {
-                       var row = table.row('.selected');
-                       if (row.node()) {
-                         row.node().scrollIntoView({ block: 'center', behavior: 'instant' });
-                       }
-                     }, 100);
+                     var row = table.row('.selected');
+                     if (row.node()) {
+                       row.node().scrollIntoView({ block: 'center', behavior: 'instant' });
+                     }
                    }")),
     rownames = FALSE, server = FALSE)
 
@@ -320,28 +320,6 @@ builder_server <- function(id) {
       # values$active_tag_ui <-
       #   values$tag_variables[!(values$tag_variables %in% notes_variables)]
 
-      ### Bibliography table -----------------------------------------
-      if(all(values$bib_table_col %in%
-             names(values$d_mcdr_filtered))){
-        output$table <- renderDT(values$d_mcdr_filtered %>%
-                                    select(values$bib_table_col),
-                                 selection = list(mode ="single"),
-                                 options = list(dom = "t",
-                                                pageLength = 10000,
-                                                stateSave = TRUE,
-                                                stateDuration = 0,
-                                                order = list(),
-                                                scrollY = "600px",
-                                                scrollCollapse = TRUE,
-                                                drawCallback = JS("function(settings) {
-                                                  var table = this.api();
-                                                  var row = table.row('.selected');
-                                                  if (row.node()) {
-                                                    row.node().scrollIntoView({ block: 'center', behavior: 'instant' });
-                                                  }
-                                                }")),
-                                 rownames = FALSE, server = FALSE)
-      }
 
       ### Show selected paper info -------------------------------------
       output$selected_year <- render_paper_info("Year:", "publication_year")
@@ -400,7 +378,7 @@ builder_server <- function(id) {
       values$bib_table_col <- c("first_author", "publication_year", "title")
       output$selected_extra <- NULL
     }
-    # trigger table update as the column structure has changed
+    # trigger table update as column structure changed
     values$table_trigger <- values$table_trigger + 1
   })
 
@@ -444,21 +422,16 @@ builder_server <- function(id) {
     input$filter_var %>%
         map(\(x) filter_fun(x))
 
-    # surgically update the data without re-rendering the whole widget
-    replaceData(dt_proxy, values$d_mcdr_filtered %>%
-                  select(all_of(values$bib_table_col)),
-                resetPaging = FALSE, rownames = FALSE)
+    # trigger re-render on search/filter
+    values$table_trigger <- values$table_trigger + 1
   })
 
   ## Observe show all button  -------------------------
 
   observeEvent(input$show_all_db, {
     values$d_mcdr_filtered <-  values$d_mcdr_tagged
-
-    # surgically update the data without re-rendering the whole widget
-    replaceData(dt_proxy, values$d_mcdr_filtered %>%
-                  select(all_of(values$bib_table_col)),
-                resetPaging = FALSE, rownames = FALSE)
+    # trigger re-render
+    values$table_trigger <- values$table_trigger + 1
   })
 
   ## Observe unselect filters button ------------------------
@@ -511,11 +484,8 @@ builder_server <- function(id) {
       values$d_mcdr_filtered[values$d_mcdr_filtered$key == key,] <-
         values$d_mcdr_tagged[values$d_mcdr_tagged$key == key, ]
 
-      # Use replaceData to surgically update the table content without re-rendering the whole widget.
-      # This preserves the user's current sort order and pagination.
-      replaceData(dt_proxy, values$d_mcdr_filtered %>%
-                    select(all_of(values$bib_table_col)),
-                  resetPaging = FALSE, rownames = FALSE)
+      # trigger table update to show changes in bibliography columns (e.g. Extra)
+      values$table_trigger <- values$table_trigger + 1
     }
   }
 
