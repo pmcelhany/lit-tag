@@ -161,6 +161,17 @@ builder_server <- function(id) {
           }
         }
       });
+      table.on('draw', function() {
+        var selected = table.rows({selected: true}).indexes();
+        if (selected.length > 0) {
+          var row = table.row(selected[selected.length - 1]).node();
+          if (row) {
+            setTimeout(function() {
+              row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            }, 100);
+          }
+        }
+      });
     "),
     options = list(dom = "t",
                    pageLength = 10000,
