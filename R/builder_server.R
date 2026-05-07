@@ -151,16 +151,22 @@ builder_server <- function(id) {
     },
     selection = list(mode = "single"),
     callback = JS("
-      table.on('select', function(e, dt, type, indexes) {
-        if (type === 'row') {
-          var row = table.row(indexes).node();
-          if (row) {
-            setTimeout(function() {
-              row.scrollIntoView({ block: 'center', behavior: 'smooth' });
-            }, 100);
+      var centerTimer;
+      function centerRow() {
+        clearTimeout(centerTimer);
+        centerTimer = setTimeout(function() {
+          var row = table.row('.selected').node();
+          if (!row) return;
+          var $scrollBody = $(row).closest('.dataTables_scrollBody');
+          if ($scrollBody.length) {
+            var container = $scrollBody[0];
+            var target = row.offsetTop - (container.offsetHeight / 2) + (row.offsetHeight / 2);
+            $scrollBody.stop().animate({ scrollTop: target }, 200);
           }
-        }
-      });
+        }, 150);
+      }
+      table.on('select', centerRow);
+      table.on('draw', centerRow);
     "),
     options = list(dom = "t",
                    pageLength = 10000,
