@@ -150,20 +150,25 @@ builder_server <- function(id) {
         select(all_of(values$bib_table_col))
     },
     selection = list(mode = "single"),
+    callback = JS("
+      table.on('select', function(e, dt, type, indexes) {
+        if (type === 'row') {
+          var row = table.row(indexes).node();
+          if (row) {
+            setTimeout(function() {
+              row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            }, 100);
+          }
+        }
+      });
+    "),
     options = list(dom = "t",
                    pageLength = 10000,
                    stateSave = TRUE,
                    stateDuration = 0,
                    order = list(),
                    scrollY = "600px",
-                   scrollCollapse = TRUE,
-                   drawCallback = JS("function(settings) {
-                     var table = this.api();
-                     var row = table.row('.selected');
-                     if (row.node()) {
-                       row.node().scrollIntoView({ block: 'center', behavior: 'instant' });
-                     }
-                   }")),
+                   scrollCollapse = TRUE),
     rownames = FALSE, server = FALSE)
 
   ## Render paper info function ----------------------------
