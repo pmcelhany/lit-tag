@@ -151,26 +151,9 @@ builder_server <- function(id) {
     },
     selection = list(mode = "single"),
     callback = JS("
-      var centerTimer;
-      function centerRow() {
-        clearTimeout(centerTimer);
-        centerTimer = setTimeout(function() {
-          var row = table.row('.selected').node();
-          if (!row) return;
-          var $scrollBody = $(row).closest('.dataTables_scrollBody');
-          if ($scrollBody.length) {
-            var container = $scrollBody[0];
-            var containerRect = container.getBoundingClientRect();
-            var rowRect = row.getBoundingClientRect();
-            var relativeTop = rowRect.top - containerRect.top;
-            var currentScroll = container.scrollTop;
-            var target = currentScroll + relativeTop - (container.clientHeight / 2) + (row.offsetHeight / 2);
-            $scrollBody.stop().animate({ scrollTop: Math.max(0, target) }, 200);
-          }
-        }, 200);
-      }
-      table.on('select', centerRow);
-      table.on('draw', centerRow);
+      table.on('select', function() {
+        if (typeof table.centerRow === 'function') table.centerRow(true);
+      });
     "),
     options = list(dom = "t",
                    pageLength = 10000,
@@ -178,7 +161,31 @@ builder_server <- function(id) {
                    stateDuration = 0,
                    order = list(),
                    scrollY = "600px",
-                   scrollCollapse = TRUE),
+                   scrollCollapse = TRUE,
+                   drawCallback = JS("function(settings) {
+                     var table = this.api();
+                     table.centerRow = function(animate) {
+                       var row = table.row('.selected').node();
+                       if (!row) return;
+                       var $scrollBody = $(row).closest('.dataTables_scrollBody');
+                       if ($scrollBody.length) {
+                         var container = $scrollBody[0];
+                         var containerRect = container.getBoundingClientRect();
+                         var rowRect = row.getBoundingClientRect();
+                         var relativeTop = rowRect.top - containerRect.top;
+                         var currentScroll = container.scrollTop;
+                         var target = currentScroll + relativeTop - (container.clientHeight / 2) + (row.offsetHeight / 2);
+                         if (animate) {
+                           $scrollBody.stop().animate({ scrollTop: Math.max(0, target) }, 200);
+                         } else {
+                           $scrollBody.scrollTop(Math.max(0, target));
+                         }
+                       }
+                     };
+                     setTimeout(function() {
+                       table.centerRow(false);
+                     }, 200);
+                   }")),
     rownames = FALSE, server = FALSE)
 
   ## Render paper info function ----------------------------
