@@ -160,10 +160,14 @@ builder_server <- function(id) {
           var $scrollBody = $(row).closest('.dataTables_scrollBody');
           if ($scrollBody.length) {
             var container = $scrollBody[0];
-            var target = row.offsetTop - (container.offsetHeight / 2) + (row.offsetHeight / 2);
-            $scrollBody.stop().animate({ scrollTop: target }, 200);
+            var containerRect = container.getBoundingClientRect();
+            var rowRect = row.getBoundingClientRect();
+            var relativeTop = rowRect.top - containerRect.top;
+            var currentScroll = container.scrollTop;
+            var target = currentScroll + relativeTop - (container.clientHeight / 2) + (row.offsetHeight / 2);
+            $scrollBody.stop().animate({ scrollTop: Math.max(0, target) }, 200);
           }
-        }, 150);
+        }, 200);
       }
       table.on('select', centerRow);
       table.on('draw', centerRow);
