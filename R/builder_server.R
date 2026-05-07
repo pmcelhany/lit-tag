@@ -445,8 +445,7 @@ builder_server <- function(id) {
         map(\(x) filter_fun(x))
 
     # trigger re-render on search/filter
-    replaceData(dt_proxy, values$d_mcdr_filtered %>% select(all_of(values$bib_table_col)),
-                resetPaging = FALSE, rownames = FALSE)
+    values$table_trigger <- values$table_trigger + 1
   })
 
   ## Observe show all button  -------------------------
@@ -454,8 +453,7 @@ builder_server <- function(id) {
   observeEvent(input$show_all_db, {
     values$d_mcdr_filtered <-  values$d_mcdr_tagged
     # trigger re-render
-    replaceData(dt_proxy, values$d_mcdr_filtered %>% select(all_of(values$bib_table_col)),
-                resetPaging = FALSE, rownames = FALSE)
+    values$table_trigger <- values$table_trigger + 1
   })
 
   ## Observe unselect filters button ------------------------
@@ -509,8 +507,7 @@ builder_server <- function(id) {
         values$d_mcdr_tagged[values$d_mcdr_tagged$key == key, ]
 
       # trigger table update to show changes in bibliography columns (e.g. Extra)
-      replaceData(dt_proxy, values$d_mcdr_filtered %>% select(all_of(values$bib_table_col)),
-                  resetPaging = FALSE, rownames = FALSE)
+      values$table_trigger <- values$table_trigger + 1
     }
   }
 
