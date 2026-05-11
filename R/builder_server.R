@@ -132,12 +132,28 @@ builder_server <- function(id) {
                            d_old_key_db = NULL, d_split_db = NULL,
                            tag_variables = NULL,
                            bib_table_col = c("first_author", "publication_year", "title"),
+                           bib_sort_column = "first_author",
+                           bib_sort_dir = "asc",
                            active_cat_tabs = character(0),
                            active_tag_ui = character(0),
                            table_trigger = 0)
 
     ## Proxy for the papers table ------------------------------
     dt_proxy <- DT::dataTableProxy("table")
+
+    # Capture user sort order
+    observeEvent(input$table_order_manual, {
+      req(input$table_order_manual)
+      order_info <- input$table_order_manual[[1]]
+      # Handle both list and vector formats from JS
+      col_idx <- if (is.list(order_info)) order_info$column else order_info[1]
+      dir <- if (is.list(order_info)) order_info$dir else order_info[2]
+
+      if (!is.null(col_idx) && !is.na(col_idx) && col_idx < length(values$bib_table_col)) {
+        values$bib_sort_column <- values$bib_table_col[as.numeric(col_idx) + 1]
+        values$bib_sort_dir <- dir
+      }
+    })
 
     ### Bibliography table -----------------------------------------
     output$table <- renderDT({
@@ -146,23 +162,32 @@ builder_server <- function(id) {
       req(values$d_mcdr_filtered)
       req(all(values$bib_table_col %in% names(values$d_mcdr_filtered)))
 
-      isolate(values$d_mcdr_filtered) %>%
-        select(all_of(values$bib_table_col))
-    },
-    selection = list(mode = "single"),
-    callback = JS("
-      table.on('select', function() {
-        if (typeof table.centerRow === 'function') table.centerRow(true);
-      });
-    "),
-    options = list(dom = "t",
-                   pageLength = 10000,
-                   stateSave = TRUE,
-                   stateDuration = 0,
-                   order = list(),
-                   scrollY = "600px",
-                   scrollCollapse = TRUE,
-                   drawCallback = JS("function(settings) {
+      curr_sort_col <- isolate(values$bib_sort_column)
+      curr_sort_dir <- isolate(values$bib_sort_dir)
+      col_idx <- match(curr_sort_col, values$bib_table_col) - 1
+      if (is.na(col_idx)) col_idx <- 0
+
+      datatable(
+        isolate(values$d_mcdr_filtered) %>%
+          select(all_of(values$bib_table_col)),
+        selection = list(mode = "single"),
+        callback = JS(paste0("
+          table.on('select', function() {
+            if (typeof table.centerRow === 'function') table.centerRow(true);
+          });
+          table.on('order.dt', function() {
+            var order = table.order();
+            Shiny.setInputValue('", ns("table_order_manual"), "', order);
+          });
+        ")),
+        options = list(dom = "t",
+                       pageLength = 10000,
+                       stateSave = TRUE,
+                       stateDuration = 0,
+                       order = list(list(col_idx, curr_sort_dir)),
+                       scrollY = "600px",
+                       scrollCollapse = TRUE,
+                       drawCallback = JS("function(settings) {
                      var table = this.api();
                      table.centerRow = function(animate) {
                        var row = table.row('.selected').node();
@@ -186,7 +211,9 @@ builder_server <- function(id) {
                        table.centerRow(false);
                      }, 200);
                    }")),
-    rownames = FALSE, server = FALSE)
+        rownames = FALSE
+      )
+    }, server = FALSE)
 
   ## Render paper info function ----------------------------
   render_paper_info <- function(label, paper_var){
