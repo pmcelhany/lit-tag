@@ -142,14 +142,15 @@ builder_server <- function(id) {
     dt_proxy <- DT::dataTableProxy("table")
 
     # Capture user sort order
-    observeEvent(input$table_order, {
-      req(input$table_order)
-      order_info <- input$table_order[[1]]
-      col_idx <- order_info$column
-      dir <- order_info$dir
+    observeEvent(input$table_order_manual, {
+      req(input$table_order_manual)
+      order_info <- input$table_order_manual[[1]]
+      # Handle both list and vector formats from JS
+      col_idx <- if (is.list(order_info)) order_info$column else order_info[1]
+      dir <- if (is.list(order_info)) order_info$dir else order_info[2]
 
-      if (col_idx < length(values$bib_table_col)) {
-        values$bib_sort_column <- values$bib_table_col[col_idx + 1]
+      if (!is.null(col_idx) && !is.na(col_idx) && col_idx < length(values$bib_table_col)) {
+        values$bib_sort_column <- values$bib_table_col[as.numeric(col_idx) + 1]
         values$bib_sort_dir <- dir
       }
     })
@@ -170,11 +171,15 @@ builder_server <- function(id) {
         isolate(values$d_mcdr_filtered) %>%
           select(all_of(values$bib_table_col)),
         selection = list(mode = "single"),
-        callback = JS("
+        callback = JS(paste0("
           table.on('select', function() {
             if (typeof table.centerRow === 'function') table.centerRow(true);
           });
-        "),
+          table.on('order.dt', function() {
+            var order = table.order();
+            Shiny.setInputValue('", ns("table_order_manual"), "', order);
+          });
+        ")),
         options = list(dom = "t",
                        pageLength = 10000,
                        stateSave = TRUE,
