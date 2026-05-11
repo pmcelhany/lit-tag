@@ -331,7 +331,7 @@ viewer_server <- function(id) {
 
         ### Summary table variables dropdown ------------------
 
-        summary_tbl_paper_fields <- c(plot_paper_fields, "doi", "url")
+        summary_tbl_paper_fields <- c(plot_paper_fields, "doi", "url", "extra")
 
         summary_opt_list <- names(cat_without_notes) %>%
            purrr::set_names() %>%
