@@ -144,13 +144,27 @@ builder_server <- function(id) {
     # Capture user sort order
     observeEvent(input$table_order_manual, {
       req(input$table_order_manual)
+      # input$table_order_manual is usually a list of lists: [[0, "asc"]] or [[column: 0, dir: "asc"]]
       order_info <- input$table_order_manual[[1]]
-      # Handle both list and vector formats from JS
-      col_idx <- if (is.list(order_info)) order_info$column else order_info[1]
-      dir <- if (is.list(order_info)) order_info$dir else order_info[2]
 
-      if (!is.null(col_idx) && !is.na(col_idx) && col_idx < length(values$bib_table_col)) {
-        values$bib_sort_column <- values$bib_table_col[as.numeric(col_idx) + 1]
+      col_idx <- NA
+      dir <- NA
+
+      if (is.list(order_info)) {
+        if (!is.null(order_info$column)) {
+          col_idx <- as.numeric(order_info$column)
+          dir <- as.character(order_info$dir)
+        } else {
+          col_idx <- as.numeric(order_info[[1]])
+          dir <- as.character(order_info[[2]])
+        }
+      } else if (is.vector(order_info)) {
+        col_idx <- as.numeric(order_info[1])
+        dir <- as.character(order_info[2])
+      }
+
+      if (!is.na(col_idx) && col_idx < length(values$bib_table_col)) {
+        values$bib_sort_column <- values$bib_table_col[col_idx + 1]
         values$bib_sort_dir <- dir
       }
     })
@@ -187,6 +201,9 @@ builder_server <- function(id) {
                        order = list(list(col_idx, curr_sort_dir)),
                        scrollY = "600px",
                        scrollCollapse = TRUE,
+                       stateLoadParams = JS("function(settings, data) {
+                         data.order = [];
+                       }"),
                        drawCallback = JS("function(settings) {
                      var table = this.api();
                      table.centerRow = function(animate) {
