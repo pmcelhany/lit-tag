@@ -165,7 +165,8 @@ builder_server <- function(id) {
 
       if (!is.na(col_idx) && col_idx < length(values$bib_table_col)) {
         values$bib_sort_column <- values$bib_table_col[col_idx + 1]
-        values$bib_sort_dir <- dir
+        # Ensure direction is valid and not reversed
+        values$bib_sort_dir <- if (identical(dir, "desc")) "desc" else "asc"
       }
     })
 
@@ -202,7 +203,10 @@ builder_server <- function(id) {
                        scrollY = "600px",
                        scrollCollapse = TRUE,
                        stateLoadParams = JS("function(settings, data) {
-                         data.order = [];
+                         delete data.order;
+                       }"),
+                       stateSaveParams = JS("function(settings, data) {
+                         delete data.order;
                        }"),
                        drawCallback = JS("function(settings) {
                      var table = this.api();
