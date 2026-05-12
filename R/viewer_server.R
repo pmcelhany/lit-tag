@@ -296,7 +296,7 @@ viewer_server <- function(id) {
         ### Plot x variables dropdown -----------------
 
         plot_paper_fields <- c("item_type", "publication_year", "author", "title",
-                               "pub_name_short", "first_author")
+                               "pub_name_short", "first_author", "extra")
 
         cat_without_notes <- values$categories %>%
            list_modify(notes = zap())
@@ -913,10 +913,10 @@ viewer_server <- function(id) {
                      scrollX = TRUE,
                      scrollY = TRUE,
                      colReorder = TRUE),
-      rownames = TRUE, server = TRUE)
+      rownames = FALSE, server = TRUE)
 
       replaceData(dt_summary_proxy, d, resetPaging = FALSE,
-                  rownames = TRUE)
+                  rownames = FALSE)
 
     }, ignoreInit = TRUE)
 
