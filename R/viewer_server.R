@@ -102,16 +102,16 @@ viewer_server <- function(id) {
     ### newjs ------
     # function to get column order from summary table
     # code from https://stackoverflow.com/questions/59428159/in-r-shinyproxy-how-do-i-get-the-order-of-columns-from-a-dtdatatable-after-a
-    newjs <- 'table.on("column-reorder", function(e, settings, details){
-        var table = document.getElementById("summary_table");
+    newjs <- paste0('table.on("column-reorder", function(e, settings, details){
+        var table = document.getElementById("', ns("summary_table"), '");
         var thead = table.getElementsByTagName("thead");
         var ths = thead[0].getElementsByTagName("th");
         var tableFields = [];
         for (let i = 0; i < ths.length; i++) {
             tableFields[i] = ths[i].innerHTML;
         }
-        Shiny.onInputChange("colOrder", tableFields);
-    });'
+        Shiny.onInputChange("', ns("colOrder"), '", tableFields);
+    });')
 
 
     ## Reactive values --------------------------------------------
@@ -123,7 +123,6 @@ viewer_server <- function(id) {
                              table_trigger = 0)
 
     dt_proxy <- DT::dataTableProxy("table")
-    dt_summary_proxy <- DT::dataTableProxy("summary_table")
 
     # trigger table re-render when columns change
     observeEvent(input$show_extra, {
@@ -880,9 +879,8 @@ viewer_server <- function(id) {
     ## Summary table ---------------------------------------------
 
     ### Show summary table change -------------------
-    #observeEvent(input$show_summary_table,{
-    #observeEvent(c(input$summary_data),{
-    observeEvent(c(input$summary_var, input$summary_data, input$select_papers),{
+    output$summary_table <- renderDT({
+
       #### Use full data set or the filtered data set? -----------
       d <- NULL
       if(input$summary_data == "Full dataset"){
@@ -896,29 +894,22 @@ viewer_server <- function(id) {
            select(input$summary_var)
       }
 
-      output$summary_table <- renderDT({
-        req(d)
-        isolate(d)
-      },
-      selection = "none",
-      extensions = 'ColReorder',
-      callback = JS(newjs),
-      options = list(dom = "t",
-                     pageLength = 10000,
-                     stateSave = TRUE,
-                     stateDuration = 0,
-                     order = list(),
-                     columnDefs = list(list(visible = FALSE, targets = 0),
-                                       list(width = '200px', targets = "_all")),
-                     scrollX = TRUE,
-                     scrollY = TRUE,
-                     colReorder = TRUE),
-      rownames = FALSE, server = TRUE)
-
-      replaceData(dt_summary_proxy, d, resetPaging = FALSE,
-                  rownames = FALSE)
-
-    }, ignoreInit = TRUE)
+      req(d)
+      d
+    },
+    selection = "none",
+    extensions = 'ColReorder',
+    callback = JS(newjs),
+    options = list(dom = "t",
+                   pageLength = 10000,
+                   stateSave = TRUE,
+                   stateDuration = 0,
+                   order = list(),
+                   columnDefs = list(list(width = '200px', targets = "_all")),
+                   scrollX = TRUE,
+                   scrollY = TRUE,
+                   colReorder = TRUE),
+    rownames = FALSE, server = FALSE)
 
     ### Download summary csv ----------------------------
     output$download_summary <- downloadHandler(
