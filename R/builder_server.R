@@ -535,27 +535,34 @@ builder_server <- function(id) {
       tag_value <- NA
     }
 
-    values$d_mcdr_tagged[values$d_mcdr_tagged$key == key, tag] <-
-      tag_value
+    current_val <- values$d_mcdr_tagged[values$d_mcdr_tagged$key == key, tag, drop = TRUE]
+
+    if(!identical(as.character(tag_value), as.character(current_val))){
+      values$d_mcdr_tagged[values$d_mcdr_tagged$key == key, tag] <-
+        tag_value
+      return(TRUE)
+    }
+    return(FALSE)
   }
 
   ### Save last row function -----------------------
   save_last_row <- function(key, d_category_meta, d_notes){
-    if(!is.null(key)){
+    if(!is.null(key) && length(key) > 0 && !is.na(key)){
 
-      rownames(d_category_meta) %>%
-          map(\(x) save_tag_value(key, x))
+      tag_changes <- rownames(d_category_meta) %>%
+          map_lgl(\(x) save_tag_value(key, x))
 
-      d_notes %>%
+      note_changes <- d_notes %>%
          pull("notes") %>%
-          map(\(x) save_tag_value(key, x))
+          map_lgl(\(x) save_tag_value(key, x))
 
+      if(any(tag_changes) || any(note_changes)){
+        values$d_mcdr_filtered[values$d_mcdr_filtered$key == key,] <-
+          values$d_mcdr_tagged[values$d_mcdr_tagged$key == key, ]
 
-      values$d_mcdr_filtered[values$d_mcdr_filtered$key == key,] <-
-        values$d_mcdr_tagged[values$d_mcdr_tagged$key == key, ]
-
-      # trigger table update to show changes in bibliography columns (e.g. Extra)
-      values$table_trigger <- values$table_trigger + 1
+        # trigger table update to show changes in bibliography columns (e.g. Extra)
+        values$table_trigger <- values$table_trigger + 1
+      }
     }
   }
 
@@ -598,11 +605,15 @@ builder_server <- function(id) {
   observeEvent(input$table_rows_selected, {
 
     w$show()
+    on.exit(w$hide())
 
     table_rows_selected <- input$table_rows_selected
 
-    current_key <- values$d_mcdr_filtered %>% slice(table_rows_selected) %>%
-       pull(key)
+    current_key <- NULL
+    if(length(table_rows_selected) > 0){
+      current_key <- values$d_mcdr_filtered %>% slice(table_rows_selected) %>%
+        pull(key)
+    }
 
     last_key <- values$last_key
     d_category_meta <- values$d_category_meta
@@ -612,49 +623,48 @@ builder_server <- function(id) {
     tags <-  rownames(d_category_meta)[rownames(d_category_meta) != "notes"]
 
     if(is.null(last_key)){
-      last_key <- current_key
-      # load selected row tags
-      tags %>%
-          map(\(x) load_row_tags_fun(x, d_category_meta, table_rows_selected))
+      if(!is.null(current_key)){
+        # load selected row tags
+        tags %>%
+            map(\(x) load_row_tags_fun(x, d_category_meta, table_rows_selected))
 
-      #load selected row notes
-      d_notes %>%
-         pull("notes") %>%
-          map(\(x) updateTextAreaInput(inputId = x,
-                                     value = values$d_mcdr_filtered %>% slice(table_rows_selected) %>%
-                                        pull(x)))
-
+        #load selected row notes
+        d_notes %>%
+           pull("notes") %>%
+            map(\(x) updateTextAreaInput(inputId = x,
+                                       value = values$d_mcdr_filtered %>% slice(table_rows_selected) %>%
+                                          pull(x)))
+      }
       values$last_key <- current_key
-    }
-    if(current_key != last_key){
+    } else if(!identical(current_key, last_key)){
 
       # update database with last selected rows data
       # selecting a new row tiggers the saving of the last rows input data
       save_last_row(last_key, d_category_meta, d_notes)
 
-      # load selected row tags
-      tags %>%
-          map(\(x) load_row_tags_fun(x, d_category_meta, table_rows_selected))
+      if(!is.null(current_key)){
+        # load selected row tags
+        tags %>%
+            map(\(x) load_row_tags_fun(x, d_category_meta, table_rows_selected))
 
-      #load selected row notes
-      d_notes %>%
-         pull("notes") %>%
-          map(\(x) updateTextAreaInput(inputId = x,
-                                     value = values$d_mcdr_filtered %>% slice(table_rows_selected) %>%
-                                        pull(x)))
+        #load selected row notes
+        d_notes %>%
+           pull("notes") %>%
+            map(\(x) updateTextAreaInput(inputId = x,
+                                       value = values$d_mcdr_filtered %>% slice(table_rows_selected) %>%
+                                          pull(x)))
+
+        #need for some reason to make sure it does not loose
+        #highlighting the current row
+        selectRows(dt_proxy, table_rows_selected)
+      }
 
       # change the last key to the current row
       # this will be used to save any data changes when a new row is selected
       values$last_key <- current_key
-
-      #need for some reason to make sure it does not loose
-      #highlighting the current row
-      selectRows(dt_proxy, table_rows_selected)
     }
 
-    w$hide()
-
-  })
+  }, ignoreNULL = FALSE)
 
   ## Download edits button ------------------
   output$download_edits <- downloadHandler(
