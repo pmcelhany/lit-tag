@@ -27,6 +27,157 @@ builder_server <- function(id) {
 
     ns <- session$ns
 
+    # Inject CSS and JS for resizable panels in the Tag edit tab
+    insertUI(
+      selector = "head",
+      where = "beforeEnd",
+      ui = tagList(
+        tags$style(HTML("
+          @media (min-width: 768px) {
+            .resizable-container {
+              display: flex !important;
+              flex-direction: row !important;
+              width: 100% !important;
+              gap: 0 !important;
+              grid-template-columns: none !important;
+            }
+            .resizable-container > .bslib-grid-item {
+              flex: 1 1 0px;
+              min-width: 100px;
+              overflow: auto;
+            }
+            .gutter {
+              width: 10px;
+              background-color: #f8f9fa;
+              cursor: col-resize;
+              flex: 0 0 auto;
+              transition: background-color 0.2s;
+              z-index: 10;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-left: 1px solid #dee2e6;
+              border-right: 1px solid #dee2e6;
+            }
+            .gutter:hover, .gutter.dragging {
+              background-color: #6A5ACD;
+              border-color: #6A5ACD;
+            }
+            .gutter::after {
+              content: '⋮';
+              color: #adb5bd;
+              font-size: 16px;
+              font-weight: bold;
+            }
+            .gutter:hover::after, .gutter.dragging::after {
+              color: white;
+            }
+          }
+        ")),
+        tags$script(HTML(paste0("
+          (function() {
+            function initResizer() {
+              const containers = document.querySelectorAll('bslib-layout-columns');
+              for (const container of containers) {
+                if (container.classList.contains('resizable-container')) continue;
+
+                const panels = Array.from(container.querySelectorAll(':scope > .bslib-grid-item'));
+                if (panels.length !== 3) continue;
+
+                // Check if it's the right one by looking at headers
+                const h3s = Array.from(container.querySelectorAll('h3')).map(h => h.textContent.trim());
+                const isTagEdit = h3s.includes('Paper table') &&
+                                  h3s.includes('Paper info and notes') &&
+                                  h3s.includes('Tags');
+
+                if (!isTagEdit) continue;
+
+                container.classList.add('resizable-container');
+
+                // Set initial flex values
+                panels.forEach(p => {
+                  p.style.flex = '1 1 0px';
+                });
+
+                for (let i = 0; i < panels.length - 1; i++) {
+                  const leftPanel = panels[i];
+                  const rightPanel = panels[i+1];
+                  const gutter = document.createElement('div');
+                  gutter.className = 'gutter';
+                  leftPanel.after(gutter);
+
+                  gutter.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    const startX = e.pageX;
+                    const leftWidth = leftPanel.getBoundingClientRect().width;
+                    const rightWidth = rightPanel.getBoundingClientRect().width;
+                    const totalWidth = leftWidth + rightWidth;
+
+                    // Use getComputedStyle to get the actual flex-grow value
+                    const leftFlex = parseFloat(window.getComputedStyle(leftPanel).flexGrow) || 1;
+                    const rightFlex = parseFloat(window.getComputedStyle(rightPanel).flexGrow) || 1;
+                    const totalFlex = leftFlex + rightFlex;
+
+                    gutter.classList.add('dragging');
+                    document.body.style.cursor = 'col-resize';
+
+                    function onMouseMove(e) {
+                      const deltaX = e.pageX - startX;
+                      let newLeftWidth = leftWidth + deltaX;
+                      let newRightWidth = rightWidth - deltaX;
+
+                      if (newLeftWidth < 100) {
+                        newLeftWidth = 100;
+                        newRightWidth = totalWidth - 100;
+                      }
+                      if (newRightWidth < 100) {
+                        newRightWidth = 100;
+                        newLeftWidth = totalWidth - 100;
+                      }
+
+                      const newLeftFlex = (newLeftWidth / totalWidth) * totalFlex;
+                      const newRightFlex = (newRightWidth / totalWidth) * totalFlex;
+
+                      leftPanel.style.flex = newLeftFlex + ' 1 0px';
+                      rightPanel.style.flex = newRightFlex + ' 1 0px';
+                    }
+
+                    function onMouseUp() {
+                      gutter.classList.remove('dragging');
+                      document.body.style.cursor = '';
+                      document.removeEventListener('mousemove', onMouseMove);
+                      document.removeEventListener('mouseup', onMouseUp);
+                    }
+
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                  });
+                }
+              }
+            }
+
+            $(document).on('shown.bs.tab', function() {
+              setTimeout(initResizer, 200);
+            });
+
+            const observer = new MutationObserver((mutations) => {
+              for (const mutation of mutations) {
+                if (mutation.addedNodes.length) {
+                  initResizer();
+                }
+              }
+            });
+
+            $(document).ready(function() {
+              observer.observe(document.body, { childList: true, subtree: true });
+              setTimeout(initResizer, 1000); // Increased timeout to be safe
+            });
+          })();
+        ")))
+      ),
+      immediate = TRUE
+    )
+
     ## Misc functions -----------------------------------
 
     # function to add columns to a df if the columns do not already exist
