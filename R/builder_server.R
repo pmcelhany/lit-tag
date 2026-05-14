@@ -27,53 +27,11 @@ builder_server <- function(id) {
 
     ns <- session$ns
 
-    # Inject CSS and JS for resizable panels in the Tag edit tab
+    # Inject JS for resizable panels in the Tag edit tab
     insertUI(
       selector = "head",
       where = "beforeEnd",
       ui = tagList(
-        tags$style(HTML("
-          @media (min-width: 768px) {
-            .resizable-container {
-              display: flex !important;
-              flex-direction: row !important;
-              width: 100% !important;
-              gap: 0 !important;
-              grid-template-columns: none !important;
-            }
-            .resizable-container > .bslib-grid-item {
-              flex: 1 1 0px;
-              min-width: 100px;
-              overflow: auto;
-            }
-            .gutter {
-              width: 10px;
-              background-color: #f8f9fa;
-              cursor: col-resize;
-              flex: 0 0 auto;
-              transition: background-color 0.2s;
-              z-index: 10;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              border-left: 1px solid #dee2e6;
-              border-right: 1px solid #dee2e6;
-            }
-            .gutter:hover, .gutter.dragging {
-              background-color: #6A5ACD;
-              border-color: #6A5ACD;
-            }
-            .gutter::after {
-              content: '⋮';
-              color: #adb5bd;
-              font-size: 16px;
-              font-weight: bold;
-            }
-            .gutter:hover::after, .gutter.dragging::after {
-              color: white;
-            }
-          }
-        ")),
         tags$script(HTML(paste0("
           (function() {
             function initResizer() {
