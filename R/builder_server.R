@@ -705,7 +705,13 @@ builder_server <- function(id) {
     }
 
     if(d_category_meta[x, "select_type"] == "date"){
-      updateDateInput(inputId = x, value = row_val)
+      if(is.na(row_val) | row_val == "NA" | row_val == "" |
+         identical(row_val, character(0))){
+        d_val <- NA
+      } else{
+        d_val <- row_val
+      }
+      updateDateInput(inputId = x, value = d_val)
     }
 
   }
