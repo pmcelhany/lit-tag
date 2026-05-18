@@ -284,17 +284,27 @@ builder_server <- function(id) {
       # trigger update when data is initially loaded or filtered or when show_extra changes
       values$table_trigger
       req(values$d_mcdr_filtered)
-      req(all(values$bib_table_col %in% names(values$d_mcdr_filtered)))
+
+      d_filtered <- isolate(values$d_mcdr_filtered)
+      bib_cols <- isolate(values$bib_table_col)
+      req(all(bib_cols %in% names(d_filtered)))
 
       curr_sort_col <- isolate(values$bib_sort_column)
       curr_sort_dir <- isolate(values$bib_sort_dir)
-      col_idx <- match(curr_sort_col, values$bib_table_col) - 1
+      col_idx <- match(curr_sort_col, bib_cols) - 1
       if (is.na(col_idx)) col_idx <- 0
 
+      # Determine selected row index
+      sel_row <- NULL
+      last_key <- isolate(values$last_key)
+      if (!is.null(last_key) && "key" %in% names(d_filtered)) {
+        sel_row <- which(d_filtered$key == last_key)
+      }
+
       datatable(
-        isolate(values$d_mcdr_filtered) %>%
-          select(all_of(values$bib_table_col)),
-        selection = list(mode = "single"),
+        d_filtered %>%
+          select(all_of(bib_cols)),
+        selection = list(mode = "single", selected = sel_row),
         callback = JS(paste0("
           table.on('select', function() {
             if (typeof table.centerRow === 'function') table.centerRow(true);
@@ -566,14 +576,19 @@ builder_server <- function(id) {
 
     ### Render UI of filters -----------------------------
     output$filters  <- renderUI({
+      d_tagged <- isolate(values$d_mcdr_tagged)
       input$filter_var %>%
-          map(\(x) checkboxGroupInput(ns(paste("filter", x, sep = "_")),
-                                    paste("filter", x, sep = "_"),
-                                    unique(values$d_mcdr_tagged %>%
-                                              pull(x) %>%
-                                             replace_na("NA")) %>%
-                                      sort(),
-                                    inline = TRUE))
+        map(\(x) {
+          id <- paste("filter", x, sep = "_")
+          checkboxGroupInput(ns(id),
+                             id,
+                             unique(d_tagged %>%
+                                      pull(x) %>%
+                                      replace_na("NA")) %>%
+                               sort(),
+                             selected = isolate(input[[id]]),
+                             inline = TRUE)
+        })
     })
 
   })
@@ -609,6 +624,10 @@ builder_server <- function(id) {
 
   observeEvent(input$show_all_db, {
     values$d_mcdr_filtered <-  values$d_mcdr_tagged
+
+    updateVirtualSelect(inputId = "filter_var",
+                        selected = character(0))
+
     # trigger re-render
     values$table_trigger <- values$table_trigger + 1
   })
