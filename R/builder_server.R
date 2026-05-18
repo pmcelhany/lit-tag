@@ -624,6 +624,10 @@ builder_server <- function(id) {
 
   observeEvent(input$show_all_db, {
     values$d_mcdr_filtered <-  values$d_mcdr_tagged
+
+    updateVirtualSelect(inputId = "filter_var",
+                        selected = character(0))
+
     # trigger re-render
     values$table_trigger <- values$table_trigger + 1
   })
