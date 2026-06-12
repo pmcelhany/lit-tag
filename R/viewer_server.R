@@ -1009,9 +1009,12 @@ viewer_server <- function(id) {
       withProgress(message = "Rendering report", value = 0, {
         incProgress(1/4)
         render_quarto_fun("html")
-        output$report <- renderUI(includeHTML({
-          "report/lit_tag_report_template.html"
-        }))
+        output$report <- renderUI({
+          tags$iframe(
+            src = paste0("reports/lit_tag_report_template.html?t=", as.numeric(Sys.time())),
+            style = "width: 100%; height: 100vh; border: none;"
+          )
+        })
         incProgress(4/4)
       })
     })

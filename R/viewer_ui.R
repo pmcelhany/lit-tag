@@ -230,7 +230,7 @@ viewer_ui <- function(id){
                              downloadButton(ns("download_report"), "Download report")
                 ),
                 mainPanel(width = 9,
-                          htmlOutput(ns("report")))
+                          htmlOutput(ns("report"), style = "width: 100%;"))
               )
     ),
     ## Help panel ------------------------
