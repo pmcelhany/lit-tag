@@ -61,10 +61,15 @@ viewer_ui <- function(id){
                 col_widths = c(4,4,4),
                 ### Left panel: table of papers ---------------------
                 card(card_header(h3("Paper table (filtered)")),
-                     checkboxInput(ns("show_extra"),
-                                   "Show \"extra\" field",
-                                   value = FALSE),
-                     DTOutput(ns('table'))),
+                     card_body(
+                       checkboxInput(ns("show_extra"),
+                                     "Show \"extra\" field",
+                                     value = FALSE),
+                       fill = FALSE
+                     ),
+                     card_body(
+                       DTOutput(ns('table'))
+                     )),
 
                 ### Center panel: search criteria ---------------------------
                 card(card_header(h3("Search criteria")),

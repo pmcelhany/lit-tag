@@ -146,12 +146,12 @@ viewer_server <- function(id) {
         select(all_of(table_vars()))
     },
     selection = "single",
+    fillContainer = TRUE,
     options = list(dom = "t",
                    pageLength = 10000,
                    stateSave = TRUE,
                    stateDuration = 0,
                    order = list(),
-                   scrollY = "600px",
                    scrollCollapse = TRUE,
                    drawCallback = JS("function(settings) {
                      var table = this.api();
