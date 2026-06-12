@@ -1012,7 +1012,7 @@ viewer_server <- function(id) {
         output$report <- renderUI({
           tags$iframe(
             src = paste0("reports/lit_tag_report_template.html?t=", as.numeric(Sys.time())),
-            style = "width: 100%; height: 800px; border: none;"
+            style = "width: 100%; height: 100vh; border: none;"
           )
         })
         incProgress(4/4)
