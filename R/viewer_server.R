@@ -1056,7 +1056,7 @@ viewer_server <- function(id) {
         "mcdr_example.zip"
       },
       content = function(file) {
-        file.copy("docs/mcdr_example.zip", file)
+        file.copy("data/mcdr_example.zip", file)
       },
       contentType = "application/zip")
 
