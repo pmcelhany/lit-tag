@@ -940,6 +940,7 @@ viewer_server <- function(id) {
 
     ## Render quarto fun -----------
     render_quarto_fun <- function(report_type){
+
       d_report <- values$d_mcdr_tagged
       if(input$report_data == "Filtered dataset") {
         d_report <- values$d_mcdr_filtered
@@ -960,6 +961,11 @@ viewer_server <- function(id) {
 
       d_report <- d_report %>%
         replace(is.na(.), "NA")
+
+      if(report_type == "pdf"){
+        d_report <- d_report %>%
+          mutate(across(everything(), \(x) escape_latex(x)))
+      }
 
       categories <- values$categories %>%
          list_modify("notes" = rlang::zap())
