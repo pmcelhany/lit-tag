@@ -1,65 +1,50 @@
-
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 # `{littag}`
 
-<!-- badges: start -->
-<!-- badges: end -->
+## About Lit-tag
 
-## Installation
+To facilitate the review, evaluation and analysis of scientific literature, the lit-tag R Shiny application provides a convenient interface for users to generate a citation database with custom, user-defined tags and notes. Lit-tag is not subject-specific and is useful for any field of research. Starting with a table of citations exported from a Zotero library and a user-generated Excel file describing a set of tags and notes fields, lit-tag provides tools for assigning tags and notes to papers ("lit-tag-builder" module) and for exporting, graphing, and generating reports from the resulting database ("lit-tag-viewer" module). The app fills a need not met by the limited tagging tools available in bibliographic software and does not require database programming skills.
 
-You can install the development version of `{littag}` like so:
+## Lit-tag paper pre-print
+
+A paper on lit-tag is currently available as pre-print ([McElhany, Grabb and Wood 2026](https://arxiv.org/abs/2603.19238)).
+
+## Package installation
+
+You can install `{littag}` as a package like so:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+remotes::install_github("pmcelhany/lit-tag")
 ```
 
-## Run
+## Run app from package
 
 You can launch the application by running:
 
 ``` r
+library(littag)
 littag::run_app()
 ```
 
-## About
+## Run app from source code
 
-You are reading the doc about version : 0.0.0.9000
+1.  Open littag.proj in RStudio.
 
-This README has been compiled on the
+2.  Open app.R script.
 
-``` r
-Sys.time()
-#> [1] "2025-11-26 10:41:53 PST"
-```
+3.  Click "Run App" button in top bar of script panel.
 
-Here are the tests results and package coverage:
+## Run on NOAA Fisheries server
 
-``` r
-devtools::check(quiet = TRUE)
-#> ══ Documenting ═════════════════════════════════════════════════════════════════
-#> ℹ Installed roxygen2 version (7.3.2) doesn't match required (7.1.1)
-#> ✖ `check()` will not re-document this package
-#> ── R CMD check results ────────────────────────────────── littag 0.0.0.9000 ────
-#> Duration: 15.4s
-#> 
-#> ❯ checking for future file timestamps ... NOTE
-#>   unable to verify current time
-#> 
-#> ❯ checking DESCRIPTION meta-information ... NOTE
-#>   License stub is invalid DCF.
-#> 
-#> ❯ checking top-level files ... NOTE
-#>   Non-standard file/directory found at top level:
-#>     ‘dev’
-#> 
-#> 0 errors ✔ | 0 warnings ✔ | 3 notes ✖
-```
+To run lit-tag on the NOAA Fisheries Posit server, [click here](https://connect.fisheries.noaa.gov/lit-tag/).
 
-``` r
-covr::package_coverage()
-#> littag Coverage: 0.00%
-#> R/app_config.R: 0.00%
-#> R/app_ui.R: 0.00%
-#> R/run_app.R: 0.00%
-```
+## Publish on Posit sever
+
+1.  Open littag.proj in RStudio.
+
+2.  Open app.R script.
+
+3.  Click "Publish" button in top bar of script panel.
+
+## Quarto path
+
+Generating reports in lit-tag viewer requires the installation of [Quarto](https://quarto.org/) on the local machine or on the Posit server, depending on where the app is run. The path to Quarto is set using the Sys.setenv() function in the lit-tag App.R script. The App.R script includes several common path configurations, but the Quarto installation is platform dependent and the path will depend on your particular deployment.
