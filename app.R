@@ -8,7 +8,7 @@
 # Quarto path option 1
 # This is the typical path on a Mac and can be used to set the env variable
 # for rendering quarto on the local machine.
-# Sys.setenv(QUARTO_PATH="/usr/local/bin/quarto")
+Sys.setenv(QUARTO_PATH="/usr/local/bin/quarto")
 
 #Quarto path option 2
 # This is a path commonly used for Posit servers
