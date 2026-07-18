@@ -50,3 +50,6 @@ rsconnect/
 
 # quarto folder
 quarto-1.5.57/
+
+/.quarto/
+**/*.quarto_ipynb
