@@ -1,9 +1,7 @@
 ---
 format:
   gfm:
-    mermaid-format: png
-    fig-width: 7.5
-    fig-height: 8.75
+    mermaid-format: svg
 ---
 
 ```{mermaid}
@@ -11,33 +9,33 @@ format:
   'theme': 'base',
   'themeVariables': {
     'fontFamily': 'Arial, Helvetica, sans-serif',
-    'fontSize': '14px'
+    'fontSize': '10pt'
   }
 }}%%
 flowchart TD
 
 subgraph IP["Inputs Pipeline"]
     direction TB
-    A(["User created 'categories' Excel file"])
-    B(["Zotero library or collection"])
-    C(["CSV file exported from Zotero"])
-    E(["Citation RIS file"])
+    A("(User created 'categories' Excel file)")
+    B("(Zotero library or collection)")
+    C("(CSV file exported from Zotero)")
+    E("(Citation RIS file)")
 end
 
 subgraph CE["Lit-tag Core Ecosystem"]
     direction TB
-    D(["Lit-tag builder module"])
-    G(["Lit-tag CSV database"])
-    F(["Google Drive for sharing"])
-    H(["Lit-tag viewer module"])
+    D("(Lit-tag builder module)")
+    G("(Lit-tag CSV database)")
+    F("(Google Drive for sharing)")
+    H("(Lit-tag viewer module)")
 end
 
 subgraph UO["User Outputs"]
     direction TB
-    I(["Searching and filtering"])
-    J(["Summary tables - CSV"])
-    K(["Summary plots"])
-    L(["Reports - HTML, PDF, Word"])
+    I("(Searching and filtering)")
+    J("(Summary tables - CSV)")
+    K("(Summary plots)")
+    L("(Reports - HTML, PDF, Word)")
 end
 
 A --> |"Creating lit-tag DB<br>Applying categories"| D
