@@ -1,0 +1,122 @@
+---
+format:
+  typst:
+    papersize: a1
+    margin:
+      x: "0cm"
+      y: "0cm"
+---
+
+```{dot}
+#//| file: diagram.dot
+
+digraph G {
+    fontname="Arial"
+    fontsize=10
+    compound=true;
+    
+    // Reverting to the preferred Top-to-Bottom vertical flow
+    rankdir=TD; 
+    nodesep=0.4;
+    ranksep=0.5;
+
+    // Global node & edge formatting
+    node [
+        fontname="Arial", 
+        fontsize=12, 
+        shape=box, 
+        style="filled,rounded", 
+        fixedsize=true, 
+        width=2.5, 
+        height=0.8
+    ];
+    
+    edge [
+        fontname="Arial", 
+        fontsize=10, 
+        color="#64748B", 
+        penwidth=1.5
+    ];
+
+    // --- Subgraphs ---
+    
+    // User Outputs 
+    subgraph cluster_UO {
+        label="User Outputs";
+        labelloc="t"; 
+        labeljust="l"; 
+        fontname="Arial";
+        fontsize=14;
+        style="filled,rounded";
+        fillcolor="#F0F9FF"; // Soft Light Blue
+        color="#0284C7";     // Sky Blue Border
+        
+        I [label="Searching and\nfiltering", fillcolor="#E0F2FE", color="#0284C7", fontcolor="#0369A1"];
+        J [label="Summary tables\n- CSV", fillcolor="#E0F2FE", color="#0284C7", fontcolor="#0369A1"];
+        K [label="Summary plots\n- PNG", fillcolor="#E0F2FE", color="#0284C7", fontcolor="#0369A1"];
+        L [label="Reports -\nHTML, PDF, Word", fillcolor="#E0F2FE", color="#0284C7", fontcolor="#0369A1"];
+    }
+
+     // Collaborative workflows 
+    subgraph cluster_CW {
+        label="Collaborative Workflows";
+        labelloc="t"; 
+        labeljust="l";
+        fontname="Arial";
+        fontsize=14;
+        style="filled,rounded";
+        fillcolor="#eddaf6"; // Soft Light Blue
+        color="#ae1bed";     // Sky Blue Border
+        
+        E [label="Citation RIS file", fillcolor="#eddaf6", color="#ae1bed", fontcolor="#ae1bed"];
+         F [label="Google Drive", fillcolor="#eddaf6", color="#ae1bed", fontcolor="#ae1bed"];
+    }
+
+    // Inputs Pipeline 
+    subgraph cluster_IP {
+        label="Inputs Pipeline";
+        labelloc="t"; 
+        labeljust="l";
+        fontname="Arial";
+        fontsize=14;
+        style="filled,rounded";
+        fillcolor="#F4FBF7"; // Soft Light Green
+        color="#137333";     // Sage Green Border
+        
+        A [label="User created\n'categories' Excel file", fillcolor="#E6F4EA", color="#137333", fontcolor="#137333"];
+        B [label="Zotero library\nor collection", fillcolor="#E6F4EA", color="#137333", fontcolor="#137333"];
+        C [label="CSV file exported\nfrom Zotero", fillcolor="#E6F4EA", color="#137333", fontcolor="#137333"];     
+    }
+
+    // Core Ecosystem
+    subgraph cluster_CE {
+        label="Lit-tag\nCore\nEcosystem";
+        labelloc="t"; 
+        labeljust="l";
+        fontname="Arial";
+        fontsize=14;
+        style="filled,rounded";
+        fillcolor="#EEF2FF"; // Soft Light Indigo
+        color="#3730A3";     // Indigo Border
+        
+        D [label="Lit-tag builder\nmodule", fillcolor="#4F46E5", color="#3730A3", fontcolor="#FFFFFF", style="filled,rounded,bold"];
+        G [label="Lit-tag CSV\ndatabase", fillcolor="#FFF7ED", color="#EA580C", fontcolor="#C2410C"];
+        H [label="Lit-tag viewer\nmodule", fillcolor="#4F46E5", color="#3730A3", fontcolor="#FFFFFF", style="filled,rounded,bold"];
+    }
+
+    // --- Process Flow Connections ---
+    A -> D [taillabel="Defines tags\nand notes", labeldistance= 6, labelangle=-30];
+    A -> H [label="  Controls tag UI"];
+    B -> C [label="  Export citations"];
+    C -> D [taillabel="Import citations", labeldistance= 4, labelangle=-85];
+    #D -> E [label="Export citations"];
+    D -> E [taillabel="Export citations", labeldistance= 20, labelangle=-6];
+    D -> G [dir=both, label="  Create and update"];
+    G -> F [dir=both, taillabel="Sync for sharing", labeldistance= 10, labelangle=-18];
+    G -> H [label="  Data exploration"];
+    H -> I [label="  Interactive"];
+    I -> J [label=" View and\nexport"];
+    I -> K [label=" View and\nexport"];
+    I -> L [label="View and\nexport"];
+}
+```
