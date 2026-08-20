@@ -51,5 +51,5 @@ rsconnect/
 # quarto folder
 quarto-1.5.57/
 
-/.quarto/
-**/*.quarto_ipynb
+# DS_Store files
+.DS_Store
