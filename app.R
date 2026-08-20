@@ -2,12 +2,15 @@
 # To deploy, run: rsconnect::deployApp()
 # Or use the blue button on top of this file
 
+# Disable auto-reload globally for this session
+options(shiny.autoreload = FALSE)
+
 # QUARTO_PATH  -----------------------
 # QUARTO_PATH must be set for reports
 
 # This is the path used the NFMS Posit server
 # The code points to a copy of quarto version 1.5.57 installed within the shiny app.
-# The version 1.5.57 is needed because the version 1.9.37 installed on the server cause the app to crash when rendering quarto
+# The version 1.5.57 is needed because the version 1.9.37 installed on the server causes the app to crash when rendering quarto
 # 1. Define paths
 quarto_base_dir <- file.path(getwd(), "quarto-1.5.57", "bin")
 local_quarto <- file.path(quarto_base_dir, "quarto")
