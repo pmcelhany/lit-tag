@@ -357,9 +357,13 @@ builder_server <- function(id) {
 
   ## Render paper info function ----------------------------
   render_paper_info <- function(label, paper_var){
-    return(renderText(paste(label, values$d_mcdr_filtered[input$table_rows_selected, ] %>%
-                               pull(paper_var))))
-  }
+    if(!is.null(values$d_mcdr_filtered)){
+      return(renderText(paste(label, values$d_mcdr_filtered[input$table_rows_selected, ] %>%
+                                 pull(paper_var))))
+    } else{
+      return(renderText(paste(label, "")))
+    }
+    }
 
   ## load categories function -----------------
   load_categories <- function(filepath){
@@ -559,7 +563,7 @@ builder_server <- function(id) {
   })
 
   ## Observe show extra --------------------------------
-  observeEvent(input$show_extra,{
+  observeEvent(input$show_extra, {
     if(input$show_extra){
       values$bib_table_col <- c("first_author", "publication_year", "title", "extra")
       output$selected_extra <- render_paper_info("Extra:", "extra")
