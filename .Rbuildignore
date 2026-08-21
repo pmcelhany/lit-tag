@@ -7,3 +7,5 @@
 ^app\.R$
 ^rsconnect$
 ^\.rscignore$
+^\.vscode$
+^[.]?air[.]toml$

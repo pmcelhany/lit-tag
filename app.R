@@ -18,7 +18,11 @@ local_quarto <- file.path(quarto_base_dir, "quarto")
 # This recursively finds EVERY file inside the quarto bin folder
 # (including deno, sass, pandoc, etc.) and makes them executable on the linex server.
 if (dir.exists(quarto_base_dir)) {
-  all_binaries <- list.files(quarto_base_dir, recursive = TRUE, full.names = TRUE)
+  all_binaries <- list.files(
+    quarto_base_dir,
+    recursive = TRUE,
+    full.names = TRUE
+  )
   Sys.chmod(all_binaries, mode = "0755")
 }
 # 3. Point R to the local version
@@ -29,8 +33,8 @@ Sys.setenv(QUARTO_PATH = local_quarto)
 # for rendering quarto on the local machine.
 #Sys.setenv(QUARTO_PATH="/usr/local/bin/quarto")
 
-pkgload::load_all(export_all = TRUE,helpers = FALSE,attach_testthat = FALSE)
-options( "golem.app.prod" = TRUE)
+pkgload::load_all(export_all = TRUE, helpers = FALSE, attach_testthat = FALSE)
+options("golem.app.prod" = TRUE)
 
 # run the app
 run_app()

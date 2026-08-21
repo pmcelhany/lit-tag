@@ -21,10 +21,12 @@
 golem::fill_desc(
   pkg_name = "littag", # The name of the golem package containing the app (typically lowercase, no underscore or periods)
   pkg_title = "Lit-tag: an app for custom annotation of a citation database", # What the Package Does (One Line, Title Case, No Period)
-  pkg_description = paste0("Starting with a citation library exported from Zotero, ",
-  "the lit-tag builder interface allows the creation custom annotation tags and ",
-  "notes. The lit-tag view module provides options to search the annotated database, ",
-  "generate custom reports, create summary graphics."), # What the package does (one paragraph).
+  pkg_description = paste0(
+    "Starting with a citation library exported from Zotero, ",
+    "the lit-tag builder interface allows the creation custom annotation tags and ",
+    "notes. The lit-tag view module provides options to search the annotated database, ",
+    "generate custom reports, create summary graphics."
+  ), # What the package does (one paragraph).
   authors = person(
     given = "Paul", # Your First Name
     family = "McElhany", # Your Last Name
