@@ -10,9 +10,9 @@ id = "6a72e0e3-7e95-4988-9bd2-3bca6d3a5623"
 dashboard_url = "https://connect.fisheries.noaa.gov/connect/#/apps/6a72e0e3-7e95-4988-9bd2-3bca6d3a5623"
 direct_url = "https://connect.fisheries.noaa.gov/content/6a72e0e3-7e95-4988-9bd2-3bca6d3a5623/"
 logs_url = "https://connect.fisheries.noaa.gov/connect/#/apps/6a72e0e3-7e95-4988-9bd2-3bca6d3a5623/logs"
-deployed_at = "2026-08-21T17:15:43.623Z"
-bundle_id = "6802"
-bundle_url = "https://connect.fisheries.noaa.gov/__api__/v1/content/6a72e0e3-7e95-4988-9bd2-3bca6d3a5623/bundles/6802/download"
+deployed_at = "2026-08-22T01:03:56.507Z"
+bundle_id = "6811"
+bundle_url = "https://connect.fisheries.noaa.gov/__api__/v1/content/6a72e0e3-7e95-4988-9bd2-3bca6d3a5623/bundles/6811/download"
 files = [
     ".posit/publish/deployments/deployment-172M.toml",
     ".posit/publish/lit-tag-test-6BUF.toml",
@@ -5296,7 +5296,7 @@ hash = "3f9796a8d0a0e8c6eb49a4b029359d1f"
 
 [renv.packages.shiny]
 package = "shiny"
-version = "1.11.1"
+version = "1.14.0"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -5317,6 +5317,7 @@ requirements = [
     "lifecycle",
     "methods",
     "mime",
+    "otel",
     "promises",
     "rlang",
     "sourcetools",
@@ -5325,7 +5326,7 @@ requirements = [
     "withr",
     "xtable",
 ]
-hash = "1c1a2437351984ff592639ae28cda09e"
+hash = "e71fb3fcf73db153eccd8afed293984f"
 
 [renv.packages.shinyWidgets]
 package = "shinyWidgets"
