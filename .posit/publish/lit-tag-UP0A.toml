@@ -16,6 +16,9 @@ files = [
     "/LICENSE",
     "/NAMESPACE",
     "/inst",
+    "/quarto-1.5.57/bin",
+    "/quarto-1.5.57",
+    "/quarto-1.5.57/share",
 ]
 validate = true
 product_type = "connect"

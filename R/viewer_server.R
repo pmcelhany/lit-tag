@@ -131,7 +131,8 @@ viewer_server <- function(id) {
       d_category_meta = NULL,
       d_mcdr_filtered = NULL,
       d_plot = NULL,
-      table_trigger = 0
+      table_trigger = 0,
+      has_notes = FALSE
     )
 
     dt_proxy <- DT::dataTableProxy("table")
@@ -243,16 +244,30 @@ viewer_server <- function(id) {
           values$categories <- values$categories_with_meta %>%
             map(\(x) category_remove_meta_fun(x))
 
-          values$tag_variables <- c(
-            row.names(values$d_category_meta) %>%
-              stringr::str_subset("notes", negate = TRUE),
-            values$categories$notes %>%
+          # Set has_notes
+          if ("notes" %in% row.names(values$d_category_meta)) {
+            values$has_notes <- TRUE
+          } else {
+            values$has_notes <- FALSE
+          }
+
+          #vector of tag variables
+          if (values$has_notes) {
+            values$tag_variables <- c(
+              row.names(values$d_category_meta)[
+                row.names(values$d_category_meta) != "notes"
+              ],
+              values$categories$notes %>%
+                pull("notes")
+            )
+          } else {
+            values$tag_variables <- row.names(values$d_category_meta)
+          }
+          notes_variables <- NULL
+          if (values$has_notes) {
+            notes_variables <- values$categories$notes %>%
               pull("notes")
-          )
-
-          notes_variables <- values$categories$notes %>%
-            pull("notes")
-
+          }
           incProgress(2 / 4)
 
           ### Load database ----------------------------------------------
@@ -406,12 +421,23 @@ viewer_server <- function(id) {
           summary_opt_list <- names(cat_without_notes) %>%
             purrr::set_names() %>%
             map(\(x) names(cat_without_notes[[x]])) %>%
-            list_assign(notes = notes_variables) %>%
             list_assign(paper_fields = summary_tbl_paper_fields)
+
+          if (!is.null(notes_variables)) {
+            summary_opt_list <- summary_opt_list %>%
+              list_assign(notes = notes_variables)
+          }
+
+          # summary_opt_list_name_order <- c(
+          #   "paper_fields",
+          #   names(summary_opt_list)[1:length(summary_opt_list) - 1]
+          # )
 
           summary_opt_list_name_order <- c(
             "paper_fields",
-            names(summary_opt_list)[1:length(summary_opt_list) - 1]
+            names(summary_opt_list)[
+              "paper_fields" != names(summary_opt_list)
+            ]
           )
 
           summary_opt_list_sorted <- summary_opt_list_name_order %>%
@@ -426,8 +452,8 @@ viewer_server <- function(id) {
 
           ### Add tag input to ui --------------------------------------
           #insert tag panels
-          names(values$categories) %>%
-            stringr::str_subset("notes", negate = TRUE) %>%
+          names(values$categories)["notes" != names(values$categories)] %>%
+            #stringr::str_subset("notes", negate = TRUE) %>%
             map(\(x) {
               nav_insert(
                 id = "tag_tabs",
@@ -455,10 +481,16 @@ viewer_server <- function(id) {
             })
 
           ### Add notes input to ui  ------------------------------------
-          output$notes <- renderUI({
-            notes_variables %>%
-              map(\(x) textInput(ns(x), x))
-          })
+          if (!is.null(notes_variables)) {
+            output$notes <- renderUI({
+              notes_variables %>%
+                map(\(x) textInput(ns(x), x))
+            })
+          } else {
+            output$notes <- renderUI({
+              return(NULL)
+            })
+          }
 
           ### Render n paper in selection summary -------------
           output$n_papers_db <- renderText(paste(
@@ -675,13 +707,15 @@ viewer_server <- function(id) {
           }
 
           d_filtered$meet_criteria <- NA
-          for (j in 1:nrow(d_filtered)) {
-            if (!is.na(d_criteria_paper_tag$field[i])) {
-              d_filtered$meet_criteria[j] <-
-                any(str_detect(
-                  d_filtered[[d_criteria_paper_tag$field[i]]][j],
-                  choices
-                ))
+          if (nrow(d_filtered) > 0) {
+            for (j in 1:nrow(d_filtered)) {
+              if (!is.na(d_criteria_paper_tag$field[i])) {
+                d_filtered$meet_criteria[j] <-
+                  any(str_detect(
+                    d_filtered[[d_criteria_paper_tag$field[i]]][j],
+                    choices
+                  ))
+              }
             }
           }
 
@@ -763,24 +797,27 @@ viewer_server <- function(id) {
         }
       }
 
-      notes_variables <- values$categories$notes %>%
-        pull("notes")
-
       notes_text <- ""
-      for (i in 1:length(notes_variables)) {
-        notes_text <- paste(
-          notes_text,
-          "<b>",
-          notes_variables[i],
-          ":</b><br>",
-          sep = ""
-        )
-        notes_text <- paste(
-          notes_text,
-          selected_row_data[[notes_variables[i]]],
-          "<br><br>",
-          sep = ""
-        )
+
+      if (values$has_notes) {
+        notes_variables <- values$categories$notes %>%
+          pull("notes")
+
+        for (i in 1:length(notes_variables)) {
+          notes_text <- paste(
+            notes_text,
+            "<b>",
+            notes_variables[i],
+            ":</b><br>",
+            sep = ""
+          )
+          notes_text <- paste(
+            notes_text,
+            selected_row_data[[notes_variables[i]]],
+            "<br><br>",
+            sep = ""
+          )
+        }
       }
 
       showModal(modalDialog(

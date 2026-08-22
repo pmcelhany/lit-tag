@@ -259,7 +259,8 @@ builder_server <- function(id) {
       bib_sort_dir = "asc",
       active_cat_tabs = character(0),
       active_tag_ui = character(0),
-      table_trigger = 0
+      table_trigger = 0,
+      has_notes = FALSE
     )
 
     ## Proxy for the papers table ------------------------------
@@ -415,13 +416,25 @@ builder_server <- function(id) {
       values$categories <- values$categories_with_meta %>%
         map(\(x) category_remove_meta_fun(x))
 
+      # Set has_notes
+      if ("notes" %in% row.names(values$d_category_meta)) {
+        values$has_notes <- TRUE
+      } else {
+        values$has_notes <- FALSE
+      }
+
       #vector of tag variables
-      values$tag_variables <- c(
-        row.names(values$d_category_meta) %>%
-          stringr::str_subset("notes", negate = TRUE),
-        values$categories$notes %>%
-          pull("notes")
-      )
+      if (values$has_notes) {
+        values$tag_variables <- c(
+          row.names(values$d_category_meta)[
+            row.names(values$d_category_meta) != "notes"
+          ],
+          values$categories$notes %>%
+            pull("notes")
+        )
+      } else {
+        values$tag_variables <- row.names(values$d_category_meta)
+      }
     }
 
     ## Load data button ---------------------------------------
@@ -448,8 +461,11 @@ builder_server <- function(id) {
           load_categories(input$categories_excel$datapath)
 
           #vector of notes variables
-          notes_variables <- values$categories$notes %>%
-            pull("notes")
+          notes_variables <- NULL
+          if (values$has_notes) {
+            notes_variables <- values$categories$notes %>%
+              pull("notes")
+          }
 
           tag_variables <- values$tag_variables
           categories_with_meta <- values$categories_with_meta
@@ -494,7 +510,6 @@ builder_server <- function(id) {
           ### Add new tags to database. -----------------------------------
           # If there are tags in the categories file that are not in database,
           # the new tags need to be added
-
           new_tags <- c(tag_variables[
             !(tag_variables %in%
               names(values$d_mcdr_tagged))
@@ -523,12 +538,18 @@ builder_server <- function(id) {
           incProgress(3 / 4)
 
           ### Add notes input to ui  ------------------------------------
-          output$notes <- renderUI({
-            notes_variables %>%
-              map(\(x) {
-                textAreaInput(ns(x), x, width = 600, height = 200)
-              })
-          })
+          if (!is.null(notes_variables)) {
+            output$notes <- renderUI({
+              notes_variables %>%
+                map(\(x) {
+                  textAreaInput(ns(x), x, width = 600, height = 200)
+                })
+            })
+          } else {
+            output$notes <- renderUI({
+              return(NULL)
+            })
+          }
 
           ### Add tag input to ui --------------------------------------
           # remove old tag ui
@@ -573,8 +594,6 @@ builder_server <- function(id) {
 
           values$active_cat_tabs <-
             names(values$categories)[names(values$categories) != "notes"]
-          # values$active_tag_ui <-
-          #   values$tag_variables[!(values$tag_variables %in% notes_variables)]
 
           ### Show selected paper info -------------------------------------
           output$selected_year <- render_paper_info("Year:", "publication_year")
@@ -767,10 +786,12 @@ builder_server <- function(id) {
         tag_changes <- rownames(d_category_meta) %>%
           map_lgl(\(x) save_tag_value(key, x))
 
-        note_changes <- d_notes %>%
-          pull("notes") %>%
-          map_lgl(\(x) save_tag_value(key, x))
-
+        note_changes <- FALSE
+        if (!is.null(d_notes)) {
+          note_changes <- d_notes %>%
+            pull("notes") %>%
+            map_lgl(\(x) save_tag_value(key, x))
+        }
         if (any(tag_changes) || any(note_changes)) {
           values$d_mcdr_filtered[values$d_mcdr_filtered$key == key, ] <-
             values$d_mcdr_tagged[values$d_mcdr_tagged$key == key, ]
@@ -851,7 +872,11 @@ builder_server <- function(id) {
 
         last_key <- values$last_key
         d_category_meta <- values$d_category_meta
-        d_notes <- values$categories$notes
+
+        d_notes <- NULL
+        if (values$has_notes) {
+          d_notes <- values$categories$notes
+        }
 
         #just the tag fields (i.e. not notes)
         tags <- rownames(d_category_meta)[rownames(d_category_meta) != "notes"]
@@ -865,21 +890,25 @@ builder_server <- function(id) {
               })
 
             #load selected row notes
-            d_notes %>%
-              pull("notes") %>%
-              map(\(x) {
-                updateTextAreaInput(
-                  inputId = x,
-                  value = values$d_mcdr_filtered %>%
-                    slice(table_rows_selected) %>%
-                    pull(x)
-                )
-              })
+            if (values$has_notes) {
+              d_notes %>%
+                pull("notes") %>%
+                map(\(x) {
+                  updateTextAreaInput(
+                    inputId = x,
+                    value = values$d_mcdr_filtered %>%
+                      slice(table_rows_selected) %>%
+                      pull(x)
+                  )
+                })
+            }
           }
+
           values$last_key <- current_key
         } else if (!identical(current_key, last_key)) {
           # update database with last selected rows data
           # selecting a new row tiggers the saving of the last rows input data
+
           save_last_row(last_key, d_category_meta, d_notes)
 
           if (!is.null(current_key)) {
@@ -890,16 +919,18 @@ builder_server <- function(id) {
               })
 
             #load selected row notes
-            d_notes %>%
-              pull("notes") %>%
-              map(\(x) {
-                updateTextAreaInput(
-                  inputId = x,
-                  value = values$d_mcdr_filtered %>%
-                    slice(table_rows_selected) %>%
-                    pull(x)
-                )
-              })
+            if (values$has_notes) {
+              d_notes %>%
+                pull("notes") %>%
+                map(\(x) {
+                  updateTextAreaInput(
+                    inputId = x,
+                    value = values$d_mcdr_filtered %>%
+                      slice(table_rows_selected) %>%
+                      pull(x)
+                  )
+                })
+            }
 
             #need for some reason to make sure it does not loose
             #highlighting the current row
@@ -937,10 +968,15 @@ builder_server <- function(id) {
             slice(input$table_rows_selected) %>%
             pull(key)
 
+          d_notes <- NULL
+          if (values$has_notes) {
+            d_notes <- values$categories$notes
+          }
+
           save_last_row(
             values$last_key,
             values$d_category_meta,
-            values$categories$notes
+            d_notes
           )
         }
 
@@ -1179,7 +1215,7 @@ builder_server <- function(id) {
 
     observeEvent(input$db_tags_table_rows_selected, {
       table_rows_selected <- input$db_tags_table_rows_selected
-      #browser()
+
       tag_info <- tag_values_in_db(values$d_content_db)
 
       selected_tag <- tag_info$d_tag$tags[table_rows_selected]
@@ -1406,7 +1442,6 @@ builder_server <- function(id) {
         )
       },
       content = function(file) {
-        #browser()
         d_edit_db <- read_csv(input$edit_db$datapath)
         delete_papers_tag_options <-
           str_trim(str_split_1(input$delete_papers_with_tag_options, ","))
