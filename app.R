@@ -9,7 +9,11 @@ options(shiny.autoreload = FALSE)
 # QUARTO_PATH must be set for reports
 
 # This is the path used the NFMS Posit server
-# The code points to a copy of quarto version 1.5.57 installed within the shiny app.
+# There is some problem with using the most recent version on Quarto on NMFS server that causes a crash
+#Sys.setenv(QUARTO_PATH = "/opt/quarto/latest/bin/quarto")
+
+# Instead of using the quarto installed on the server,
+# the code points to a copy of quarto version 1.5.57 installed within the shiny app.
 # The version 1.5.57 is needed because the version 1.9.37 installed on the server causes the app to crash when rendering quarto
 # 1. Define paths
 quarto_base_dir <- file.path(getwd(), "quarto-1.5.57", "bin")
