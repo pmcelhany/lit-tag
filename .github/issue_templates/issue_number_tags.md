@@ -1,51 +1,74 @@
 
 
+## AGENT CONSTRAINTS (TOKEN OPTIMIZATION)
+
+- **Target Scope:** Do NOT rewrite or re-output the entire server.R
+  file.
+- **Output Format:** Provide ONLY the specific modified functions or
+  reactive blocks (e.g., `observeEvent(input$...)`) with surrounding
+  context line numbers.
+- **Skip Reasoning:** Do not output long natural-language explanations;
+  provide only the code modifications and a 2-sentence summary.
+
 ## 1. Scope & Targeted Files
 
 > **Strict Context Constraint:** Do NOT read or modify files outside of
 > this explicit list.
 
-- **Primary Target File(s):** `R/builder_ui.R` , `R/builder_server.R`
-- **Secondary Reference File(s) (Read-Only):**
+- **Primary Target File(s):** `R/builder_ui.R`, `R/builder_server.R`
+- **Secondary Reference File(s) (Read-Only):** None
 
 ## 2. Objective & Expected Behavior
 
-**Goal:** Add option “number” tags in the categories file. Provide data
-validation that user input number for number tags.
+**Goal:** Add a “number” tag type alongside existing tag types and
+implement data validation for numeric entries.
 
-- **Current Behavior:** Tags can be “check_box_single”,
-  “check_box_multiple”, “text_box”, or “date”
-- **Expected Behavior:** New tag option for “number”. The user input for
-  a number tag should only a number.
-  - If the user enters a non-number value in the “Tags” card of the “Tag
-    edits” tab , a dialog window should pop up prompting the user to
-    enter a number.
-  - If a non-number value is already in a loaded database for a number
-    tag, an information dialog should pop up listing the name for the
-    number tags with invalid (i.e. non-numeric) data and a message that
-    the tags contain non-numeric data, but should contain only numbers.
-  - If a non-number value is already in a loaded database for a number
-    tag, the text for the value for the tag in the “Tags” card of the
-    “Tag edits” tab should be colored red to indicate that is a
-    non-numeric value.
-  - Missing or “NA” values should be ignored with regard to whether or
-    not they are numeric (i.e. a missing or “NA” value should not
-    trigger a message about non-numeric values.
+- **Current Behavior:** Supported tag types are `"check_box_single"`,
+  `"check_box_multiple"`, `"text_box"`, and `"date"`.
+- **Expected Behavior:**
+  1.  Add `"number"` to the allowed tag type choices.
+  2.  **User Input Validation:** If a user inputs a non-numeric value
+      for a `"number"` tag in the “Tags” card (“Tag edits” tab), show a
+      `shiny::showModal()` prompt requiring a numeric entry.
+  3.  **Loaded DB Validation (On Ingest/Load):** If a loaded database
+      contains non-numeric data for a `"number"` tag:
+      - Trigger a `shiny::showModal()` listing the specific tag names
+        containing non-numeric data and explaining that these tags
+        require numeric values.
+      - Highlight the invalid tag value text in red using
+        `shiny::span(..., style = "color: red;")` (or equivalent inline
+        CSS) in the “Tags” card.
+  4.  **NA/Missing Handling:** Treat `NA`, `""` (empty string), “NA”,
+      and `NULL` as valid/ignored values. They must NOT trigger
+      validation modals or red text styling.
 
 ## 3. Implementation Requirements
 
-- **Inputs/Outputs:**
-- **Namespacing:** Ensure `ns()` is used in UI; raw IDs used in server.
-- **Reactivity Rules:** Use `observeEvent()` or `eventReactive()` with
-  `bindEvent()` where applicable to prevent unwanted re-executation.
-- **Package Calls:** Use explicit `pkg::function()` syntax. Do NOT add
-  `library()` calls or import new packages.
+- **Inputs/Outputs:** Identify and work within existing inputs/outputs
+  in `builder_ui.R` / `builder_server.R`. Wrap all new UI element IDs in
+  `ns()`.
+- **Numeric Checking:** Use base R coercion
+  `suppressWarnings(is.na(as.numeric(val)))` to check for non-numeric
+  strings while ignoring true `NA`s.
+- **Modals:** Use native `shiny::showModal(shiny::modalDialog(...))`
+  only. Do NOT add external notification packages.
+- **Reactivity Rules:** Use `observeEvent()` or `eventReactive()` paired
+  with `bindEvent()` for trigger validations. Do not run checks inside
+  raw reactive expressions.
+- **Package Calls:** Use `pkg::function()` syntax (e.g.,
+  `shiny::showModal()`). No `library()` calls.
 
 ## 4. Step-by-Step Task Checklist
 
-- [ ] Implement new number tag option in `R/builder_ui.R` ,
-  `R/builder_server.R.`
-- [ ] Ensure the changes handle NULL or empty states safely.
+- [ ] Add `"number"` option to the UI choices control in
+  `R/builder_ui.R`.
+- [ ] Implement input validation observer in `R/builder_server.R` for
+  live user edits with `shiny::showModal()`.
+- [ ] Implement database load observer in `R/builder_server.R` to scan
+  loaded `"number"` tags, trigger the summary modal for invalid tags,
+  and apply red inline styling.
+- [ ] Verify `NA`, `NULL`, “NA”, and empty strings pass validation
+  without warnings.
 - [ ] Run the automated verification commands below.
 
 ## 5. Required Verification Protocol
