@@ -10,6 +10,7 @@
 #' @noRd
 
 # builder ui ----------------------
+# Supported tag types: "check_box_single", "check_box_multiple", "text_box", "date", and "number"
 builder_ui <- function(id) {
   ns <- NS(id)
   page_navbar(
