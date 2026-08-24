@@ -3,43 +3,48 @@ format: gfm
 output-file: "copilot-instructions.md"
 ---
 
-# Repository Guidelines for AI Coding Agents
+# Repository Guidelines: R Shiny Golem App
 
-## Architecture Overview
+## Token & Scope Constraints (Strict)
 
--   **Framework:** Complex R Shiny app built using Golem framework and Modular Shiny.
--   **Directory and File Layout:**
-    -   `app.R`: Start point for app deployments; Sets the environment path for Quato; loads the app as a package; calls run_app()
-    -   `R/`: UI modules, server functions, and helper scripts.
-        -   `run_app.R`: Launches the app with shinyApp call using app_ui and app_server.
-        -   `app_ui.R`: Calls uiOutput for UI components built in app_server; adds external resources
-        -   `app_server.R`: Builds inital UI screen; Uses buttons to offer the user a choice between *lit-tag-builder* and *lit-tag-viewer* modules; after the user chooses, this screen is never visible again.
-        -   `builder_ui.R`: Complex user interface that has many UI components generated dynamically based on user input and information in user selected files.
-        -   `builder_server.R`:
-    -   `www/`: Static assets, CSS stylesheets, and JavaScript files.
-    -   `global.R`: Global environment variables and package loadings.
--   **Core Packages:** `[e.g., shiny, bslib, dplyr, plotly, targets, shinyjs]`.
+-   **Scoped Edits:** Modify ONLY files explicitly referenced in the task issue. Do NOT refactor untouched files.
+-   **Context Economy:** Do NOT inspect files outside the target module unless required to trace shared variables/inputs.
+-   **No Unsolicited Dependencies:** Do NOT add new R package dependencies without explicit approval.
 
-## Universal Coding Rules
+## Architecture & File Mapping
 
-### 1. Shiny Reactivity & Namespacing
+-   **Framework:** Golem Modular Shiny App. Heavy processing delegates to R Quarto (`.qmd`).
+-   **Core Modules:**
+    -   `lit-tag-builder` (`R/builder_ui.R`, `R/builder_server.R`): CSV/XLSX ingest, lit-tag DB creation/editing.
+    -   `lit-tag-viewer` (`R/viewer_ui.R`, `R/viewer_server.R`): Search, ggplot dynamic viz, Quarto report generation (`report/lit_tag_report_template.qmd`).
+-   **Ignored Directories (DO NOT READ OR EDIT):**
+    -   `dev/` (Golem scratch scripts)
+    -   `diagram/` (Graphviz DOT files)
+    -   `report/*.html`, `report/*.pdf`, `report/*.docx` (Generated report outputs)
 
--   **Strict Module Namespacing:** Always wrap input and output IDs in `ns()` within module UI functions. Access inputs inside server modules using `input$id` directly without `ns()`.
--   **Prevent Re-executing Code:** Avoid putting heavy computation inside reactive expressions without caching or `bindCache()`/`bindEvent()` where applicable.
--   **Isolate Side Effects:** Use `observeEvent()` for side effects and `eventReactive()` for reactive calculations triggered by inputs.
+## Coding Standards & Anti-Patterns
 
-### 2. Code Quality & Modularity
+### Reactivity & Golem Rules
 
--   **Scope Changes:** Only edit files explicitly mentioned in the issue. Do not refactor untouched modules or rewrite existing working code unnecessarily.
--   **Script Structure:** Maintain pure functions in helper scripts (e.g., `R/utils_*.R`) and keep reactive logic strictly inside module server functions.
--   **Style:** Follow `tidyverse` coding conventions. Use clear, self-documenting variable names.
+-   **Namespacing:** Always wrap UI element IDs in `ns()` inside UI modules. Inside server functions, access via `input$id` without `ns()`.
+-   **Reactivity:** Use `eventReactive()` and `observeEvent()` to isolate side effects. Never run heavy computations directly inside bare `reactive()` or `render*` functions without `bindEvent()`.
+-   **Package Management:**
+    -   All R packages must be declared in `DESCRIPTION` (Imports/Suggests).
+    -   Use `pkg::function()` syntax. Never call `library()` inside `R/` scripts.
+-   **R Execution:** Do NOT add `source()` calls in `R/`; Golem auto-loads all files in `R/`.
 
-### 3. File Handling & Anti-Patterns
+## Automated Verification Protocol
 
--   **Do NOT** change function signatures in existing shared utility files unless explicitly asked.
--   **Do NOT** introduce top-level `source()` calls inside module files; all scripts in `R/` are auto-loaded.
--   **Do NOT** modify `www/` static assets or CSS unless specified.
+Before finalizing any pull request, execute the following commands to confirm code integrity:
 
-## Verification Checklist
+### 1. Check syntax and package loadability 
 
-Before submitting a pull request or completing a task, verify: - Code parses without syntax errors. - All reactive IDs match their respective `ns()` definitions. - New dependencies are explicitly listed in `DESCRIPTION` or `global.R`.
+Rscript -e "devtools::load_all()"
+
+### 2. Verify dependencies and namespace match DESCRIPTION
+
+Rscript -e "devtools::document()"
+
+### 3. Parse ALL R files in the R/ directory for syntax errors
+
+Rscript -e "invisible(lapply(list.files('R', pattern = '\\.R\$', full.names = TRUE), parse))"
