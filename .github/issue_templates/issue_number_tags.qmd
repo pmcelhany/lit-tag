@@ -4,9 +4,10 @@ output-file: "issue_number_tags.md"
 ---
 
 ## AGENT CONSTRAINTS (TOKEN OPTIMIZATION)
-- **Target Scope:** Do NOT rewrite or re-output the entire server.R file.
-- **Output Format:** Provide ONLY the specific modified functions or reactive blocks (e.g., `observeEvent(input$...)`) with surrounding context line numbers.
-- **Skip Reasoning:** Do not output long natural-language explanations; provide only the code modifications and a 2-sentence summary.
+
+-   **Target Scope:** Do NOT rewrite or re-output the entire server.R file.
+-   **Output Format:** Provide ONLY the specific modified functions or reactive blocks (e.g., `observeEvent(input$...)`) with surrounding context line numbers.
+-   **Skip Reasoning:** Do not output long natural-language explanations; provide only the code modifications and a 2-sentence summary.
 
 ## 1. Scope & Targeted Files
 

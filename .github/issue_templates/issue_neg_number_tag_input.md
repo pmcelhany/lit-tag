@@ -20,24 +20,23 @@
 
 ## 2. Objective & Expected Behavior
 
-**Goal:** Do not pop up the modal dialog that has
-`title = "Invalid Input"` if the user has started to type a negative
-number
+**Goal:** Return a number tag label from red back to the default label
+color if the user changes a non-numeric value to a number.
 
-- **Current Behavior:** The invalid date dialog pops up if the user
-  starts to input a negative number.
+- **Current Behavior:** If a number tag imports a non-number value, the
+  tag label in the in the “Tags” card (“Tag edits” tab) will be red and
+  will remain red even if the user enters a valid number
 - **Expected Behavior:**
-  1.  Negative numbers are valid input for a number tag.
-  2.  The invalid date dialog should not pop up if the user types a
-      valid number.
+  1.  If the tag label in the in the “Tags” card (“Tag edits” tab) is
+      red because the imported value is invalid, the tag label should
+      change to the default label color if the user enters a valid
+      number for the tag.
 
 ## 3. Implementation Requirements
 
 - **Inputs/Outputs:** Identify and work within existing inputs/outputs
   in `builder_ui.R` / `builder_server.R`. Wrap all new UI element IDs in
   `ns()`.
-- **Modals:** Use native `shiny::showModal(shiny::modalDialog(...))`
-  only. Do NOT add external notification packages.
 - **Reactivity Rules:** Use `observeEvent()` or `eventReactive()` paired
   with `bindEvent()` for trigger validations. Do not run checks inside
   raw reactive expressions.
@@ -45,7 +44,8 @@ number
 
 ## 4. Step-by-Step Task Checklist
 
-- [ ] Allow user to enter negative numbers
+- [ ] Change tag label color to default color if a user corrects an
+  non-number by entering a number for a number type tag.
 - [ ] Run the automated verification commands below.
 
 ## 5. Required Verification Protocol
