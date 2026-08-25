@@ -30,13 +30,15 @@ builder_server <- function(id) {
         return(FALSE)
       }
       val <- as.character(val)
-      if (length(val) > 1) {
-        val <- paste(val, collapse = ";")
-      }
-      if (is.na(val) || val == "" || val == "NA") {
+      vals <- unlist(strsplit(val, ";", fixed = TRUE))
+      vals <- trimws(vals)
+      vals <- vals[!is.na(vals) & vals != "" & vals != "NA"]
+      if (length(vals) == 0) {
         return(FALSE)
       }
-      suppressWarnings(is.na(as.numeric(val)))
+      any(vapply(vals, function(v) {
+        suppressWarnings(is.na(as.numeric(v)))
+      }, FUN.VALUE = logical(1)))
     }
 
     # Inject JS for resizable panels in the Tag edit tab
