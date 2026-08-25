@@ -10,9 +10,9 @@ id = "6a72e0e3-7e95-4988-9bd2-3bca6d3a5623"
 dashboard_url = "https://connect.fisheries.noaa.gov/connect/#/apps/6a72e0e3-7e95-4988-9bd2-3bca6d3a5623"
 direct_url = "https://connect.fisheries.noaa.gov/content/6a72e0e3-7e95-4988-9bd2-3bca6d3a5623/"
 logs_url = "https://connect.fisheries.noaa.gov/connect/#/apps/6a72e0e3-7e95-4988-9bd2-3bca6d3a5623/logs"
-deployed_at = "2026-08-22T01:03:56.507Z"
-bundle_id = "6811"
-bundle_url = "https://connect.fisheries.noaa.gov/__api__/v1/content/6a72e0e3-7e95-4988-9bd2-3bca6d3a5623/bundles/6811/download"
+deployed_at = "2026-08-25T22:14:13.693Z"
+bundle_id = "6883"
+bundle_url = "https://connect.fisheries.noaa.gov/__api__/v1/content/6a72e0e3-7e95-4988-9bd2-3bca6d3a5623/bundles/6883/download"
 files = [
     ".posit/publish/deployments/deployment-172M.toml",
     ".posit/publish/lit-tag-test-6BUF.toml",

@@ -1010,6 +1010,7 @@ viewer_server <- function(id) {
             p <- h_plot_data %>%
               ggplot(aes(x_val)) +
               geom_histogram(fill = "blue", bins = input$hist_n_bins) +
+              xlab(input$plot_x_var) +
               theme_bw(base_size = 24)
             print(p)
             return(p)
