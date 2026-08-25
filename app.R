@@ -32,10 +32,9 @@ if (dir.exists(quarto_base_dir)) {
 # 3. Point R to the local version
 Sys.setenv(QUARTO_PATH = local_quarto)
 
-
 # This is the path on Paul's mac and can be used to set the env variable
 # for rendering quarto on the local machine.
-#Sys.setenv(QUARTO_PATH="/usr/local/bin/quarto")
+#Sys.setenv(QUARTO_PATH = "/usr/local/bin/quarto")
 
 pkgload::load_all(export_all = TRUE, helpers = FALSE, attach_testthat = FALSE)
 options("golem.app.prod" = TRUE)

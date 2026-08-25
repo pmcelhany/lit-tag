@@ -164,6 +164,18 @@ viewer_ui <- function(id) {
             "Combine multi-select",
             choices = c("Combine x-axis", "Combine stacked")
           ),
+          checkboxGroupInput(
+            ns("plot_numbers_as_text"),
+            "Number tags",
+            choices = c("Plot number tags as text")
+          ),
+          numericInput(
+            ns("hist_n_bins"),
+            "Histogram number of bins",
+            value = 30,
+            min = 5,
+            max = 50
+          ),
           virtualSelectInput(
             inputId = ns("plot_x_var"),
             label = "Plot x-axis variable",

@@ -29,6 +29,34 @@ viewer_server <- function(id) {
     ns <- session$ns
 
     ## Misc functions -----------------------------------
+
+    # function to check if a string is a valid number
+    is_invalid_numeric <- function(val) {
+      if (is.null(val) || length(val) == 0) {
+        return(FALSE)
+      }
+      val <- as.character(val)
+      vals <- unlist(strsplit(val, ";", fixed = TRUE))
+      vals <- trimws(vals)
+      vals <- vals[
+        !is.na(vals) &
+          vals != "" &
+          vals != "NA" &
+          vals != "-" &
+          vals != "-." &
+          vals != "."
+      ]
+      if (length(vals) == 0) {
+        return(FALSE)
+      }
+      any(vapply(
+        vals,
+        function(v) {
+          suppressWarnings(is.na(as.numeric(v)))
+        },
+        FUN.VALUE = logical(1)
+      ))
+    }
     # function to pull out the category label and selection type metadata
     category_meta_fun <- function(d) {
       d_meta <- d[1, ] %>%
@@ -132,7 +160,10 @@ viewer_server <- function(id) {
       d_mcdr_filtered = NULL,
       d_plot = NULL,
       table_trigger = 0,
-      has_notes = FALSE
+      has_notes = NULL,
+      notes_variables = NULL,
+      number_tags = NULL,
+      active_cat_tabs = character(0)
     )
 
     dt_proxy <- DT::dataTableProxy("table")
@@ -213,6 +244,12 @@ viewer_server <- function(id) {
 
     ## Load data button ---------------------------------------
     observeEvent(input$load_data, {
+      values$d_mcdr_tagged <- NULL
+      values$categories <- NULL
+      values$d_category_meta <- NULL
+      values$d_mcdr_filtered <- NULL
+      selectRows(dt_proxy, selected = NULL)
+
       #show dialog if database or category file missing
       if (
         is.null(input$database_csv$datapath) |
@@ -251,6 +288,15 @@ viewer_server <- function(id) {
             values$has_notes <- FALSE
           }
 
+          # vector of number tag variables
+          values$number_tags <- NULL
+          if ("number" %in% values$d_category_meta$select_type) {
+            values$number_tags <- values$d_category_meta %>%
+              filter(select_type == "number") %>%
+              pull(cat_label) %>%
+              make_clean_names()
+          }
+
           #vector of tag variables
           if (values$has_notes) {
             values$tag_variables <- c(
@@ -263,9 +309,9 @@ viewer_server <- function(id) {
           } else {
             values$tag_variables <- row.names(values$d_category_meta)
           }
-          notes_variables <- NULL
+          values$notes_variables <- NULL
           if (values$has_notes) {
-            notes_variables <- values$categories$notes %>%
+            values$notes_variables <- values$categories$notes %>%
               pull("notes")
           }
           incProgress(2 / 4)
@@ -311,6 +357,52 @@ viewer_server <- function(id) {
           ])
 
           values$d_mcdr_tagged[new_tags] <- NA
+
+          ### Check if number tags include non-number values
+          # Loaded DB Validation: check for non-numeric data in "number" tags
+          number_tags <- row.names(values$d_category_meta)[
+            values$d_category_meta$select_type == "number"
+          ]
+          invalid_loaded_tags <- c()
+          if (length(number_tags) > 0) {
+            for (t in number_tags) {
+              if (t %in% names(values$d_mcdr_tagged)) {
+                vals <- unique(values$d_mcdr_tagged[[t]])
+                has_invalid <- any(vapply(
+                  vals,
+                  is_invalid_numeric,
+                  FUN.VALUE = logical(1)
+                ))
+                if (has_invalid) {
+                  lbl <- values$d_category_meta[t, "cat_label"]
+                  invalid_loaded_tags <- c(invalid_loaded_tags, lbl)
+                }
+              }
+            }
+          }
+          # Show dialog if number tags have non-number values
+          if (length(invalid_loaded_tags) > 0) {
+            shiny::showModal(shiny::modalDialog(
+              title = "Invalid Numeric Data in Loaded Database",
+              shiny::tagList(
+                shiny::p(
+                  "The loaded database contains non-numeric data for the following tags which are expecting only numeric values:"
+                ),
+                shiny::tags$ul(
+                  lapply(invalid_loaded_tags, function(tag_name) {
+                    shiny::tags$li(tag_name)
+                  })
+                ),
+                shiny::p(
+                  "For histogram plots, non-numeric values are ignored (i.e. treated as missing). For all other features in lit-tag-viewer, the all values for these tags are treated as text."
+                )
+              ),
+              easyClose = TRUE,
+              footer = shiny::modalButton("OK")
+            ))
+          }
+
+          ######################
 
           ### Filter database ---------------
           # the d_mcdr_filtered dataframe is the filtered data shown in table
@@ -423,9 +515,9 @@ viewer_server <- function(id) {
             map(\(x) names(cat_without_notes[[x]])) %>%
             list_assign(paper_fields = summary_tbl_paper_fields)
 
-          if (!is.null(notes_variables)) {
+          if (!is.null(values$notes_variables)) {
             summary_opt_list <- summary_opt_list %>%
-              list_assign(notes = notes_variables)
+              list_assign(notes = values$notes_variables)
           }
 
           # summary_opt_list_name_order <- c(
@@ -451,6 +543,14 @@ viewer_server <- function(id) {
           )
 
           ### Add tag input to ui --------------------------------------
+          # remove old tag ui
+          # if you don't do this and press the load button after a db is already loaded,
+          # you will just add another set of tags to  UI, which is not good
+
+          walk(
+            values$active_cat_tabs,
+            ~ nav_remove(id = "tag_tabs", target = .x)
+          )
           #insert tag panels
           names(values$categories)["notes" != names(values$categories)] %>%
             #stringr::str_subset("notes", negate = TRUE) %>%
@@ -479,11 +579,13 @@ viewer_server <- function(id) {
                 )
               )
             })
-
+          # Reset vector of active categories and tag UI elements
+          values$active_cat_tabs <-
+            names(values$categories)[names(values$categories) != "notes"]
           ### Add notes input to ui  ------------------------------------
-          if (!is.null(notes_variables)) {
+          if (!is.null(values$notes_variables)) {
             output$notes <- renderUI({
-              notes_variables %>%
+              values$notes_variables %>%
                 map(\(x) textInput(ns(x), x))
             })
           } else {
@@ -800,20 +902,20 @@ viewer_server <- function(id) {
       notes_text <- ""
 
       if (values$has_notes) {
-        notes_variables <- values$categories$notes %>%
-          pull("notes")
+        # notes_variables <- values$categories$notes %>%
+        #   pull("notes")
 
-        for (i in 1:length(notes_variables)) {
+        for (i in 1:length(values$notes_variables)) {
           notes_text <- paste(
             notes_text,
             "<b>",
-            notes_variables[i],
+            values$notes_variables[i],
             ":</b><br>",
             sep = ""
           )
           notes_text <- paste(
             notes_text,
-            selected_row_data[[notes_variables[i]]],
+            selected_row_data[[values$notes_variables[i]]],
             "<br><br>",
             sep = ""
           )
@@ -853,6 +955,15 @@ viewer_server <- function(id) {
           d <- values$d_mcdr_filtered
         }
 
+        # ###  Number tags
+        # if (
+        #   is.null(input$plot_numbers_as_text) &
+        #     !is.null(values$number_tags)
+        # ) {
+        #   d <- d %>%
+        #     mutate(across(any_of(values$number_tags), as.numeric))
+        # }
+
         ### Exclude N/A or missing from x-axis? -------
         d <- d %>%
           filter(
@@ -882,10 +993,33 @@ viewer_server <- function(id) {
         if (input$show_bar_data == "Number of papers") {
           bar_data <- "n"
         }
+        ### histogram for numberic tag
+        #browser()
+        if (
+          is.null(input$plot_numbers_as_text) &
+            !is.null(values$number_tags)
+        ) {
+          if (input$plot_x_var %in% values$number_tags) {
+            h_plot_data <- data.frame(
+              x_val = as.numeric(unlist(strsplit(
+                d[[input$plot_x_var]],
+                ";",
+                fixed = TRUE
+              )))
+            )
+            p <- h_plot_data %>%
+              ggplot(aes(x_val)) +
+              geom_histogram(fill = "blue", bins = input$hist_n_bins) +
+              theme_bw(base_size = 24)
+            print(p)
+            return(p)
+          }
+        }
 
         ### If there is no stacking variable ----------
         if (input$plot_stack_var == "none") {
           #if the x-axis mutli-select is combined
+
           d_plot <- d %>%
             select(input$plot_x_var)
           if (!("Combine x-axis" %in% input$combine_multi)) {
@@ -1241,17 +1375,20 @@ viewer_server <- function(id) {
           report_title = input$report_title,
           d = d_report,
           categories = d_cat_tag,
-          note_var = values$tag_variables[str_detect(
-            values$tag_variables,
-            "note"
-          )],
+          # note_var = values$tag_variables[str_detect(
+          #   values$tag_variables,
+          #   "note"
+          # )]
+          note_var = values$notes_variables,
           include_url = "paper_url" %in% input$report_include,
           include_abstract = "abstract" %in% input$report_include,
           include_tags = "tags" %in% input$report_include,
           include_tags_missing = "missing_tags" %in% input$report_include,
           include_tags_not_applicable = "not_applicable_tags" %in%
             input$report_include,
-          include_notes = "notes" %in% input$report_include,
+          include_notes = ("notes" %in%
+            input$report_include &
+            !is.null(values$notes_variables)),
           include_pagebreaks = "pagebreaks" %in% input$report_include
         )
       )

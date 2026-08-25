@@ -25,33 +25,6 @@ builder_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    is_invalid_numeric <- function(val) {
-      if (is.null(val) || length(val) == 0) {
-        return(FALSE)
-      }
-      val <- as.character(val)
-      vals <- unlist(strsplit(val, ";", fixed = TRUE))
-      vals <- trimws(vals)
-      vals <- vals[
-        !is.na(vals) &
-          vals != "" &
-          vals != "NA" &
-          vals != "-" &
-          vals != "-." &
-          vals != "."
-      ]
-      if (length(vals) == 0) {
-        return(FALSE)
-      }
-      any(vapply(
-        vals,
-        function(v) {
-          suppressWarnings(is.na(as.numeric(v)))
-        },
-        FUN.VALUE = logical(1)
-      ))
-    }
-
     # Inject JS for resizable panels in the Tag edit tab
     insertUI(
       selector = "head",
@@ -164,6 +137,35 @@ builder_server <- function(id) {
     )
 
     ## Misc functions -----------------------------------
+
+    # function to check if a string is a valid number
+
+    is_invalid_numeric <- function(val) {
+      if (is.null(val) || length(val) == 0) {
+        return(FALSE)
+      }
+      val <- as.character(val)
+      vals <- unlist(strsplit(val, ";", fixed = TRUE))
+      vals <- trimws(vals)
+      vals <- vals[
+        !is.na(vals) &
+          vals != "" &
+          vals != "NA" &
+          vals != "-" &
+          vals != "-." &
+          vals != "."
+      ]
+      if (length(vals) == 0) {
+        return(FALSE)
+      }
+      any(vapply(
+        vals,
+        function(v) {
+          suppressWarnings(is.na(as.numeric(v)))
+        },
+        FUN.VALUE = logical(1)
+      ))
+    }
 
     # function to add columns to a df if the columns do not already exist
     add_cols_if_missing <- function(df, cols_to_add) {
@@ -733,7 +735,6 @@ builder_server <- function(id) {
               )
             })
           # Reset vector of active categories and tag UI elements
-
           values$active_cat_tabs <-
             names(values$categories)[names(values$categories) != "notes"]
 
