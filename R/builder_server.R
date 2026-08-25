@@ -606,6 +606,11 @@ builder_server <- function(id) {
                   shiny::updateTextInput(session, y, value = revert_val)
                 } else {
                   values$number_last_val[[y]] <- val
+                  shiny::updateTextInput(
+                    session,
+                    y,
+                    label = values$d_category_meta[y, "cat_label"]
+                  )
                 }
               }, ignoreInit = TRUE)
             })
