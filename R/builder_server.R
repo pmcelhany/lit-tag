@@ -32,7 +32,7 @@ builder_server <- function(id) {
       val <- as.character(val)
       vals <- unlist(strsplit(val, ";", fixed = TRUE))
       vals <- trimws(vals)
-      vals <- vals[!is.na(vals) & vals != "" & vals != "NA"]
+      vals <- vals[!is.na(vals) & vals != "" & vals != "NA" & vals != "-" & vals != "-." & vals != "."]
       if (length(vals) == 0) {
         return(FALSE)
       }
