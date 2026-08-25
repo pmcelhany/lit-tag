@@ -32,13 +32,24 @@ builder_server <- function(id) {
       val <- as.character(val)
       vals <- unlist(strsplit(val, ";", fixed = TRUE))
       vals <- trimws(vals)
-      vals <- vals[!is.na(vals) & vals != "" & vals != "NA" & vals != "-" & vals != "-." & vals != "."]
+      vals <- vals[
+        !is.na(vals) &
+          vals != "" &
+          vals != "NA" &
+          vals != "-" &
+          vals != "-." &
+          vals != "."
+      ]
       if (length(vals) == 0) {
         return(FALSE)
       }
-      any(vapply(vals, function(v) {
-        suppressWarnings(is.na(as.numeric(v)))
-      }, FUN.VALUE = logical(1)))
+      any(vapply(
+        vals,
+        function(v) {
+          suppressWarnings(is.na(as.numeric(v)))
+        },
+        FUN.VALUE = logical(1)
+      ))
     }
 
     # Inject JS for resizable panels in the Tag edit tab
@@ -540,13 +551,19 @@ builder_server <- function(id) {
           values$d_mcdr_tagged[new_tags] <- NA
 
           # Loaded DB Validation: check for non-numeric data in "number" tags
-          number_tags <- row.names(values$d_category_meta)[values$d_category_meta$select_type == "number"]
+          number_tags <- row.names(values$d_category_meta)[
+            values$d_category_meta$select_type == "number"
+          ]
           invalid_loaded_tags <- c()
           if (length(number_tags) > 0) {
             for (t in number_tags) {
               if (t %in% names(values$d_mcdr_tagged)) {
                 vals <- unique(values$d_mcdr_tagged[[t]])
-                has_invalid <- any(vapply(vals, is_invalid_numeric, FUN.VALUE = logical(1)))
+                has_invalid <- any(vapply(
+                  vals,
+                  is_invalid_numeric,
+                  FUN.VALUE = logical(1)
+                ))
                 if (has_invalid) {
                   lbl <- values$d_category_meta[t, "cat_label"]
                   invalid_loaded_tags <- c(invalid_loaded_tags, lbl)
@@ -558,13 +575,17 @@ builder_server <- function(id) {
             shiny::showModal(shiny::modalDialog(
               title = "Invalid Numeric Data in Loaded Database",
               shiny::tagList(
-                shiny::p("The loaded database contains non-numeric data for the following tags which require numeric values:"),
+                shiny::p(
+                  "The loaded database contains non-numeric data for the following tags which require numeric values:"
+                ),
                 shiny::tags$ul(
                   lapply(invalid_loaded_tags, function(tag_name) {
                     shiny::tags$li(tag_name)
                   })
                 ),
-                shiny::p("These tags require numeric values.")
+                shiny::p(
+                  "Change the non-numeric values to numbers.\nThe non-numeric entries can be found by filtering the database."
+                )
               ),
               easyClose = TRUE,
               footer = shiny::modalButton("OK")
@@ -574,9 +595,12 @@ builder_server <- function(id) {
           # Clear old number observers to avoid leaking observers
           if (!is.null(values$number_observers)) {
             for (obs in values$number_observers) {
-              tryCatch({
-                obs$destroy()
-              }, error = function(e) NULL)
+              tryCatch(
+                {
+                  obs$destroy()
+                },
+                error = function(e) NULL
+              )
             }
           }
           values$number_observers <- list()
@@ -585,34 +609,53 @@ builder_server <- function(id) {
           # Set up new live-edit observers for each "number" tag
           if (length(number_tags) > 0) {
             values$number_observers <- lapply(number_tags, function(y) {
-              observeEvent(input[[y]], {
-                val <- input[[y]]
-                last_val <- values$number_last_val[[y]]
-                
-                # If val is NULL, ignore
-                if (is.null(val)) return()
-                
-                # If identical to last known val, ignore
-                if (identical(val, last_val)) return()
-                
-                if (is_invalid_numeric(val)) {
-                  shiny::showModal(shiny::modalDialog(
-                    title = "Invalid Input",
-                    paste("The value entered for tag '", values$d_category_meta[y, "cat_label"], "' must be a numeric entry.", sep = ""),
-                    easyClose = TRUE,
-                    footer = shiny::modalButton("OK")
-                  ))
-                  revert_val <- if (is.null(last_val) || is.na(last_val) || last_val == "NA") "" else last_val
-                  shiny::updateTextInput(session, y, value = revert_val)
-                } else {
-                  values$number_last_val[[y]] <- val
-                  shiny::updateTextInput(
-                    session,
-                    y,
-                    label = values$d_category_meta[y, "cat_label"]
-                  )
-                }
-              }, ignoreInit = TRUE)
+              observeEvent(
+                input[[y]],
+                {
+                  val <- input[[y]]
+                  last_val <- values$number_last_val[[y]]
+
+                  # If val is NULL, ignore
+                  if (is.null(val)) {
+                    return()
+                  }
+
+                  # If identical to last known val, ignore
+                  if (identical(val, last_val)) {
+                    return()
+                  }
+
+                  if (is_invalid_numeric(val)) {
+                    shiny::showModal(shiny::modalDialog(
+                      title = "Invalid Input",
+                      paste(
+                        "The value entered for tag '",
+                        values$d_category_meta[y, "cat_label"],
+                        "' must be a numeric entry.",
+                        sep = ""
+                      ),
+                      easyClose = TRUE,
+                      footer = shiny::modalButton("OK")
+                    ))
+                    revert_val <- if (
+                      is.null(last_val) || is.na(last_val) || last_val == "NA"
+                    ) {
+                      ""
+                    } else {
+                      last_val
+                    }
+                    shiny::updateTextInput(session, y, value = revert_val)
+                  } else {
+                    values$number_last_val[[y]] <- val
+                    shiny::updateTextInput(
+                      session,
+                      y,
+                      label = values$d_category_meta[y, "cat_label"]
+                    )
+                  }
+                },
+                ignoreInit = TRUE
+              )
             })
           }
 
@@ -943,7 +986,10 @@ builder_server <- function(id) {
         if (is_invalid_numeric(row_val)) {
           updateTextInput(
             inputId = x,
-            label = shiny::span(d_category_meta[x, "cat_label"], style = "color: red;"),
+            label = shiny::span(
+              d_category_meta[x, "cat_label"],
+              style = "color: red;"
+            ),
             value = row_val
           )
         } else {
