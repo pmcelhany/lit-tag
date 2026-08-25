@@ -87,7 +87,7 @@ viewer_server <- function(id) {
           choices = choice_opts
         )
       }
-      if (meta[y, "select_type"] == "text_box") {
+      if (meta[y, "select_type"] %in% c("text_box", "number")) {
         box <- textInput(inputId = ns(y), label = meta[y, "cat_label"])
       }
 
