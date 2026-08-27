@@ -10,9 +10,9 @@ id = "6a72e0e3-7e95-4988-9bd2-3bca6d3a5623"
 dashboard_url = "https://connect.fisheries.noaa.gov/connect/#/apps/6a72e0e3-7e95-4988-9bd2-3bca6d3a5623"
 direct_url = "https://connect.fisheries.noaa.gov/content/6a72e0e3-7e95-4988-9bd2-3bca6d3a5623/"
 logs_url = "https://connect.fisheries.noaa.gov/connect/#/apps/6a72e0e3-7e95-4988-9bd2-3bca6d3a5623/logs"
-deployed_at = "2026-08-25T22:50:58.274Z"
-bundle_id = "6885"
-bundle_url = "https://connect.fisheries.noaa.gov/__api__/v1/content/6a72e0e3-7e95-4988-9bd2-3bca6d3a5623/bundles/6885/download"
+deployed_at = "2026-08-26T23:42:41.592Z"
+bundle_id = "6907"
+bundle_url = "https://connect.fisheries.noaa.gov/__api__/v1/content/6a72e0e3-7e95-4988-9bd2-3bca6d3a5623/bundles/6907/download"
 files = [
     ".posit/publish/deployments/deployment-172M.toml",
     ".posit/publish/lit-tag-test-6BUF.toml",
@@ -38,6 +38,29 @@ files = [
     "inst/app/www/lit_tag_logo_1.png",
     "inst/app/www/styles.css",
     "inst/golem-config.yml",
+    "inst/user_guides_raw/images_builder_guide/media/builder_compare_db_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/builder_db_contents_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/builder_db_maintenance_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/builder_delete_based_on_tag_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/builder_delete_not_zotero_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/builder_delete_tag_opt_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/builder_delete_tag_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/builder_filter_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/builder_help_example_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/builder_new_db_download_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/builder_new_db_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/builder_new_zorero.png",
+    "inst/user_guides_raw/images_builder_guide/media/builder_replace_tag_name_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/builder_replace_tag_opt_name_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/builder_sync_zotero_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/builder_tabs_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/builder_tag_contents_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/builder_tag_edit_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/builer_help_guide_shot.png",
+    "inst/user_guides_raw/images_builder_guide/media/lit_tag_architecture.png",
+    "inst/user_guides_raw/images_builder_guide/media/lit_tag_logo.png",
+    "inst/user_guides_raw/images_builder_guide/media/zotero_dup_papers.png",
+    "inst/user_guides_raw/images_builder_guide/media/zotero_export_shot.png",
     "quarto-1.5.57/bin/quarto",
     "quarto-1.5.57/bin/quarto.js",
     "quarto-1.5.57/bin/tools/x86_64/dart-sass/sass",
@@ -3274,6 +3297,13 @@ files = [
     "/LICENSE",
     "/NAMESPACE",
     "/inst",
+    "/inst/user_guides_raw",
+    "!/inst/user_guides_raw/.gitignore",
+    "/inst/user_guides_raw/images_builder_guide/media",
+    "!/inst/user_guides_raw/images_viewer_guide",
+    "!/inst/user_guides_raw/lit_tag_builder_guide.qmd",
+    "!/inst/user_guides_raw/lit_tag_viewer_guide.qmd",
+    "/inst/user_guides_raw/images_builder_guide",
 ]
 validate = true
 product_type = "connect"

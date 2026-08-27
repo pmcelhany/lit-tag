@@ -41,3 +41,28 @@ golem_add_external_resources <- function() {
     # for example, you can add shinyalert::useShinyalert()
   )
 }
+
+# golem_add_external_resources <- function() {
+#   # Safe local absolute path in dev, app_sys() in production/server
+#   www_path <- if (interactive()) {
+#     here::here("inst/app/www")
+#   } else {
+#     app_sys("app/www")
+#   }
+#   report_path <- if (interactive()) {
+#     here::here("inst/report")
+#   } else {
+#     app_sys("report")
+#   }
+
+#   add_resource_path("www", www_path)
+#   add_resource_path("reports", report_path)
+
+#   tags$head(
+#     favicon(),
+#     bundle_resources(
+#       path = www_path,
+#       app_title = "littag"
+#     )
+#   )
+# }

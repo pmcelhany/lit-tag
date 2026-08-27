@@ -17,6 +17,13 @@ files = [
     "/LICENSE",
     "/NAMESPACE",
     "/inst",
+    "/inst/user_guides_raw",
+    "!/inst/user_guides_raw/.gitignore",
+    "/inst/user_guides_raw/images_builder_guide/media",
+    "!/inst/user_guides_raw/images_viewer_guide",
+    "!/inst/user_guides_raw/lit_tag_builder_guide.qmd",
+    "!/inst/user_guides_raw/lit_tag_viewer_guide.qmd",
+    "/inst/user_guides_raw/images_builder_guide",
 ]
 validate = true
 product_type = "connect"
