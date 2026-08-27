@@ -41,3 +41,6 @@ options("golem.app.prod" = TRUE)
 
 # run the app
 run_app()
+
+# To run the app with updated resources (i.e. contents of of inst/app/www) during development,
+# run golem::run_dev() in the console
