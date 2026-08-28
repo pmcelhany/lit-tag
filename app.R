@@ -44,3 +44,4 @@ run_app()
 
 # To run the app with updated resources (i.e. contents of of inst/app/www) during development,
 # run golem::run_dev() in the console
+# also note that positron will not open the pdf user guides - you have to open in a browser
