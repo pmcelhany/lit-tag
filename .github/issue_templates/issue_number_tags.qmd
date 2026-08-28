@@ -1,6 +1,6 @@
 ---
 format: gfm
-output-file: "issue_number_tags.md"
+output-file: "issue_builder_reorg.md"
 ---
 
 ## AGENT CONSTRAINTS (TOKEN OPTIMIZATION)
