@@ -2,7 +2,7 @@
 "$schema" = "https://cdn.posit.co/publisher/schemas/posit-publishing-record-schema-v3.json"
 server_type = "connect"
 server_url = "https://connect.fisheries.noaa.gov"
-client_version = "2.10.0"
+client_version = "2.12.0"
 created_at = "2026-08-20T22:44:50.700Z"
 type = "r-shiny"
 configuration_name = "lit-tag-UP0A"
@@ -10,9 +10,9 @@ id = "36ea4ada-78c3-447e-8d3b-105fff332ecb"
 dashboard_url = "https://connect.fisheries.noaa.gov/connect/#/apps/36ea4ada-78c3-447e-8d3b-105fff332ecb"
 direct_url = "https://connect.fisheries.noaa.gov/content/36ea4ada-78c3-447e-8d3b-105fff332ecb/"
 logs_url = "https://connect.fisheries.noaa.gov/connect/#/apps/36ea4ada-78c3-447e-8d3b-105fff332ecb/logs"
-deployed_at = "2026-08-27T00:12:12.856Z"
-bundle_id = "6909"
-bundle_url = "https://connect.fisheries.noaa.gov/__api__/v1/content/36ea4ada-78c3-447e-8d3b-105fff332ecb/bundles/6909/download"
+deployed_at = "2026-08-28T19:30:42.845Z"
+bundle_id = "6943"
+bundle_url = "https://connect.fisheries.noaa.gov/__api__/v1/content/36ea4ada-78c3-447e-8d3b-105fff332ecb/bundles/6943/download"
 files = [
     ".posit/publish/deployments/deployment-OPEL.toml",
     ".posit/publish/lit-tag-UP0A.toml",
@@ -32,10 +32,10 @@ files = [
     "data/mcdr_example.zip",
     "data/unicorn_example.zip",
     "data/zotero_fields.csv",
-    "inst/app/www/LitTag viewer guide.pdf",
     "inst/app/www/favicon.ico",
     "inst/app/www/lit_tag_builder_guide.pdf",
     "inst/app/www/lit_tag_logo_1.png",
+    "inst/app/www/lit_tag_viewer_guide.pdf",
     "inst/app/www/styles.css",
     "inst/golem-config.yml",
     "inst/user_guides_raw/.gitignore",
@@ -62,15 +62,16 @@ files = [
     "inst/user_guides_raw/images_builder_guide/media/lit_tag_logo.png",
     "inst/user_guides_raw/images_builder_guide/media/zotero_dup_papers.png",
     "inst/user_guides_raw/images_builder_guide/media/zotero_export_shot.png",
-    "inst/user_guides_raw/images_viewer_guide/media/image1.png",
-    "inst/user_guides_raw/images_viewer_guide/media/image2.png",
-    "inst/user_guides_raw/images_viewer_guide/media/image3.png",
-    "inst/user_guides_raw/images_viewer_guide/media/image4.png",
-    "inst/user_guides_raw/images_viewer_guide/media/image5.png",
-    "inst/user_guides_raw/images_viewer_guide/media/image6.png",
-    "inst/user_guides_raw/images_viewer_guide/media/image7.png",
-    "inst/user_guides_raw/images_viewer_guide/media/image8.png",
-    "inst/user_guides_raw/images_viewer_guide/media/image9.png",
+    "inst/user_guides_raw/images_viewer_guide/media/filtered_bar_plot.png",
+    "inst/user_guides_raw/images_viewer_guide/media/filtered_stacked_bar_plot.png",
+    "inst/user_guides_raw/images_viewer_guide/media/histogram.png",
+    "inst/user_guides_raw/images_viewer_guide/media/lit_tag_log.png",
+    "inst/user_guides_raw/images_viewer_guide/media/load_db.png",
+    "inst/user_guides_raw/images_viewer_guide/media/load_embedded_db.png",
+    "inst/user_guides_raw/images_viewer_guide/media/paper_tag_summary_pop_up.png",
+    "inst/user_guides_raw/images_viewer_guide/media/report.png",
+    "inst/user_guides_raw/images_viewer_guide/media/search_tab.png",
+    "inst/user_guides_raw/images_viewer_guide/media/summary_table.png",
     "inst/user_guides_raw/lit_tag_builder_guide.qmd",
     "inst/user_guides_raw/lit_tag_viewer_guide.qmd",
     "quarto-1.5.57/bin/quarto",
@@ -3328,31 +3329,30 @@ url = "https://cloud.r-project.org"
 
 [renv.packages.DBI]
 package = "DBI"
-version = "1.2.2"
+version = "1.3.0"
 source = "Repository"
 repository = "CRAN"
 requirements = [
     "R",
     "methods",
 ]
-hash = "164809cd72e1d5160b4cb3aa57f510fe"
+hash = "dbfa2adb83f8063640982459e153f650"
 
 [renv.packages.DT]
 package = "DT"
-version = "0.33"
+version = "0.34.0"
 source = "Repository"
 repository = "CRAN"
 requirements = [
     "crosstalk",
     "htmltools",
     "htmlwidgets",
-    "httpuv",
     "jquerylib",
     "jsonlite",
     "magrittr",
     "promises",
 ]
-hash = "64ff3427f559ce3f2597a4fe13255cb6"
+hash = "a9d00f59f9c7e613dd4c3e0d27135a03"
 
 [renv.packages.KernSmooth]
 package = "KernSmooth"
@@ -3430,14 +3430,15 @@ hash = "45f0398006e83a5b10b72a90663d8d8c"
 
 [renv.packages.Rcpp]
 package = "Rcpp"
-version = "1.1.0"
+version = "1.1.1"
 source = "Repository"
 repository = "CRAN"
 requirements = [
+    "R",
     "methods",
     "utils",
 ]
-hash = "0d3d8867aa41b0d9ad113b50c169ecb2"
+hash = "60df6f11cbeffbf9d50ad0852867f6b6"
 
 [renv.packages.RcppTOML]
 package = "RcppTOML"
@@ -3515,41 +3516,42 @@ hash = "e1e1b9d75c37401117b636b7ae50827a"
 
 [renv.packages.base64enc]
 package = "base64enc"
-version = "0.1-3"
+version = "0.1-6"
 source = "Repository"
 repository = "CRAN"
 requirements = [
     "R",
 ]
-hash = "543776ae6848fde2f48ff3816d0628bc"
+hash = "5edb675b7baa6e9a0d86dd2c28de1676"
 
 [renv.packages.bit]
 package = "bit"
-version = "4.0.5"
+version = "4.6.0"
 source = "Repository"
 repository = "CRAN"
 requirements = [
     "R",
 ]
-hash = "d242abec29412ce988848d0294b208fd"
+hash = "ebe86ffd194564abdc895d87742d5a29"
 
 [renv.packages.bit64]
 package = "bit64"
-version = "4.0.5"
+version = "4.6.0-1"
 source = "Repository"
 repository = "CRAN"
 requirements = [
     "R",
     "bit",
+    "graphics",
     "methods",
     "stats",
     "utils",
 ]
-hash = "9fe98599ca456d6552421db0d6772d8f"
+hash = "4f572fbc586294afff277db583b9060f"
 
 [renv.packages.blob]
 package = "blob"
-version = "1.2.4"
+version = "1.3.0"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -3557,7 +3559,7 @@ requirements = [
     "rlang",
     "vctrs",
 ]
-hash = "40415719b5a479b87949f3aa0aee737c"
+hash = "1e0ae40898be928695fd90a80e816253"
 
 [renv.packages.boot]
 package = "boot"
@@ -3590,7 +3592,7 @@ hash = "c1ee497a6d999947c2c224ae46799b1a"
 
 [renv.packages.broom]
 package = "broom"
-version = "1.0.9"
+version = "1.0.12"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -3607,11 +3609,11 @@ requirements = [
     "tibble",
     "tidyr",
 ]
-hash = "e22a2be2b646fbc8e8c3cc8deefc01de"
+hash = "6cf2f6757591ea712c57c5d7bedc3c27"
 
 [renv.packages.bslib]
 package = "bslib"
-version = "0.9.0"
+version = "0.10.0"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -3629,7 +3631,7 @@ requirements = [
     "rlang",
     "sass",
 ]
-hash = "70a6489cc254171fb9b4a7f130f44dca"
+hash = "d6072fb96c4868d8cb40d4071cdc472b"
 
 [renv.packages.cachem]
 package = "cachem"
@@ -3767,7 +3769,7 @@ hash = "af5958631ca49510aff96d0f5c0bbb76"
 
 [renv.packages.crayon]
 package = "crayon"
-version = "1.5.2"
+version = "1.5.3"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -3775,7 +3777,7 @@ requirements = [
     "methods",
     "utils",
 ]
-hash = "e8a1e41acf02548751f45c718d55aa6a"
+hash = "859d96e65ef198fd43e82b9628d593ef"
 
 [renv.packages.credentials]
 package = "credentials"
@@ -3793,7 +3795,7 @@ hash = "c7844b32098dcbd1c59cbd8dddb4ecc6"
 
 [renv.packages.crosstalk]
 package = "crosstalk"
-version = "1.2.1"
+version = "1.2.2"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -3802,7 +3804,7 @@ requirements = [
     "jsonlite",
     "lazyeval",
 ]
-hash = "ab12c7b080a57475248a30f4db6298c0"
+hash = "8b008bc619e0bbebb5646b3d37efdad1"
 
 [renv.packages.curl]
 package = "curl"
@@ -3816,18 +3818,18 @@ hash = "aa27e963d3deccf4bade44d06b976977"
 
 [renv.packages."data.table"]
 package = "data.table"
-version = "1.17.8"
+version = "1.18.2.1"
 source = "Repository"
 repository = "CRAN"
 requirements = [
     "R",
     "methods",
 ]
-hash = "1d991cd6160fa7b1fdbd3689034cbd15"
+hash = "df99cd4333ce592df5173d6ad39b5c14"
 
 [renv.packages.dbplyr]
 package = "dbplyr"
-version = "2.5.0"
+version = "2.5.1"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -3851,7 +3853,7 @@ requirements = [
     "vctrs",
     "withr",
 ]
-hash = "39b2e002522bfd258039ee4e889e0fd1"
+hash = "e38d7151c767b00b919091be4686e274"
 
 [renv.packages.desc]
 package = "desc"
@@ -3971,7 +3973,7 @@ hash = "71a469a5d5f9fdbf7de6c0dbeece0e22"
 
 [renv.packages.dtplyr]
 package = "dtplyr"
-version = "1.3.1"
+version = "1.3.3"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -3986,7 +3988,7 @@ requirements = [
     "tidyselect",
     "vctrs",
 ]
-hash = "54ed3ea01b11e81a86544faaecfef8e2"
+hash = "7f6db50cf8183cce63c06510fc74a318"
 
 [renv.packages.ellipsis]
 package = "ellipsis"
@@ -4049,7 +4051,7 @@ hash = "bd1297f9b5b1fc1372d19e2c4cd82215"
 
 [renv.packages.forcats]
 package = "forcats"
-version = "1.0.0"
+version = "1.0.1"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -4061,7 +4063,7 @@ requirements = [
     "rlang",
     "tibble",
 ]
-hash = "1a0a9a3d5083d0d573c4214576f1e690"
+hash = "f884a14605c6a9eb01db676eee793ba7"
 
 [renv.packages.foreign]
 package = "foreign"
@@ -4078,18 +4080,18 @@ hash = "550170303dbb19d07b2bcc288068e7dc"
 
 [renv.packages.fs]
 package = "fs"
-version = "1.6.6"
+version = "1.6.7"
 source = "Repository"
 repository = "CRAN"
 requirements = [
     "R",
     "methods",
 ]
-hash = "7eb1e342eee7e0a7449c49cdaa526d39"
+hash = "5940e9a672d097b8956b201fdbc53451"
 
 [renv.packages.gargle]
 package = "gargle"
-version = "1.5.2"
+version = "1.6.1"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -4107,7 +4109,7 @@ requirements = [
     "utils",
     "withr",
 ]
-hash = "fc0b272e5847c58cd5da9b20eedbd026"
+hash = "99e4f3f00be5075372bb650a3e237a71"
 
 [renv.packages.generics]
 package = "generics"
@@ -4216,7 +4218,7 @@ hash = "11be24963e2f220c403eafd01e2259d5"
 
 [renv.packages.googledrive]
 package = "googledrive"
-version = "2.1.1"
+version = "2.1.2"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -4237,11 +4239,11 @@ requirements = [
     "vctrs",
     "withr",
 ]
-hash = "e99641edef03e2a5e87f0a0b1fcc97f4"
+hash = "292be194aa519482c4b83f488a818ba3"
 
 [renv.packages.googlesheets4]
 package = "googlesheets4"
-version = "1.1.1"
+version = "1.1.2"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -4265,7 +4267,7 @@ requirements = [
     "vctrs",
     "withr",
 ]
-hash = "d6db1667059d027da730decdc214b959"
+hash = "376adbf359b416dbb30a76a2d2051ed5"
 
 [renv.packages.gtable]
 package = "gtable"
@@ -4285,7 +4287,7 @@ hash = "de949855009e2d4d0e52a844e30617ae"
 
 [renv.packages.haven]
 package = "haven"
-version = "2.5.4"
+version = "2.5.5"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -4302,7 +4304,7 @@ requirements = [
     "tidyselect",
     "vctrs",
 ]
-hash = "9171f898db9d9c4c1b2c745adc2c1ef1"
+hash = "437bc7804f8ffdfcfed38d0aead6a9d7"
 
 [renv.packages.here]
 package = "here"
@@ -4316,32 +4318,33 @@ hash = "e5114f2abe04168238181913a8572358"
 
 [renv.packages.highr]
 package = "highr"
-version = "0.10"
+version = "0.12"
 source = "Repository"
 repository = "CRAN"
 requirements = [
     "R",
     "xfun",
 ]
-hash = "06230136b2d2b9ba5805e1963fa6e890"
+hash = "2a2f862ade01a56dcbcd60944de11255"
 
 [renv.packages.hms]
 package = "hms"
-version = "1.1.3"
+version = "1.1.4"
 source = "Repository"
 repository = "CRAN"
 requirements = [
+    "cli",
     "lifecycle",
     "methods",
     "pkgconfig",
     "rlang",
     "vctrs",
 ]
-hash = "b59377caa7ed00fa41808342002138f9"
+hash = "2799ac720626cec589478b191e48b88b"
 
 [renv.packages.htmltools]
 package = "htmltools"
-version = "0.5.8.1"
+version = "0.5.9"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -4353,7 +4356,7 @@ requirements = [
     "rlang",
     "utils",
 ]
-hash = "81d371a9cc60640e74e4ab6ac46dcedc"
+hash = "102298e238c14eb830cc4b5edd23c3e8"
 
 [renv.packages.htmlwidgets]
 package = "htmlwidgets"
@@ -4372,7 +4375,7 @@ hash = "04291cc45198225444a397606810ac37"
 
 [renv.packages.httpuv]
 package = "httpuv"
-version = "1.6.16"
+version = "1.6.17"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -4383,7 +4386,7 @@ requirements = [
     "promises",
     "utils",
 ]
-hash = "6c3c8728e40326de6529a5c46e377e5c"
+hash = "4ff0297ad1cd631d57f0d30172972754"
 
 [renv.packages.httr]
 package = "httr"
@@ -4455,7 +4458,7 @@ hash = "0f9a864bbd7ce0232ad05cb76249cc1a"
 
 [renv.packages.janitor]
 package = "janitor"
-version = "2.2.0"
+version = "2.2.1"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -4473,7 +4476,7 @@ requirements = [
     "tidyr",
     "tidyselect",
 ]
-hash = "5baae149f1082f466df9d1442ba7aa65"
+hash = "64f308bf1fbf5f856cdf4b4c7c0ce51b"
 
 [renv.packages.jose]
 package = "jose"
@@ -4508,7 +4511,7 @@ hash = "b0776f526d36d8bd4a3344a88fe165c4"
 
 [renv.packages.knitr]
 package = "knitr"
-version = "1.46"
+version = "1.51"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -4520,7 +4523,7 @@ requirements = [
     "xfun",
     "yaml",
 ]
-hash = "6e008ab1d696a5283c79765fa7b56b47"
+hash = "27682babb50f03b6eb7939ea69ec79ca"
 
 [renv.packages.labeling]
 package = "labeling"
@@ -4535,14 +4538,15 @@ hash = "b64ec208ac5bc1852b285f665d6368b3"
 
 [renv.packages.later]
 package = "later"
-version = "1.4.4"
+version = "1.4.8"
 source = "Repository"
 repository = "CRAN"
 requirements = [
+    "R",
     "Rcpp",
     "rlang",
 ]
-hash = "a729883bff94b606cd4f0445aeed95b5"
+hash = "824c180e69b9be79ab96a985e233c470"
 
 [renv.packages.lattice]
 package = "lattice"
@@ -4583,7 +4587,7 @@ hash = "36dbfe4fba6c064db50a671a90297c85"
 
 [renv.packages.lubridate]
 package = "lubridate"
-version = "1.9.3"
+version = "1.9.5"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -4592,7 +4596,7 @@ requirements = [
     "methods",
     "timechange",
 ]
-hash = "680ad542fbcf801442c83a6ac5a2126c"
+hash = "07061b348d057e8ac86771e0eff36b62"
 
 [renv.packages.magick]
 package = "magick"
@@ -4938,44 +4942,48 @@ hash = "0154ac5b9ef4df1a7be3a54602e781cf"
 
 [renv.packages.quarto]
 package = "quarto"
-version = "1.4.4"
+version = "1.5.1"
 source = "Repository"
 repository = "CRAN"
 requirements = [
     "R",
     "cli",
+    "fs",
+    "htmltools",
     "jsonlite",
     "later",
+    "lifecycle",
     "processx",
     "rlang",
     "rmarkdown",
     "rstudioapi",
     "tools",
     "utils",
+    "xfun",
     "yaml",
 ]
-hash = "af456d7a181750812bd8b2bfedb3ea4e"
+hash = "c948476ae43811c74888f0d4534832a3"
 
 [renv.packages.ragg]
 package = "ragg"
-version = "1.3.0"
+version = "1.5.1"
 source = "Repository"
 repository = "CRAN"
 requirements = [
     "systemfonts",
     "textshaping",
 ]
-hash = "082e1a198e3329d571f4448ef0ede4bc"
+hash = "be139d96b8fa66f90b10988d96edc71b"
 
 [renv.packages.rappdirs]
 package = "rappdirs"
-version = "0.3.3"
+version = "0.3.4"
 source = "Repository"
 repository = "CRAN"
 requirements = [
     "R",
 ]
-hash = "5e3c5dc0b071b21fa128676560dbe94d"
+hash = "f146a5bfc94db048309712535d4d0aee"
 
 [renv.packages.rcmdcheck]
 package = "rcmdcheck"
@@ -5001,7 +5009,7 @@ hash = "8f25ebe2ec38b1f2aef3b0d2ef76f6c4"
 
 [renv.packages.readr]
 package = "readr"
-version = "2.1.5"
+version = "2.2.0"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -5011,6 +5019,7 @@ requirements = [
     "clipr",
     "cpp11",
     "crayon",
+    "glue",
     "hms",
     "lifecycle",
     "methods",
@@ -5019,12 +5028,13 @@ requirements = [
     "tzdb",
     "utils",
     "vroom",
+    "withr",
 ]
-hash = "9de96463d2117f6ac49980577939dfb3"
+hash = "4425ad9e28b8e3351184ca2739995b87"
 
 [renv.packages.readxl]
 package = "readxl"
-version = "1.4.3"
+version = "1.4.5"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -5035,7 +5045,7 @@ requirements = [
     "tibble",
     "utils",
 ]
-hash = "8cf9c239b96df1bbb133b74aef77ad0a"
+hash = "18948de59f05d38a44d3e5065a76b4b6"
 
 [renv.packages.rematch]
 package = "rematch"
@@ -5080,7 +5090,7 @@ hash = "397b7b2a265bc5a7a06852524dabae20"
 
 [renv.packages.reprex]
 package = "reprex"
-version = "2.1.0"
+version = "2.1.1"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -5098,7 +5108,7 @@ requirements = [
     "utils",
     "withr",
 ]
-hash = "1425f91b4d5d9a8f25352c44a3d914ed"
+hash = "97b1d5361a24d9fb588db7afe3e5bcbf"
 
 [renv.packages.rhub]
 package = "rhub"
@@ -5139,7 +5149,7 @@ hash = "34c0d101f4613098abc538b82e0d86c5"
 
 [renv.packages.rmarkdown]
 package = "rmarkdown"
-version = "2.28"
+version = "2.30"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -5158,7 +5168,7 @@ requirements = [
     "xfun",
     "yaml",
 ]
-hash = "062470668513dcda416927085ee9bdc7"
+hash = "efe19db0fde0fff13cea7eec6f695021"
 
 [renv.packages.roxygen2]
 package = "roxygen2"
@@ -5255,7 +5265,7 @@ hash = "a9881dfed103e83f9de151dc17002cd1"
 
 [renv.packages.rvest]
 package = "rvest"
-version = "1.0.4"
+version = "1.0.5"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -5270,7 +5280,7 @@ requirements = [
     "tibble",
     "xml2",
 ]
-hash = "0bcf0c6f274e90ea314b812a6d19a519"
+hash = "2804ddcd7737082306c559d919886546"
 
 [renv.packages.sass]
 package = "sass"
@@ -5307,7 +5317,7 @@ hash = "c5bba8f0d1df8c4b9538a40570798d9b"
 
 [renv.packages.selectr]
 package = "selectr"
-version = "0.4-2"
+version = "0.5-1"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -5316,7 +5326,7 @@ requirements = [
     "methods",
     "stringr",
 ]
-hash = "3838071b66e0c566d55cc26bd6e27bf4"
+hash = "fb6f4aacfcc16539458c66b698339e69"
 
 [renv.packages.sessioninfo]
 package = "sessioninfo"
@@ -5367,7 +5377,7 @@ hash = "e71fb3fcf73db153eccd8afed293984f"
 
 [renv.packages.shinyWidgets]
 package = "shinyWidgets"
-version = "0.9.0"
+version = "0.9.1"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -5380,7 +5390,7 @@ requirements = [
     "sass",
     "shiny",
 ]
-hash = "2356d33ce915ad415b1fe9a476c99a7d"
+hash = "e8f592e8c0a636fef0c253c8196d78c7"
 
 [renv.packages.snakecase]
 package = "snakecase"
@@ -5533,15 +5543,19 @@ hash = "0ff174f3cfef696f36a70dc84a0fd839"
 
 [renv.packages.textshaping]
 package = "textshaping"
-version = "0.3.7"
+version = "1.0.5"
 source = "Repository"
 repository = "CRAN"
 requirements = [
     "R",
     "cpp11",
+    "lifecycle",
+    "stats",
+    "stringi",
     "systemfonts",
+    "utils",
 ]
-hash = "997aac9ad649e0ef3b97f96cddd5622b"
+hash = "addb750a886a2ac415dea6f8068867de"
 
 [renv.packages.tibble]
 package = "tibble"
@@ -5643,27 +5657,6 @@ hash = "c328568cd14ea89a83bd4ca7f54ae07e"
 
 [renv.packages.timechange]
 package = "timechange"
-version = "0.3.0"
-source = "Repository"
-repository = "CRAN"
-requirements = [
-    "R",
-    "cpp11",
-]
-hash = "c5f3c201b931cd6474d17d8700ccb1c8"
-
-[renv.packages.tinytex]
-package = "tinytex"
-version = "0.50"
-source = "Repository"
-repository = "CRAN"
-requirements = [
-    "xfun",
-]
-hash = "be7a76845222ad20adb761f462eed3ea"
-
-[renv.packages.tzdb]
-package = "tzdb"
 version = "0.4.0"
 source = "Repository"
 repository = "CRAN"
@@ -5671,7 +5664,28 @@ requirements = [
     "R",
     "cpp11",
 ]
-hash = "f561504ec2897f4d46f0c7657e488ae1"
+hash = "39c40cb1ad47a4cc384a34a22a29463f"
+
+[renv.packages.tinytex]
+package = "tinytex"
+version = "0.58"
+source = "Repository"
+repository = "CRAN"
+requirements = [
+    "xfun",
+]
+hash = "03af3ad04817f3019de8ee5c73dab807"
+
+[renv.packages.tzdb]
+package = "tzdb"
+version = "0.5.0"
+source = "Repository"
+repository = "CRAN"
+requirements = [
+    "R",
+    "cpp11",
+]
+hash = "09e3961e87b7bafa4a9340bbb34aeda8"
 
 [renv.packages.urlchecker]
 package = "urlchecker"
@@ -5731,13 +5745,13 @@ hash = "d526d558be176e9ceb68c3d1e83479b7"
 
 [renv.packages.uuid]
 package = "uuid"
-version = "1.2-0"
+version = "1.2-2"
 source = "Repository"
 repository = "CRAN"
 requirements = [
     "R",
 ]
-hash = "303c19bfd970bece872f93a824e323d9"
+hash = "528fc9e90d70a6a115e21164f37b2c64"
 
 [renv.packages.vctrs]
 package = "vctrs"
@@ -5765,7 +5779,7 @@ hash = "9380d36888b72faf5ae6c22b44703867"
 
 [renv.packages.vroom]
 package = "vroom"
-version = "1.6.5"
+version = "1.7.0"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -5787,11 +5801,11 @@ requirements = [
     "vctrs",
     "withr",
 ]
-hash = "390f9315bc0025be03012054103d227c"
+hash = "255cb6f090718455ff89cbc28cb5eea7"
 
 [renv.packages.waiter]
 package = "waiter"
-version = "0.2.5"
+version = "0.2.5.1"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -5799,7 +5813,7 @@ requirements = [
     "htmltools",
     "shiny",
 ]
-hash = "93e6b6c8ae3f81d4be77a0dc74e5cf5e"
+hash = "695c6fadef72d88e1ea024a5a74571bb"
 
 [renv.packages.waldo]
 package = "waldo"
@@ -5856,19 +5870,20 @@ hash = "c58dc41b898080efbe58558fe012852c"
 
 [renv.packages.xfun]
 package = "xfun"
-version = "0.43"
+version = "0.57"
 source = "Repository"
 repository = "CRAN"
 requirements = [
+    "R",
     "grDevices",
     "stats",
     "tools",
 ]
-hash = "ab6371d8653ce5f2f9290f4ec7b42a8e"
+hash = "476c8908ae56baf122e69bb2c2d9f631"
 
 [renv.packages.xml2]
 package = "xml2"
-version = "1.3.6"
+version = "1.5.2"
 source = "Repository"
 repository = "CRAN"
 requirements = [
@@ -5877,7 +5892,7 @@ requirements = [
     "methods",
     "rlang",
 ]
-hash = "1d0336142f4cd25d8d23cd3ba7a8fb61"
+hash = "d8e98d08a4a4d03f5052acc6e6204b99"
 
 [renv.packages.xopen]
 package = "xopen"
@@ -5892,22 +5907,23 @@ hash = "423df1e86d5533fcb73c6b02b4923b49"
 
 [renv.packages.xtable]
 package = "xtable"
-version = "1.8-4"
+version = "1.8-8"
 source = "Repository"
 repository = "CRAN"
 requirements = [
     "R",
+    "methods",
     "stats",
     "utils",
 ]
-hash = "b8acdf8af494d9ec19ccb2481a9b11c2"
+hash = "93b19c064862d315a828c7170d806453"
 
 [renv.packages.yaml]
 package = "yaml"
-version = "2.3.10"
+version = "2.3.12"
 source = "Repository"
 repository = "CRAN"
-hash = "51dab85c6c98e50a18d7551e9d49f76c"
+hash = "7cd77cb32abd9220d744307e9fc94ffb"
 
 [renv.packages.zip]
 package = "zip"

@@ -314,7 +314,7 @@ viewer_ui <- function(id) {
           "lit-tag-viewer",
           tags$iframe(
             style = "height:100vh; width:100%; scrolling=yes",
-            src = "www/LitTag viewer guide.pdf"
+            src = "www/lit_tag_viewer_guide.pdf"
           )
         ),
         nav_panel(

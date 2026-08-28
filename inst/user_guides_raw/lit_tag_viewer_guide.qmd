@@ -17,9 +17,9 @@ number-sections: true
 
 ![](images_viewer_guide/media/lit_tag_log.png){fig-align="center" width="1.6in"}
 
-June 16, 2025
+August 28, 2026
 
-# What is lit-tag-viewer?
+# Overview
 
 The `lit-tag-viewer` module of the `lit-tag` app allows users to search, visualize, and summarize a tagged literature database created using the lit-tag-builder module.
 
@@ -49,13 +49,15 @@ Users may interact with versions of `lit-tag-viewer` with and embedded database 
 
 #### User-provided files
 
-More commonly, users may utilize the `lit-tag-viewer` module to view database and category files created with `lit-tag-builder` and saved locally on their computer. To load the database, click browse and select the appropriate `.csv` file on your local hard drive (@fig-load-db). To load the categories, click browse and select the appropriate `.xlsx` file on your local hard drive. The creation and contents of these files are described in the *lit-tag-builder User Guide* accessible in the `lit-tag-builder` module. After the database and categories files have been selected, click the **Load database** button. A table with the authors, year and title of all the references in the database will appear on the right side of the window.
+More commonly, users may utilize the `lit-tag-viewer` module to view database and category files created by by themself or someone else with `lit-tag-builder` and saved locally on their computer. To load the database, click browse and select the appropriate `.csv` file on your local hard drive (@fig-load-db). To load the categories, click browse and select the appropriate `.xlsx` file on your local hard drive. The creation and contents of these files are described in the *lit-tag-builder User Guide* accessible in the `lit-tag-builder` module. After the database and categories files have been selected, click the **Load database** button. A table with the authors, year and title of all the references in the database will appear on the right side of the window.
 
 ![Load database tab with an example database loaded.](images_viewer_guide/media/load_db.png){#fig-load-db fig-align="center" width="6.5in"}
 
 ## Search database {#search-database}
 
-The **Search database** tab can be used to filter the full database to identify a subset of references that meet user-selected criteria.
+The **Search database** tab can be used to filter the full database to identify a subset of references that meet user-selected criteria (@fig-search-tab).
+
+![Example screen shot of database search.](images_viewer_guide/media/search_tab.png){#fig-search-tab fig-align="center" width="6.5in"}
 
 The left side of the window displays the **Paper table (filtered)**. Before filtering criteria are supplied, the full database will be displayed. After filtering, the table will be updated to display only those papers that meet the filtering criteria. The center of the window displays the search criteria that may be applied by the user. The right of the window displays the selection criteria that have been applied, the number of papers meeting those criteria, and the export functionality for saving filtered databases.
 
@@ -73,7 +75,7 @@ Users may search by keywords in notes provided by the database reviewer. Strings
 
 #### Filter by [Tag criteria]{.underline}
 
-Users may filter by one or more tag categories by selecting checkboxes associated with tag values. The tag categories and values are those supplied in the **lit-tag tag categories .xlsx file**.
+Users may filter by one or more tag categories by selecting checkboxes associated with tag values. The tag categories and values are those supplied in the **lit-tag tag categories file** (`.xlsx`).
 
 #### Advanced custom search
 
@@ -81,56 +83,44 @@ More complicated searches of the database can be done by entering an advanced cu
 
 #### View tags on individual papers
 
-In the search tab, selecting a paper from the table of filtered papers in the left panel will bring up a window with the tags, notes and abstract specific to that paper. To close the tab, click "Dismiss" at the bottom.
+In the search tab, selecting a paper from the table of filtered papers in the left panel will bring up a window with the tags, notes and abstract specific to that paper (@fig-search-tab). To close the tab, click **Dismiss** at the bottom.
 
-|  |
-|:-----------------------------------------------------------------------|
-| ![](./images_viewer_guide/media/image4.png){width="6.354166666666667in" height="4.277777777777778in"} |
-| Example of "Search database" tab |
-
-|  |
-|:-----------------------------------------------------------------------|
-| ![](./images_viewer_guide/media/image5.png){width="6.354166666666667in" height="2.8472222222222223in"} |
-| View of "tags on individual papers" |
+![Pop up summary of tags on selected paper.](images_viewer_guide/media/paper_tag_summary_pop_up.png){#fig-tag-summary width="6.5in"}
 
 ## Summary plots {#summary-plots}
 
-The "Summary plots" generates bar graphs and stacked bar graphs for bibliographic information and tag categories. The user may select "Full dataset" to plot data for the entire database, or may select "Filtered database" to plot only the filtered database currently selected in the "Search database" tab.
+The **Summary plots** tab is used to generate paper frequency bar graphs, stacked frequency bar graphs and histograms for bibliographic information and tag categories. The user may select **Full dataset** to plot data for the entire database, or may select **Filtered database** to plot only the filtered database currently selected in the "Search database" tab. To change the filtered set, use the **Database search** tab.
 
-Plots are generated by selecting an x-axis variable in the "Plot x-axis variable" dropdown menu. A stack variable may also be selected under "Plot stack variable" to visualize two categorical variables together. Percentage or number of papers represented by each bar may be added by making the appropriate selection under "Show bar data value." Users may optionally exclude "not applicable" or missing values from the plot.
+### Frequency bar plots
 
-When plotting stacked variables, users may also opt to "Combine multi-select" for the x-axis and/or stack variable. This option can be applied when, for example, the stacked variable has multiple selections for each x-axis variable. The default plot will show the proportion of each stack value, not the absolute count. Applying "Combine stacked" will instead show the absolute count and separate stack variables for each combination of multiple selections.
+Plots are generated by selecting an x-axis variable in the **Plot x-axis variable** drop down menu (@fig-bar-plot). A stack variable may also be selected under **Plot stack variable** to visualize two categorical variables together (@fig-stacked-plot). Percentage or number of papers represented by each bar may be added by making the appropriate selection under **Show bar data value**. Users may optionally exclude **not applicable** or **missing** values from the plot.
 
-|  |
-|:-----------------------------------------------------------------------|
-| ![](./images_viewer_guide/media/image6.png){width="6.354166666666667in" height="3.0in"} |
-| Example of "Summary plots" tab |
+When plotting stacked variables, users may also opt to **Combine multi-select** for the x-axis and/or stack variable. This option can be applied when, for example, the stacked variable has multiple selections for each x-axis variable. The default plot will show the proportion of each stack value, not the absolute count. Applying **Combine stacked** will instead show the absolute count and separate stack variables for each combination of multiple selections.
 
-|  |
-|:-----------------------------------------------------------------------|
-| ![](./images_viewer_guide/media/image7.png){width="6.354166666666667in" height="2.9027777777777777in"} |
-| Example of "Summary plots" with a stacked variable |
+![Example frequency bar plot for filtered data.](images_viewer_guide/media/filtered_bar_plot.png){#fig-bar-plot fig-align="center" width="6.5in"}
+
+![Example of stacked bar plot.](images_viewer_guide/media/filtered_stacked_bar_plot.png){#fig-stacked-plot fig-align="center" width="6.5in"}
+
+### Number tag plots
+
+By default, number tags are displayed as a histogram (@fig-histogram) with the **Histogram number of bins** input controlling how many bins the tag number range is divided into for plotting. Optionally, selecting **Plot number tags as text** will display number tags as frequency bar or stacked bar plots.
+
+![Example histogram for number tag.](images_viewer_guide/media/histogram.png){#fig-histogram fig-align="center"}
 
 ## Summary table {#summary-table}
 
-A summary table can be created with user selected fields showing either the complete data set or the filtered data set. The column order can be changed by clicking and dragging the column header. The table can be sorted by clicking on the header of the column to be used for sorting. The summary table can be downloaded as a .csv file.
+A summary table can be created on the **Summary table** tab with user selected fields showing either the complete data set or the filtered data set (@fig-summary-table). The column order can be changed by clicking and dragging the column header. The table can be sorted by clicking on the header of the column to be used for sorting. The summary table can be downloaded as a `.csv` file.
 
-|  |
-|:-----------------------------------------------------------------------|
-| ![](./images_viewer_guide/media/image8.png){width="6.354166666666667in" height="3.75in"} |
-| Example summary table. |
+![Example summary table.](images_viewer_guide/media/summary_table.png){#fig-summary-table fig-align="center" width="6.5in"}
 
 ## Reports {#reports}
 
-The Reports tab allows users to generate and output summary reports for the full database or the filtered database currently selected in the "Search database" tab.
+The **Reports** tab allows users to generate and output summary reports for the full database or the filtered database currently selected in the **Search database** tab (@fig-report).
 
-Users may enter a report title and author, and opt to sort the report by author, publication year, or title. The default settings produce a report that includes basic bibliographic information, paper_url, abstract, tags, missing_tags, not_applicable_tags, notes, and pagebreaks. Users may customize the report contents by selecting only desired elements.
+Users may enter a **Report title** and **Report author**, and opt to sort the report by author, publication year, or title. The default settings produce a report that includes basic bibliographic information, paper_url, abstract, tags, missing_tags, not_applicable_tags, notes, and pagebreaks. Users may customize the report contents by selecting only desired elements.
 
-Click the "Show report" button to view the report on the right side of the window.
+Click the **Show report** button to view the report on the right side of the window.
 
-To save the report to your computer as an .html, .pdf, or .docs file, edit "Report filename" and select your preferred file format. Click the "Download report" button.
+To save the report to your computer as an `.html`, `.pdf`, or `.docx` file, edit **Report filename** and select your preferred file format. Then click the **Download report** button.
 
-|  |
-|:-----------------------------------------------------------------------|
-| ![](./images_viewer_guide/media/image9.png){width="6.354166666666667in" height="2.8194444444444446in"} |
-| Example of "Reports" tab |
+![Example report](images_viewer_guide/media/report.png){#fig-report fig-align="center"}
