@@ -1,0 +1,40 @@
+---
+format: gfm
+output-file: "issue_builder_reorg.md"
+---
+
+## 1. Scope & Targeted Files
+
+> **Strict Context Constraint:** Do NOT read or modify files outside of this explicit list.
+
+-   **Blueprint File (Read-Only):** `reorg_plan.md`
+-   **Primary Source File:** `R/builder_server.R`
+-   **Target New Output Files:**
+    -   `R/builder_server_utils.R`
+    -   `R/builder_server_tab_01_<tab_name>.R`
+    -   `R/builder_server_tab_02_<tab_name>.R`
+    -   `R/builder_server_tab_03_<tab_name>.R`
+    -   `R/builder_server_tab_04_<tab_name>.R`
+    -   `R/builder_server_tab_05_<tab_name>.R`
+    -   `R/builder_server_tab_06_<tab_name>.R`
+
+## 2. Objective & Expected Behavior
+
+**Goal:** Execute the code modularization planned in `reorg_plan.md`.
+
+**Strict Architectural & Safety Rules:** 1. **Zero Logic Modifications:** Copy functions verbatim. Do NOT modify function names, parameters, reactive bindings, or internal logic. 2. **No `source()` Calls:** Golem automatically loads all scripts inside `R/`. Do NOT add `source()` or `library()` calls to any script. 3. **Module Entrypoint:** Keep only the top-level `builder_server` module wrapper function inside `R/builder_server.R`. Move all helper/sub-functions and tab logic out into their mapped target files in `R/`.
+
+## 3. Automated Verification Protocol
+
+Before completing the task, execute the following commands sequentially to verify code integrity and confirm no missing dependencies or syntax errors:
+
+``` bash
+# 1. Check syntax and package loadability
+Rscript -e "devtools::load_all()"
+
+# 2. Verify dependencies and namespace
+Rscript -e "devtools::document()"
+
+# 3. Parse ALL R files in R/ for syntax errors
+Rscript -e "invisible(lapply(list.files('R', pattern = '\\.R$', full.names = TRUE), parse))"
+```
