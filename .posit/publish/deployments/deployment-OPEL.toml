@@ -10,9 +10,9 @@ id = "36ea4ada-78c3-447e-8d3b-105fff332ecb"
 dashboard_url = "https://connect.fisheries.noaa.gov/connect/#/apps/36ea4ada-78c3-447e-8d3b-105fff332ecb"
 direct_url = "https://connect.fisheries.noaa.gov/content/36ea4ada-78c3-447e-8d3b-105fff332ecb/"
 logs_url = "https://connect.fisheries.noaa.gov/connect/#/apps/36ea4ada-78c3-447e-8d3b-105fff332ecb/logs"
-deployed_at = "2026-08-28T19:30:42.845Z"
-bundle_id = "6943"
-bundle_url = "https://connect.fisheries.noaa.gov/__api__/v1/content/36ea4ada-78c3-447e-8d3b-105fff332ecb/bundles/6943/download"
+deployed_at = "2026-08-28T22:34:26.533Z"
+bundle_id = "6944"
+bundle_url = "https://connect.fisheries.noaa.gov/__api__/v1/content/36ea4ada-78c3-447e-8d3b-105fff332ecb/bundles/6944/download"
 files = [
     ".posit/publish/deployments/deployment-OPEL.toml",
     ".posit/publish/lit-tag-UP0A.toml",
