@@ -54,10 +54,8 @@ ris_fun <- function(paper) {
     SN = "issn"
   )
 
-  environment(ris_tag_fun) <- environment()
-
   tag_value <- names(ris_tag_map) %>%
-    map(\(x) ris_tag_fun(x)) %>%
+    map(\(x) ris_tag_fun(x, paper = paper, ris_tag_map = ris_tag_map)) %>%
     unlist()
 
   general_tags <- data.frame(tag_value)
