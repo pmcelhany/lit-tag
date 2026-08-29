@@ -231,8 +231,6 @@ builder_server_tab_04_database_maintenance <- function() {
     },
     content = function(file) {
       withProgress(message = "Generating combined database", value = 0, {
-        # read vector of all possible zotero fields
-        zotero_fields <- read_csv("data/zotero_fields.csv")$zotero_fields
         incProgress(1 / 4)
 
         load_categories(input$combine_cat$datapath)
