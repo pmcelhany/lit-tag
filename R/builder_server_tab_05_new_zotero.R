@@ -6,16 +6,15 @@ unescape_html <- function(str) {
 }
 
 #' @noRd
-ris_tag_fun <- function(tag) {
+ris_tag_fun <- function(tag, paper, ris_tag_map) {
   value <- NA
   if (hasName(paper, ris_tag_map[tag])) {
     value <- pull(paper, ris_tag_map[tag])
   }
-  value_tag <- NULL
   if (!is.na(value)) {
-    value_tag <- paste(tag, "-", value, sep = "  ")
+    return(paste(tag, "-", value, sep = "  "))
   }
-  return(value_tag)
+  return(NULL)
 }
 
 #' @noRd
