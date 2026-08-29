@@ -1,0 +1,49 @@
+## 1. Scope & Targeted Files
+
+> **Strict Context Constraint:** Do NOT read or modify files outside of this explicit list.
+
+- **Blueprint File (Read-Only):** `viewer_reorg_plan.md`
+- **Primary Source File:** `R/viewer_server.R`
+- **UI Reference (Read-Only):** `R/viewer_ui.R`
+- **Target Output Files:** Defined by `viewer_reorg_plan.md` (`R/viewer_server_utils.R` and `R/viewer_server_tab_XX_<tab_name>.R`)
+
+## 2. Objective & Expected Behavior
+
+**Goal:** Execute the code modularization defined in `viewer_reorg_plan.md`.
+
+**Strict Architectural & Safety Rules:**
+1. **Zero Logic Modifications:** Copy functions verbatim. Do NOT modify function names, parameters, reactive bindings, or internal logic.
+2. **Exact Function Routing:** Move each function strictly to its assigned file as specified in Section 2 of `viewer_reorg_plan.md`.
+3. **UI-Server Linkage Protection:** Maintain every single `input$id` and `output$id` binding. Do NOT alter or omit any `output$...` assignments or `observeEvent(input$...))` listeners matching `R/viewer_ui.R`.
+4. **No `source()` Calls:** Golem automatically loads all scripts inside `R/`. Do NOT add `source()` or `library()` calls to any script.
+5. **Module Entrypoint:** Keep only the top-level `viewer_server` module wrapper function definition inside `R/viewer_server.R`.
+
+## 3. Automated Verification Protocol
+
+Before completing the task, execute the following commands sequentially to verify code integrity, ensure no syntax errors, and confirm package parsing:
+
+```bash
+# 1. Check syntax and package loadability
+Rscript -e "devtools::load_all()"
+
+# 2. Verify dependencies and namespace
+Rscript -e "devtools::document()"
+
+# 3. Parse ALL R files in R/ for syntax errors
+Rscript -e "invisible(lapply(list.files('R', pattern = '\\.R$', full.names = TRUE), parse))"
+
+# 4. Verify script loading across new server files
+Rscript -e "
+server_files <- list.files('R', pattern = '^viewer_server.*\\.R$', full.names = TRUE);
+invisible(lapply(server_files, parse));
+message('Verification complete: All viewer server files parsed successfully.');
+"
+```
+
+## 4. Step-by-Step Task Checklist
+
+- [ ] Read `viewer_reorg_plan.md` for exact function-to-file mapping.
+- [ ] Move utility functions into `R/viewer_server_utils.R`.
+- [ ] Move tab-specific functions/outputs into their designated tab scripts defined in the plan.
+- [ ] Clean up `R/viewer_server.R` so it only contains the main module function.
+- [ ] Run all 4 verification checks to confirm zero syntax errors or broken dependencies.

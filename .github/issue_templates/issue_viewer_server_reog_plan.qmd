@@ -1,0 +1,47 @@
+## 1. Scope & Targeted Files
+
+> **Strict Context Constraint:** Do NOT read or modify files outside of this explicit list.
+
+- **Primary Source File:** `R/viewer_server.R`
+- **Structure Reference File (Read-Only):** `R/viewer_ui.R`
+- **Allowed Output File:** `viewer_reorg_plan.md`
+
+## 2. Objective & Expected Behavior
+
+**Goal:** Draft a modularization plan in `viewer_reorg_plan.md`.
+
+**STRICT CONSTRAINT:** DO NOT EDIT OR CREATE ANY R CODE FILES. DO NOT ADD `source()` CALLS (Golem auto-loads files in `R/`). ONLY CREATE `viewer_reorg_plan.md`.
+
+**Architectural Rules & Naming Convention:**
+1. Inspect `R/viewer_ui.R` to identify the UI tab/section structure.
+2. Map `R/viewer_server.R` logic directly to match these UI sections.
+3. **Strict Naming Scheme:**
+   - Tab/section-specific files MUST use two-digit indexed lower_snake_case: `R/viewer_server_tab_01_<tab_name>.R`, `R/viewer_server_tab_02_<tab_name>.R`, etc.
+   - Shared helpers, non-tab reactive expressions, and utility functions MUST be assigned to `R/viewer_server_utils.R`.
+4. Preserve all original function names, parameters, and Shiny reactivity behavior without changing features.
+
+## 3. Required Output Format
+
+Write `viewer_reorg_plan.md` using EXACTLY this Markdown structure (keep descriptions concise):
+
+```markdown
+# Viewer Server Reorganization Plan
+
+## Planned File Structure
+- `R/viewer_server_utils.R`: Common helper functions and shared reactive expressions.
+- `R/viewer_server_tab_01_<tab_name>.R`: Server logic for Tab 1 (<Tab Name>).
+- `R/viewer_server_tab_02_<tab_name>.R`: Server logic for Tab 2 (<Tab Name>).
+
+## Function Mapping
+### `R/viewer_server_utils.R`
+- `function_name_1()`
+
+### `R/viewer_server_tab_01_<tab_name>.R`
+- `function_name_2()`
+```
+
+## 4. Step-by-Step Task Checklist
+
+- [ ] Parse `R/viewer_ui.R` to identify UI tabs/sections in sequential order.
+- [ ] Parse `R/viewer_server.R` and map functions to their designated tab file or `R/viewer_server_utils.R`.
+- [ ] Output the completed plan into `viewer_reorg_plan.md` strictly following the target format.

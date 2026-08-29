@@ -1,32 +1,28 @@
----
-format: gfm
-output-file: "issue_builder_reorg.md"
----
-
 ## 1. Scope & Targeted Files
 
 > **Strict Context Constraint:** Do NOT read or modify files outside of this explicit list.
 
 -   **Blueprint File (Read-Only):** `reorg_plan.md`
 -   **Primary Source File:** `R/builder_server.R`
--   **Target New Output Files:**
+-   **UI Reference (Read-Only):** `R/builder_ui.R`
+-   **Target Output Files:**
     -   `R/builder_server_utils.R`
-    -   `R/builder_server_tab_01_<tab_name>.R`
-    -   `R/builder_server_tab_02_<tab_name>.R`
-    -   `R/builder_server_tab_03_<tab_name>.R`
-    -   `R/builder_server_tab_04_<tab_name>.R`
-    -   `R/builder_server_tab_05_<tab_name>.R`
-    -   `R/builder_server_tab_06_<tab_name>.R`
+    -   `R/builder_server_tab_01_tag_edit.R`
+    -   `R/builder_server_tab_02_new_database.R`
+    -   `R/builder_server_tab_03_sync_zotero.R`
+    -   `R/builder_server_tab_04_database_maintenance.R`
+    -   `R/builder_server_tab_05_new_zotero.R`
+    -   `R/builder_server_tab_06_help.R`
 
 ## 2. Objective & Expected Behavior
 
-**Goal:** Execute the code modularization planned in `reorg_plan.md`.
+**Goal:** Execute the code modularization defined in `reorg_plan.md`.
 
-**Strict Architectural & Safety Rules:** 1. **Zero Logic Modifications:** Copy functions verbatim. Do NOT modify function names, parameters, reactive bindings, or internal logic. 2. **No `source()` Calls:** Golem automatically loads all scripts inside `R/`. Do NOT add `source()` or `library()` calls to any script. 3. **Module Entrypoint:** Keep only the top-level `builder_server` module wrapper function inside `R/builder_server.R`. Move all helper/sub-functions and tab logic out into their mapped target files in `R/`.
+**Strict Architectural & Safety Rules:** 1. **Zero Logic Modifications:** Copy functions verbatim. Do NOT modify function names, parameters, reactive bindings, or internal logic. 2. **Exact Function Routing:** Move each function strictly to its assigned file as specified in Section 2 of `reorg_plan.md`. 3. **UI-Server Linkage Protection:** Maintain every single `input$id` and `output$id` binding. Do NOT alter or omit any `output$...` assignments or `observeEvent(input$...))` listeners matching `R/builder_ui.R`. 4. **No `source()` Calls:** Golem automatically loads all scripts inside `R/`. Do NOT add `source()` or `library()` calls to any script. 5. **Module Entrypoint:** Keep only the top-level `builder_server` module wrapper function definition inside `R/builder_server.R`.
 
 ## 3. Automated Verification Protocol
 
-Before completing the task, execute the following commands sequentially to verify code integrity and confirm no missing dependencies or syntax errors:
+Before completing the task, execute the following commands sequentially to verify code integrity, ensure no syntax errors, and confirm package parsing:
 
 ``` bash
 # 1. Check syntax and package loadability
@@ -37,4 +33,19 @@ Rscript -e "devtools::document()"
 
 # 3. Parse ALL R files in R/ for syntax errors
 Rscript -e "invisible(lapply(list.files('R', pattern = '\\.R$', full.names = TRUE), parse))"
+
+# 4. Verify script loading across new server files
+Rscript -e "
+server_files <- list.files('R', pattern = '^builder_server.*\\.R$', full.names = TRUE);
+invisible(lapply(server_files, parse));
+message('Verification complete: All builder server files parsed successfully.');
+"
 ```
+
+## 4. Step-by-Step Task Checklist
+
+-   [ ] Read `reorg_plan.md` for exact function-to-file mapping.
+-   [ ] Move utility functions (`is_invalid_numeric()`, `read_zotero()`, etc.) into `R/builder_server_utils.R`.
+-   [ ] Move tab-specific functions/outputs into their designated tab scripts (01 through 06).
+-   [ ] Clean up `R/builder_server.R` so it only contains the main module function.
+-   [ ] Run all 4 verification checks to confirm zero syntax errors or broken dependencies.
