@@ -98,7 +98,7 @@ ris_fun <- function(paper) {
 builder_server_tab_05_new_zotero <- function() {
   output$generate_ris <- downloadHandler(
     filename = function() {
-      paste(input$database_nz_csv$name, ".ris", sep = "")
+      paste(str_remove(input$database_nz_csv$name, ".csv"), ".ris", sep = "")
     },
     content = function(file) {
       withProgress(message = "Generating RIS file", value = 0, {
