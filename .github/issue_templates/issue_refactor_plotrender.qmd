@@ -1,0 +1,54 @@
+### Title
+
+Refactor `renderPlot` in `R/viewer_server_tab_03_summary_plots.R` for Readability and DRY Compliance
+
+------------------------------------------------------------------------
+
+### Task Description
+
+Refactor the internal code inside `renderPlot()` in `R/viewer_server_tab_03_summary_plots.R` to improve readability and reduce repetition. The current implementation is functionally correct, so **do not change any reactive inputs, outputs, plot visual behavior, or plot export data structures**.
+
+------------------------------------------------------------------------
+
+### Strict Repository Constraints
+
+-   **Scope Boundary:** Edits MUST be strictly limited to `R/viewer_server_tab_03_summary_plots.R`. Do not modify or inspect unrelated files.
+-   **No New Dependencies:** Do not add new R package dependencies. Use existing functions from loaded packages (`dplyr`, `ggplot2`, `stringr`, `tidyr`, `janitor`).
+-   **Behavior Preservation:**
+    -   Keep the `renderPlot` signature and `height = 800` parameter unchanged.
+    -   Preserve exact assignment logic for `values$d_plot` in both stacked and non-stacked branches.
+    -   Maintain all existing UI reactive inputs (`input$plot_data`, `input$plot_x_var`, `input$plot_stack_var`, `input$combine_multi`, `input$show_bar_data`, `input$plot_remove`, `input$hist_n_bins`, `input$plot_numbers_as_text`).
+
+------------------------------------------------------------------------
+
+### Specific Refactoring Instructions
+
+1.  **Extract Local Helper Functions**
+    -   Extract `author_format()` outside of `renderPlot()` to the top of `R/viewer_server_tab_03_summary_plots.R` (or module scope) so it is not redefined on every reactive execution.
+2.  **Simplify & Modularize Data Transformation Pipelines**
+    -   **Deduplicate `author` Conditional Mutates:** Replace the redundant `if_else(rep(input$var == "author", nrow(.)), author_format(...), ...)` statements with a single clean helper function or a streamlined conditional transformation.
+    -   **Consolidate Semicolon Cleaning:** Unify repetitive string cleaning steps (`str_replace_all(..., ";", ", ")`) used across x-axis and stack-variable vectors.
+    -   **Streamline Multi-Select Delimiter Splitting:** Refactor duplicate `separate_longer_delim()` calls based on `input$combine_multi` checks into a clear, reusable sequence or helper function.
+3.  **Improve Code Structure & Readability**
+    -   Keep the main control flow clearly separated into three distinct code pathways:
+        1.  Histogram generation for numeric tags.
+        2.  Non-stacked bar plot generation (`input$plot_stack_var == "none"`).
+        3.  Stacked bar plot generation.
+    -   Clean up commented-out legacy code blocks.
+
+------------------------------------------------------------------------
+
+### Verification Checklist
+
+Before submitting the PR, execute the following commands in the R console to ensure syntax integrity and compliance:
+
+``` r
+# 1. Check syntax and package loadability
+devtools::load_all()
+
+# 2. Verify dependencies and namespace match DESCRIPTION
+devtools::document()
+
+# 3. Parse R files for syntax errors
+invisible(lapply(list.files('R', pattern = '\\.R$', full.names = TRUE), parse))
+```
