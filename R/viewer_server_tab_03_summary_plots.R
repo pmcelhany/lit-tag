@@ -1,5 +1,42 @@
 # R/viewer_server_tab_03_summary_plots.R
 
+### Local Helper Functions -----------------
+
+author_format <- function(author) {
+  paste(
+    str_trim(word(author, sep = ",")),
+    str_sub(str_trim(word(author, 2, 2, sep = ",")), 1, 1),
+    sep = "_"
+  )
+}
+
+format_author_col <- function(data, col_name) {
+  if (col_name == "author") {
+    data %>%
+      mutate(!!col_name := author_format(!!as.name(col_name)))
+  } else {
+    data
+  }
+}
+
+replace_semicolons <- function(x) {
+  str_replace_all(x, ";", ", ")
+}
+
+clean_semicolons <- function(data, col_name) {
+  data %>%
+    mutate(!!col_name := replace_semicolons(!!as.name(col_name)))
+}
+
+separate_col <- function(data, col_name, combine_flag, combine_input) {
+  if (!(combine_flag %in% combine_input)) {
+    data %>%
+      separate_longer_delim(cols = all_of(col_name), delim = ";")
+  } else {
+    data
+  }
+}
+
 viewer_server_tab_03_summary_plots <- function() {
   ## Plot -------------------------------------------
   output$plot <- renderPlot(
@@ -11,15 +48,6 @@ viewer_server_tab_03_summary_plots <- function() {
       } else {
         d <- values$d_mcdr_filtered
       }
-
-      # ###  Number tags
-      # if (
-      #   is.null(input$plot_numbers_as_text) &
-      #     !is.null(values$number_tags)
-      # ) {
-      #   d <- d %>%
-      #     mutate(across(any_of(values$number_tags), as.numeric))
-      # }
 
       ### Exclude N/A or missing from x-axis? -------
       d <- d %>%
@@ -37,21 +65,12 @@ viewer_server_tab_03_summary_plots <- function() {
       ### Max character x var -----------
       max_x_char <- 20
 
-      ### Author format function -----------------
-      author_format <- function(author) {
-        return(paste(
-          str_trim(word(author, sep = ",")),
-          str_sub(str_trim(word(author, 2, 2, sep = ",")), 1, 1),
-          sep = "_"
-        ))
-      }
-
       bar_data <- "percent"
       if (input$show_bar_data == "Number of papers") {
         bar_data <- "n"
       }
-      ### histogram for numberic tag
-      #browser()
+
+      ### Pathway 1: Histogram generation for numeric tags -----------
       if (
         is.null(input$plot_numbers_as_text) &
           !is.null(values$number_tags)
@@ -74,35 +93,18 @@ viewer_server_tab_03_summary_plots <- function() {
         }
       }
 
-      ### If there is no stacking variable ----------
+      ### Pathway 2: Non-stacked bar plot generation -----------
       if (input$plot_stack_var == "none") {
-        #if the x-axis mutli-select is combined
-
         d_plot <- d %>%
-          select(input$plot_x_var)
-        if (!("Combine x-axis" %in% input$combine_multi)) {
-          d_plot <- d_plot %>%
-            separate_longer_delim(input$plot_x_var, delim = ";")
-        }
+          select(all_of(input$plot_x_var)) %>%
+          separate_col(input$plot_x_var, "Combine x-axis", input$combine_multi)
 
         # the x-axis only plot
         d_plot_2 <- d_plot %>%
-          mutate(
-            !!input$plot_x_var := if_else(
-              rep(input$plot_x_var == "author", nrow(.)),
-              author_format(!!as.name(input$plot_x_var)),
-              !!as.name(input$plot_x_var)
-            )
-          ) %>%
+          format_author_col(input$plot_x_var) %>%
           tabyl(input$plot_x_var) %>%
           mutate(percent = paste(round(percent * 100), "%", sep = "")) %>%
-          mutate(
-            !!input$plot_x_var := str_replace_all(
-              !!as.name(input$plot_x_var),
-              ";",
-              ", "
-            )
-          )
+          clean_semicolons(input$plot_x_var)
 
         n_total_paper <- sum(d_plot_2$n)
 
@@ -121,6 +123,7 @@ viewer_server_tab_03_summary_plots <- function() {
           scale_x_discrete(labels = label_wrap(max_x_char)) +
           theme_bw(base_size = 24) +
           theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+
         #### If show percent -------------------
         if (input$show_bar_data != "None") {
           p +
@@ -131,7 +134,8 @@ viewer_server_tab_03_summary_plots <- function() {
           p
         }
       } else {
-        ### If there is a stacking variable -----------------
+        ### Pathway 3: Stacked bar plot generation -----------
+
         #### Is stack var multi-select? -----------------
         has_multi_select_stacked <-
           any(str_detect(d[[input$plot_stack_var]], ";"), na.rm = TRUE)
@@ -139,6 +143,7 @@ viewer_server_tab_03_summary_plots <- function() {
         if ("Combine stacked" %in% input$combine_multi) {
           has_multi_select_stacked <- FALSE
         }
+
         #### Exclude N/A or missing from stacked? -------
         d <- d %>%
           filter(
@@ -152,24 +157,15 @@ viewer_server_tab_03_summary_plots <- function() {
               is.na(.data[[input$plot_stack_var]]))
           )
 
-        #if the x-axis mutli-select is combined
+        # if the x-axis multi-select is combined
         d_plot <- d %>%
-          select(input$plot_x_var)
-        if (!("Combine x-axis" %in% input$combine_multi)) {
-          d_plot <- d_plot %>%
-            separate_longer_delim(input$plot_x_var, delim = ";")
-        }
+          select(all_of(input$plot_x_var)) %>%
+          separate_col(input$plot_x_var, "Combine x-axis", input$combine_multi)
 
         #### d_z for multi-select stack ---------------
 
         d_x_expand <- d_plot %>%
-          mutate(
-            !!input$plot_x_var := if_else(
-              rep(input$plot_x_var == "author", nrow(.)),
-              author_format(!!as.name(input$plot_x_var)),
-              !!as.name(input$plot_x_var)
-            )
-          ) %>%
+          format_author_col(input$plot_x_var) %>%
           tabyl(input$plot_x_var) %>%
           mutate(percent = paste(round(percent * 100), "%", sep = ""))
 
@@ -179,36 +175,15 @@ viewer_server_tab_03_summary_plots <- function() {
         n_total_paper <- sum(d_x_expand_n$n)
 
         d_both_expand_f_1 <- d %>%
-          select(all_of(c(input$plot_x_var, input$plot_stack_var)))
-
-        #if the x-axis mutli-select is combined
-        if (!("Combine x-axis" %in% input$combine_multi)) {
-          d_both_expand_f_1 <- d_both_expand_f_1 %>%
-            separate_longer_delim(input$plot_x_var, delim = ";")
-        }
+          select(all_of(c(input$plot_x_var, input$plot_stack_var))) %>%
+          separate_col(input$plot_x_var, "Combine x-axis", input$combine_multi)
 
         d_both_expand_f_2 <- d_both_expand_f_1 %>%
-          mutate(
-            !!input$plot_x_var := if_else(
-              rep(input$plot_x_var == "author", nrow(.)),
-              author_format(!!as.name(input$plot_x_var)),
-              !!as.name(input$plot_x_var)
-            )
-          )
-
-        if (!("Combine stacked" %in% input$combine_multi)) {
-          d_both_expand_f_2 <- d_both_expand_f_2 %>%
-            separate_longer_delim(input$plot_stack_var, delim = ";")
-        }
+          format_author_col(input$plot_x_var) %>%
+          separate_col(input$plot_stack_var, "Combine stacked", input$combine_multi)
 
         d_both_expand_f_3 <- d_both_expand_f_2 %>%
-          mutate(
-            !!input$plot_stack_var := if_else(
-              rep(input$plot_stack_var == "author", nrow(.)),
-              author_format(!!as.name(input$plot_stack_var)),
-              !!as.name(input$plot_stack_var)
-            )
-          ) %>%
+          format_author_col(input$plot_stack_var) %>%
           tabyl(.data[[input$plot_x_var]], .data[[input$plot_stack_var]]) %>%
           adorn_percentages()
 
@@ -228,14 +203,8 @@ viewer_server_tab_03_summary_plots <- function() {
         #### plot stacked ---------------------------
 
         p <- d_z %>%
-          mutate(
-            !!input$plot_x_var := str_replace_all(
-              !!as.name(input$plot_x_var),
-              ";",
-              ", "
-            )
-          ) %>%
-          mutate(stack_var = str_replace_all(stack_var, ";", ", ")) %>%
+          clean_semicolons(input$plot_x_var) %>%
+          mutate(stack_var = replace_semicolons(stack_var)) %>%
           ggplot(aes(
             x = .data[[input$plot_x_var]],
             y = n,
@@ -264,19 +233,14 @@ viewer_server_tab_03_summary_plots <- function() {
             )
           theme(plot.subtitle = element_text(size = 12))
         }
+
         #### if show percent ------------------
         if (input$show_bar_data != "None") {
           p <- p +
             geom_text(
               data = d_x_expand %>%
                 mutate(stack_var = NA) %>%
-                mutate(
-                  !!input$plot_x_var := str_replace_all(
-                    !!as.name(input$plot_x_var),
-                    ";",
-                    ", "
-                  )
-                ),
+                clean_semicolons(input$plot_x_var),
               aes(label = .data[[bar_data]]),
               vjust = -1,
               color = "black",
@@ -285,6 +249,7 @@ viewer_server_tab_03_summary_plots <- function() {
             coord_cartesian(clip = "off") +
             scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
         }
+
         # plot data to download for stacked plot
         values$d_plot <- d_z
         p
@@ -309,3 +274,4 @@ viewer_server_tab_03_summary_plots <- function() {
     }
   )
 }
+
