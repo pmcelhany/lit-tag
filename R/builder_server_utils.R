@@ -63,11 +63,8 @@ category_remove_meta_fun <- function(d) {
 #' @noRd
 select_box_fun <- function(x, y, cat, meta) {
   box <- NULL
-
   choice_opts <- NULL
-  if (
-    meta[y, "select_type"] %in% c("check_box_single", "check_box_multiple")
-  ) {
+  if (meta[y, "select_type"] %in% c("check_box_single", "check_box_multiple")) {
     choice_opts <- cat %>%
       pluck(x) %>%
       pull(y) %>%
