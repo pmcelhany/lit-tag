@@ -1,5 +1,10 @@
 # R/builder_server_utils.R
 
+# Global boolean flag to toggle validation checks.
+# Set ENABLE_FILE_VALIDATION <- FALSE to bypass all file validation checks.
+# Developers can also bypass checks via option: options(lit_tag_enable_validation = FALSE)
+ENABLE_FILE_VALIDATION <- TRUE
+
 #' @noRd
 is_invalid_numeric <- function(val) {
   if (is.null(val) || length(val) == 0) {
@@ -172,4 +177,131 @@ read_zotero <- function(filepath) {
     mutate(across(everything(), as.character))
 
   return(d)
+}
+
+#' @noRd
+validate_csv_headers <- function(filepath) {
+  if (!file.exists(filepath)) return("File does not exist.")
+  if (file.info(filepath)$size == 0) return("The database file is empty.")
+  first_line <- tryCatch(readLines(filepath, n = 1), error = function(e) NULL)
+  if (is.null(first_line) || length(first_line) == 0 || trimws(first_line) == "") {
+    return("The database file has no content or headers.")
+  }
+  headers_df <- tryCatch(read.csv(filepath, header = FALSE, nrows = 1, colClasses = "character"), error = function(e) NULL)
+  if (is.null(headers_df) || nrow(headers_df) == 0) return("Could not parse the headers of the database file.")
+  headers <- as.character(headers_df[1, ])
+  invalid_idx <- which(is.na(headers) | trimws(headers) == "")
+  if (length(invalid_idx) > 0) {
+    return(paste0("Database file contains columns with missing or empty header names (column indices: ", paste(invalid_idx, collapse = ", "), ")."))
+  }
+  return(TRUE)
+}
+
+#' @noRd
+validate_database_csv <- function(filepath) {
+  header_res <- validate_csv_headers(filepath)
+  if (!isTRUE(header_res)) return(header_res)
+  headers_df <- read.csv(filepath, header = FALSE, nrows = 1, colClasses = "character")
+  headers <- as.character(headers_df[1, ])
+  if (!("key" %in% headers)) return("Database file is missing the required 'key' column.")
+  df <- tryCatch({
+    readr::read_csv(filepath, col_types = readr::cols(.default = readr::col_character()), show_col_types = FALSE)
+  }, error = function(e) NULL)
+  if (is.null(df)) return("Failed to read the database CSV file.")
+  keys <- df[["key"]]
+  missing_keys <- which(is.na(keys) | trimws(keys) == "")
+  if (length(missing_keys) > 0) {
+    return(paste0("Database file contains missing or empty values in the 'key' column at row(s): ", paste(missing_keys + 1, collapse = ", "), "."))
+  }
+  duplicated_keys <- keys[duplicated(keys)]
+  if (length(duplicated_keys) > 0) {
+    unique_dupes <- unique(duplicated_keys)
+    return(paste0("Database file contains duplicate values in the 'key' column: ", paste(unique_dupes, collapse = ", "), "."))
+  }
+  return(TRUE)
+}
+
+#' @noRd
+validate_categories_xlsx <- function(filepath) {
+  if (!file.exists(filepath)) {
+    return("Categories file does not exist.")
+  }
+  
+  sheets <- tryCatch({
+    readxl::excel_sheets(filepath)
+  }, error = function(e) {
+    return(NULL)
+  })
+  
+  if (is.null(sheets) || length(sheets) == 0) {
+    return("Failed to read sheet names from the categories Excel file.")
+  }
+  
+  for (sheet_name in sheets) {
+    sheet_data <- tryCatch({
+      readxl::read_excel(filepath, sheet = sheet_name, col_names = FALSE, n_max = 2)
+    }, error = function(e) {
+      return(NULL)
+    })
+    
+    if (is.null(sheet_data) || nrow(sheet_data) == 0) {
+      return(paste0("Failed to read data from sheet '", sheet_name, "' or sheet is empty."))
+    }
+    
+    headers <- as.character(sheet_data[1, ])
+    
+    if (length(headers) == 0) {
+      return(paste0("Sheet '", sheet_name, "' has no columns."))
+    }
+    
+    invalid_header_idx <- which(is.na(headers) | trimws(headers) == "")
+    if (length(invalid_header_idx) > 0) {
+      return(paste0("Sheet '", sheet_name, "' contains columns with missing or empty header names at column(s): ", paste(invalid_header_idx, collapse = ", "), "."))
+    }
+    
+    if (nrow(sheet_data) < 2) {
+      return(paste0("Sheet '", sheet_name, "' is missing the field type row (Row 2)."))
+    }
+    
+    field_types <- as.character(sheet_data[2, ])
+    
+    allowed_types <- c(
+      "check_box_single",
+      "check_box_multiple",
+      "text_box",
+      "number",
+      "date",
+      "text_area"
+    )
+    
+    for (i in seq_along(field_types)) {
+      f_type <- field_types[i]
+      if (is.na(f_type) || trimws(f_type) == "") {
+        return(paste0("Sheet '", sheet_name, "' contains a missing or empty field type at column ", i, " ('", headers[i], "')."))
+      }
+      f_type_trimmed <- trimws(f_type)
+      if (!(f_type_trimmed %in% allowed_types)) {
+        return(paste0("Sheet '", sheet_name, "' contains an invalid field type '", f_type_trimmed, "' at column ", i, " ('", headers[i], "'). Allowed field types are: ", paste(allowed_types, collapse = ", "), "."))
+      }
+    }
+    
+    if (sheet_name %in% c("notes", "Notes")) {
+      if (length(headers) != 1) {
+        return(paste0("The '", sheet_name, "' sheet must contain exactly 1 column, but it has ", length(headers), " columns."))
+      }
+      if (headers[1] != "Notes") {
+        return(paste0("The '", sheet_name, "' sheet column header must be exactly 'Notes', but found '", headers[1], "'."))
+      }
+      if (trimws(field_types[1]) != "text_area") {
+        return(paste0("The '", sheet_name, "' sheet second row value must be 'text_area', but found '", field_types[1], "'."))
+      }
+    } else {
+      text_area_idx <- which(trimws(field_types) == "text_area")
+      if (length(text_area_idx) > 0) {
+        return(paste0("Sheet '", sheet_name, "' has 'text_area' at column(s): ", paste(text_area_idx, collapse = ", "), ". Only 'notes' or 'Notes' sheet is allowed to use 'text_area'."))
+      }
+    }
+  }
+  
+  return(TRUE)
 }
