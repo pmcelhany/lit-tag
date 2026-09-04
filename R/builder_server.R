@@ -337,6 +337,45 @@ builder_server <- function(id) {
       ) {
         showModal(modalDialog(title = "Select database and category files."))
       } else {
+        # Perform file format validation checks before loading data
+        enable_validation <- TRUE
+        if (exists("ENABLE_FILE_VALIDATION")) {
+          enable_validation <- ENABLE_FILE_VALIDATION
+        }
+        enable_validation <- getOption("lit_tag_enable_validation", enable_validation)
+
+        if (isTRUE(enable_validation)) {
+          # Validate Database CSV
+          db_val_res <- validate_database_csv(input$database_csv$datapath)
+          if (!isTRUE(db_val_res)) {
+            showModal(modalDialog(
+              title = "Database File Validation Error",
+              tags$div(
+                tags$p("The uploaded database CSV file failed validation check(s):"),
+                tags$p(style = "color: red; font-weight: bold;", db_val_res)
+              ),
+              easyClose = TRUE,
+              footer = modalButton("OK")
+            ))
+            return()
+          }
+
+          # Validate Categories Excel
+          cat_val_res <- validate_categories_xlsx(input$categories_excel$datapath)
+          if (!isTRUE(cat_val_res)) {
+            showModal(modalDialog(
+              title = "Categories File Validation Error",
+              tags$div(
+                tags$p("The uploaded categories Excel file failed validation check(s):"),
+                tags$p(style = "color: red; font-weight: bold;", cat_val_res)
+              ),
+              easyClose = TRUE,
+              footer = modalButton("OK")
+            ))
+            return()
+          }
+        }
+
         withProgress(message = "Loading data", value = 0, {
           ### Load category data ---------------------------------------
           incProgress(1 / 4)
