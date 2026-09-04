@@ -1,0 +1,55 @@
+# Feature: Add format validation checks for database (.csv) and categories (.xlsx) input files
+
+## Description
+
+Implement file format validation checks for user-uploaded Database CSV files and Categories Excel files before loading data in `lit-tag-builder`. If any validation criteria fail, display a clear modal popup error message to the user and halt the data loading process.
+
+------------------------------------------------------------------------
+
+## 🚨 CRITICAL SCOPE CONSTRAINTS
+
+-   **DO NOT** modify, refactor, or alter any existing application logic, operational behavior, or UI structure outside of implementing these specific file validation checks and error pop-ups.
+-   The behavior and output of the application must remain **100% unchanged** when processing valid input files.
+-   **Modify ONLY:**
+    -   `R/builder_server_utils.R` (Add utility validation functions)
+    -   `R/builder_server.R` (Integrate validation check prior to data ingest inside `observeEvent(input$load_data, ...)`)
+
+------------------------------------------------------------------------
+
+## Technical Requirements & Validation Rules
+
+### 1. Database File Validation (`.csv`)
+
+Validation checks must verify: \* **Header Presence:** Every column must have a valid header name. \* **Required Column:** Must contain a column named exactly `"key"`. \* **Key Uniqueness:** Every entry in the `"key"` column must be unique (no duplicates). \* **No Missing Keys:** No missing (`NA`, `NULL`, or empty `""`) values are allowed in the `"key"` column.
+
+### 2. Categories File Validation (`.xlsx`)
+
+Validation checks across all sheets/tabs must verify: \* **Header Presence:** Every column in every worksheet must have a header row (Row 1). \* **Allowed Field Types:** Row 2 of every column must contain exactly one of the following string values: \* `"check_box_single"` \* `"check_box_multiple"` \* `"text_box"` \* `"number"` \* `"date"` \* `"text_area"` \* **Notes Tab Constraints:** \* If a sheet named `"notes"` exists: \* It must contain **only 1 column**. \* The column header (Row 1) must be `"Notes"`. \* The second row value must be `"text_area"`. \* **Restricted `text_area` Usage:** No tab other than a `"notes"` tab is allowed to have `"text_area"` in the second row.
+
+### 3. Testing & Disabling Mechanism
+
+-   **Bypass Flag:** Include a simple, clearly documented global boolean flag (e.g., `ENABLE_FILE_VALIDATION <- TRUE` near the top of `builder_server_utils.R` or via `getOption("lit_tag_enable_validation", TRUE)`) so developers can easily switch validation off (`FALSE`) during manual testing or debug workflows.
+
+------------------------------------------------------------------------
+
+## Expected Behavior & Error Handling
+
+1.  Perform validation checks inside `observeEvent(input$load_data, ...)` in `R/builder_server.R` before starting `withProgress()` or reading data into `values$d_mcdr_tagged`.
+2.  Check the test/bypass flag first; if set to `FALSE`, skip all validation logic and proceed directly to normal loading.
+3.  If validation is active and any rule fails:
+    -   Do **NOT** attempt to process or load the data.
+    -   Display a `shiny::showModal()` containing clear, user-friendly details specifying the exact validation error encountered.
+    -   Terminate the load execution cleanly with `return()`.
+4.  Add clear, concise inline R comments explaining both the validation routines and how to toggle the testing flag.
+
+------------------------------------------------------------------------
+
+## Verification Protocol
+
+Before submitting, run these validation commands to confirm script integrity:
+
+``` r
+Rscript -e "devtools::load_all()"
+Rscript -e "devtools::document()"
+Rscript -e "invisible(lapply(list.files('R', pattern = '\\\\R\$', full.names = TRUE), parse))"
+```
