@@ -10,9 +10,9 @@ id = "36ea4ada-78c3-447e-8d3b-105fff332ecb"
 dashboard_url = "https://connect.fisheries.noaa.gov/connect/#/apps/36ea4ada-78c3-447e-8d3b-105fff332ecb"
 direct_url = "https://connect.fisheries.noaa.gov/content/36ea4ada-78c3-447e-8d3b-105fff332ecb/"
 logs_url = "https://connect.fisheries.noaa.gov/connect/#/apps/36ea4ada-78c3-447e-8d3b-105fff332ecb/logs"
-deployed_at = "2026-08-28T22:34:26.533Z"
-bundle_id = "6944"
-bundle_url = "https://connect.fisheries.noaa.gov/__api__/v1/content/36ea4ada-78c3-447e-8d3b-105fff332ecb/bundles/6944/download"
+deployed_at = "2026-09-24T18:20:38.843Z"
+bundle_id = "7385"
+bundle_url = "https://connect.fisheries.noaa.gov/__api__/v1/content/36ea4ada-78c3-447e-8d3b-105fff332ecb/bundles/7385/download"
 files = [
     ".posit/publish/deployments/deployment-OPEL.toml",
     ".posit/publish/lit-tag-UP0A.toml",
@@ -23,10 +23,24 @@ files = [
     "R/app_server.R",
     "R/app_ui.R",
     "R/builder_server.R",
+    "R/builder_server_tab_01_tag_edit.R",
+    "R/builder_server_tab_02_new_database.R",
+    "R/builder_server_tab_03_sync_zotero.R",
+    "R/builder_server_tab_04_database_maintenance.R",
+    "R/builder_server_tab_05_new_zotero.R",
+    "R/builder_server_tab_06_help.R",
+    "R/builder_server_utils.R",
     "R/builder_ui.R",
     "R/run_app.R",
     "R/utils_quarto.R",
     "R/viewer_server.R",
+    "R/viewer_server_tab_01_load_database.R",
+    "R/viewer_server_tab_02_search_database.R",
+    "R/viewer_server_tab_03_summary_plots.R",
+    "R/viewer_server_tab_04_summary_table.R",
+    "R/viewer_server_tab_05_reports.R",
+    "R/viewer_server_tab_06_help.R",
+    "R/viewer_server_utils.R",
     "R/viewer_ui.R",
     "app.R",
     "data/mcdr_example.zip",
