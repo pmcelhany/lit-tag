@@ -1,0 +1,26 @@
+# Bug: Fix filename parsing in `output$download_edits` when timestamp is preceded by a space
+
+## Scope Constraints (STRICT)
+
+-   **Target File:** `R/builder_server.R` (strictly limit code modification to the `filename = function() { ... }` function inside `output$download_edits`).
+-   **Context Limit:** Do NOT open, read, or inspect any other files in the project repository.
+-   **Modification Limit:** Do NOT modify any code outside of the target `filename` function in `R/builder_server.R`.
+
+## Issue Description
+
+Currently, if the uploaded CSV filename (`input$database_csv$name`) has a space between the base filename and the timestamp instead of an underscore (e.g., `my_database 2026_01_01_1200_UTC.csv`), the base filename is replaced with `"NA"`.
+
+## Expected Behavior
+
+1.  **Preserve Base Filename:** The `filename` function must keep the original base filename and not replace it with `"NA"`.
+2.  **Preserve Separator:** If the original file name used a space separator between the base filename and timestamp, append the new timestamp with a space separator as in the original.
+3.  **Timestamp Handling:** Ensure `input$remove_timestamps` correctly detects and removes timestamps regardless of whether they are separated by a space or an underscore.
+
+## Verification Protocol
+
+After making the minimal code edit inside the `filename` function, execute:
+
+``` bash
+Rscript -e "devtools::load_all()"
+Rscript -e "invisible(lapply(list.files('R', pattern = '\\.R$', full.names = TRUE), parse))"
+```
