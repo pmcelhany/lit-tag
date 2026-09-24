@@ -870,13 +870,18 @@ builder_server <- function(id) {
     output$download_edits <- downloadHandler(
       filename = function() {
         base_name <- str_remove(input$database_csv$name, ".csv")
-        if (input$remove_timestamps & str_detect(base_name, "_UTC")) {
-          n_ts_words <- (5 * str_count(base_name, "_UTC")) + 1
-          base_name <- word(base_name, 1, -n_ts_words, sep = "_")
+        has_space_sep <- str_detect(base_name, " [0-9]{4}_[0-9]{2}_[0-9]{2}_[0-9]{4}_UTC")
+        if (input$remove_timestamps) {
+          base_name <- str_remove_all(base_name, "[_ ][0-9]{4}_[0-9]{2}_[0-9]{2}_[0-9]{4}_UTC")
+        }
+        if (has_space_sep) {
+          sep_char <- " "
+        } else {
+          sep_char <- "_"
         }
         file_name <- paste(
           base_name,
-          "_",
+          sep_char,
           format(now("UTC"), "%Y_%m_%d_%H%M_UTC"),
           ".csv",
           sep = ""
