@@ -178,7 +178,8 @@ builder_server_tab_05_new_zotero <- function() {
         ))
       )
 
-      d_new_key_db <- values$d_old_key_db %>%
+      #d_new_key_db <- values$d_old_key_db %>%
+      d_new_key_db <- read_csv(input$database_nz_csv$datapath) %>%
         select(-key) %>%
         left_join(d_nkz, join_by(publication_year, author, title)) %>%
         relocate(key)
