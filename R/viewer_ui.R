@@ -13,15 +13,27 @@
 viewer_ui <- function(id) {
   ns <- NS(id)
 
+  golem_opts <- golem::get_golem_options()
+  app_title <- if (!is.null(golem_opts$app_title)) {
+    golem_opts$app_title
+  } else {
+    "Viewer"
+  }
+  app_icon <- if (!is.null(golem_opts$app_icon)) {
+    golem_opts$app_icon
+  } else {
+    "www/lit_tag_logo_1.png"
+  }
+
   page_navbar(
     tags$head(
-      tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
+      tags$link(rel = "stylesheet", type = "text/css", href = "www/styles.css")
     ),
 
     ## App title --------------------------------
     title = div(
-      img(src = "www/lit_tag_logo_1.png", height = "100px"),
-      h1("Viewer"),
+      img(src = app_icon, height = "100px"),
+      h1(app_title),
       HTML("&nbsp; &nbsp;"),
       style = "color: brown; display: flex; align-items: center;"
     ),
@@ -42,7 +54,7 @@ viewer_ui <- function(id) {
 
           ######
           # Always show load and download buttons
-          input_task_button(ns("load_data"), "Load database"),
+          uiOutput(ns("load_button")),
           div(style = "margin-bottom:20px"),
           downloadButton(ns("download_db"), "Download database"),
           div(style = "margin-bottom:20px"),

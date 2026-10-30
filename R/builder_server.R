@@ -342,7 +342,10 @@ builder_server <- function(id) {
         if (exists("ENABLE_FILE_VALIDATION")) {
           enable_validation <- ENABLE_FILE_VALIDATION
         }
-        enable_validation <- getOption("lit_tag_enable_validation", enable_validation)
+        enable_validation <- getOption(
+          "lit_tag_enable_validation",
+          enable_validation
+        )
 
         if (isTRUE(enable_validation)) {
           # Validate Database CSV
@@ -351,7 +354,9 @@ builder_server <- function(id) {
             showModal(modalDialog(
               title = "Database File Validation Error",
               tags$div(
-                tags$p("The uploaded database CSV file failed validation check(s):"),
+                tags$p(
+                  "The uploaded database CSV file failed validation check(s):"
+                ),
                 tags$p(style = "color: red; font-weight: bold;", db_val_res)
               ),
               easyClose = TRUE,
@@ -361,12 +366,16 @@ builder_server <- function(id) {
           }
 
           # Validate Categories Excel
-          cat_val_res <- validate_categories_xlsx(input$categories_excel$datapath)
+          cat_val_res <- validate_categories_xlsx(
+            input$categories_excel$datapath
+          )
           if (!isTRUE(cat_val_res)) {
             showModal(modalDialog(
               title = "Categories File Validation Error",
               tags$div(
-                tags$p("The uploaded categories Excel file failed validation check(s):"),
+                tags$p(
+                  "The uploaded categories Excel file failed validation check(s):"
+                ),
                 tags$p(style = "color: red; font-weight: bold;", cat_val_res)
               ),
               easyClose = TRUE,
@@ -589,7 +598,7 @@ builder_server <- function(id) {
 
           walk(
             values$active_cat_tabs,
-            ~ nav_remove(id = "tag_tabs", target = .x)
+            ~ nav_remove(id = "tag_tabs", target = .x, session = session)
           )
           #walk(values$active_tag_ui, ~ nav_remove(id = "my_navset", target = .x))
 
@@ -599,6 +608,7 @@ builder_server <- function(id) {
             map(\(x) {
               nav_insert(
                 id = "tag_tabs",
+                session = session,
                 nav_panel(
                   x,
                   card(
@@ -870,9 +880,15 @@ builder_server <- function(id) {
     output$download_edits <- downloadHandler(
       filename = function() {
         base_name <- str_remove(input$database_csv$name, ".csv")
-        has_space_sep <- str_detect(base_name, " [0-9]{4}_[0-9]{2}_[0-9]{2}_[0-9]{4}_UTC")
+        has_space_sep <- str_detect(
+          base_name,
+          " [0-9]{4}_[0-9]{2}_[0-9]{2}_[0-9]{4}_UTC"
+        )
         if (input$remove_timestamps) {
-          base_name <- str_remove_all(base_name, "[_ ][0-9]{4}_[0-9]{2}_[0-9]{2}_[0-9]{4}_UTC")
+          base_name <- str_remove_all(
+            base_name,
+            "[_ ][0-9]{4}_[0-9]{2}_[0-9]{2}_[0-9]{4}_UTC"
+          )
         }
         if (has_space_sep) {
           sep_char <- " "

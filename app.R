@@ -1,26 +1,15 @@
-# Launch the ShinyApp (Do not remove this comment)
+# Launch the ShinyApp
 # To deploy, run: rsconnect::deployApp()
-# Or use the blue button on top of this file
 
-# Disable auto-reload globally for this session
 options(shiny.autoreload = FALSE)
 
-# QUARTO_PATH  -----------------------
-# QUARTO_PATH must be set for reports
-
-# This is the path used the NFMS Posit server
-# There is some problem with using the most recent version on Quarto on NMFS server that causes a crash
-#Sys.setenv(QUARTO_PATH = "/opt/quarto/latest/bin/quarto")
-
-# Instead of using the quarto installed on the server,
-# the code points to a copy of quarto version 1.5.57 installed within the shiny app.
-# The version 1.5.57 is needed because the version 1.9.37 installed on the server causes the app to crash when rendering quarto
-# 1. Define paths
+# Configure Quarto for report generation
+# We use a bundled version of Quarto (1.5.57) to ensure compatibility on the NMFS Posit server,
+# as newer versions (e.g. 1.9.37) have caused crashes.
 quarto_base_dir <- file.path(getwd(), "quarto-1.5.57", "bin")
 local_quarto <- file.path(quarto_base_dir, "quarto")
-# 2. BULK FIX ALL PERMISSIONS:
-# This recursively finds EVERY file inside the quarto bin folder
-# (including deno, sass, pandoc, etc.) and makes them executable on the linex server.
+
+# Ensure all bundled binaries have executable permissions when running on Linux servers
 if (dir.exists(quarto_base_dir)) {
   all_binaries <- list.files(
     quarto_base_dir,
@@ -29,18 +18,30 @@ if (dir.exists(quarto_base_dir)) {
   )
   Sys.chmod(all_binaries, mode = "0755")
 }
-# 3. Point R to the local version
+
+# Point R to the local bundled version of Quarto
 Sys.setenv(QUARTO_PATH = local_quarto)
 
-# This is the path on Paul's mac and can be used to set the env variable
-# for rendering quarto on the local machine.
-#Sys.setenv(QUARTO_PATH = "/usr/local/bin/quarto")
-
+# Load application package
 pkgload::load_all(export_all = TRUE, helpers = FALSE, attach_testthat = FALSE)
 options("golem.app.prod" = TRUE)
 
-# run the app
-run_app()
+# Run the app.
+#
+# To create a topic-specific app (pre-loaded database/categories):
+# Provide BOTH database_file and categories_file paths. This skips the builder/viewer
+# selection and automatically loads the viewer with the specified data and branding.
+# You can place the specific .csv, .xlsx, and image files inside the app's directory.
+# (If you provide only one file, the app will show an error and fall back to the standard app).
+#
+# To create a standard app (where the user uploads their own files):
+# Simply comment out the assignments inside run_app().
+run_app(
+  # database_file = "data/mcdr-x-fisheries-lit-tag-database.csv",
+  # categories_file = "data/mcdr-x-fisheries-lit-tag-categories.xlsx",
+  # app_title = "mCDRxFisheries Literature Database",
+  # app_icon = "www/crab2.jpg"
+)
 
 # To run the app with updated resources (i.e. contents of of inst/app/www) during development,
 # run golem::run_dev() in the console
