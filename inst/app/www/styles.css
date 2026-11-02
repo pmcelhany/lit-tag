@@ -38,6 +38,9 @@
 }
 
 /* accordion header color to match card headers */
+.accordion-header {
+  background-color: #6A5ACD !important;
+}
 .accordion-button {
   background-color: #6A5ACD !important;
   color: white !important;
