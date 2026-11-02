@@ -20,23 +20,29 @@ viewer_server_tab_04_summary_table <- function() {
       }
 
       req(d)
-      d
+
+      esc_cols <- which(names(d) != "title")
+
+      DT::datatable(
+        d,
+        selection = "none",
+        extensions = 'ColReorder',
+        callback = JS(newjs),
+        options = list(
+          dom = "t",
+          pageLength = 10000,
+          stateSave = TRUE,
+          stateDuration = 0,
+          order = list(),
+          columnDefs = list(list(width = '200px', targets = "_all")),
+          scrollX = TRUE,
+          scrollY = TRUE,
+          colReorder = TRUE
+        ),
+        rownames = FALSE,
+        escape = esc_cols
+      )
     },
-    selection = "none",
-    extensions = 'ColReorder',
-    callback = JS(newjs),
-    options = list(
-      dom = "t",
-      pageLength = 10000,
-      stateSave = TRUE,
-      stateDuration = 0,
-      order = list(),
-      columnDefs = list(list(width = '200px', targets = "_all")),
-      scrollX = TRUE,
-      scrollY = TRUE,
-      colReorder = TRUE
-    ),
-    rownames = FALSE,
     server = FALSE
   )
 

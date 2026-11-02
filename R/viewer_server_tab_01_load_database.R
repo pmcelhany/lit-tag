@@ -222,6 +222,7 @@ viewer_server_tab_01_load_database <- function() {
             select(author, publication_year, title)
         },
         selection = "none",
+        escape = -4,
         options = list(
           dom = "t",
           pageLength = 10000,

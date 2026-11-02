@@ -15,6 +15,7 @@ viewer_server_tab_02_search_database <- function() {
         select(all_of(table_vars()))
     },
     selection = "single",
+    escape = -4,
     fillContainer = TRUE,
     options = list(
       dom = "t",
