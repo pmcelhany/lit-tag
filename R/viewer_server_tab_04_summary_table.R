@@ -66,4 +66,28 @@ viewer_server_tab_04_summary_table <- function() {
       write.csv(d, file, row.names = FALSE)
     }
   )
+
+  ### Download summary RIS ----------------------------
+  output$download_ris_summary <- downloadHandler(
+    filename = function() {
+      paste(input$summary_download_name, ".ris", sep = "")
+    },
+    content = function(file) {
+      d <- NULL
+      if (input$summary_data == "Full dataset") {
+        d <- values$d_mcdr_tagged
+      } else {
+        d <- values$d_mcdr_filtered
+      }
+
+      req(d)
+      withProgress(message = "Generating RIS file", value = 0, {
+        incProgress(1 / 3)
+        d_ris <- create_ris_dataframe(d)
+        incProgress(2 / 3)
+        write_csv(d_ris, file, quote = "none")
+        incProgress(1)
+      })
+    }
+  )
 }

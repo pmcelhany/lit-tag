@@ -447,4 +447,20 @@ viewer_server_tab_01_load_database <- function() {
       write_xlsx(values$categories_with_meta, file)
     }
   )
+
+  output$download_ris_load <- downloadHandler(
+    filename = function() {
+      "lit-tag-database.ris"
+    },
+    content = function(file) {
+      req(values$d_mcdr_tagged)
+      withProgress(message = "Generating RIS file", value = 0, {
+        incProgress(1 / 3)
+        d_ris <- create_ris_dataframe(values$d_mcdr_tagged)
+        incProgress(2 / 3)
+        write_csv(d_ris, file, quote = "none")
+        incProgress(1)
+      })
+    }
+  )
 }

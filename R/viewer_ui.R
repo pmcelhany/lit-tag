@@ -60,7 +60,10 @@ viewer_ui <- function(id) {
           div(style = "margin-bottom:20px"),
           downloadButton(ns("download_tag_cat"), "Download tag categories"),
           div(style = "margin-bottom:20px"),
-          uiOutput(ns("download_citation"))
+          downloadButton(
+            ns("download_ris_load"),
+            "Download citation file (.ris)"
+          )
         ),
         mainPanel(width = 9, DTOutput(ns("table_full")))
       )
@@ -249,6 +252,11 @@ viewer_ui <- function(id) {
           downloadButton(
             ns("download_summary"),
             "Download summary table (.csv)"
+          ),
+          div(style = "margin-bottom:20px"),
+          downloadButton(
+            ns("download_ris_summary"),
+            "Download citation file (.ris)"
           ),
           div(style = "margin-bottom:20px"),
           card(
