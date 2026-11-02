@@ -450,7 +450,16 @@ viewer_server_tab_01_load_database <- function() {
 
   output$download_ris_load <- downloadHandler(
     filename = function() {
-      "lit-tag-database.ris"
+      db_name <- "lit-tag-database"
+      if (!is.null(input$database_csv$name)) {
+        db_name <- str_remove(input$database_csv$name, "\\.csv$")
+      } else if (!is.null(golem::get_golem_options()$database_file)) {
+        db_name <- str_remove(
+          basename(golem::get_golem_options()$database_file),
+          "\\.csv$"
+        )
+      }
+      paste0(db_name, ".ris")
     },
     content = function(file) {
       req(values$d_mcdr_tagged)
