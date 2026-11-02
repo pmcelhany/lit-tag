@@ -208,11 +208,10 @@ viewer_server_tab_02_search_database <- function() {
       for (i in 1:nrow(d_criteria_paper_tag)) {
         choices <- NA
         if (!is.na(d_criteria_paper_tag$value[i])) {
-          choices <- paste(
-            "\\b",
+          choices <- paste0(
+            "(^|;)\\s*\\Q",
             str_trim(str_split_1(d_criteria_paper_tag$value[i], ";")),
-            "\\b",
-            sep = ""
+            "\\E\\s*(;|$)"
           )
         }
 
