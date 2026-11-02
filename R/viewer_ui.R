@@ -32,7 +32,10 @@ viewer_ui <- function(id) {
 
     ## App title --------------------------------
     title = div(
-      img(src = app_icon, style = "max-height: 8vh; min-height: 50px; object-fit: contain;"),
+      img(
+        src = app_icon,
+        style = "max-height: 8vh; min-height: 50px; object-fit: contain;"
+      ),
       h1(app_title),
       HTML("&nbsp; &nbsp;"),
       style = "color: brown; display: flex; align-items: center;"
@@ -42,7 +45,8 @@ viewer_ui <- function(id) {
     nav_panel(
       h2("Load database"),
       layout_sidebar(
-        sidebar = sidebar(# If in app data, show db info after loading
+        sidebar = sidebar(
+          # If in app data, show db info after loading
           uiOutput(ns("in_app_db_info")),
 
           # If user data, show file choosers
@@ -70,7 +74,11 @@ viewer_ui <- function(id) {
       h2("Search database"),
       #useWaiter(),
       layout_columns(
-        col_widths = breakpoints(md = c(12, 12, 12), lg = c(6, 6, 12), xl = c(4, 4, 4)),
+        col_widths = breakpoints(
+          md = c(12, 12, 12),
+          lg = c(6, 6, 12),
+          xl = c(4, 4, 4)
+        ),
         ### Left panel: table of papers ---------------------
         card(
           card_header(h3("Paper table (filtered)")),
@@ -108,22 +116,25 @@ viewer_ui <- function(id) {
           ),
           card(
             card_header(h4("Paper criteria")),
-            textInput(ns("author"), "Author"),
-            airYearpickerInput(
-              ns("years"),
-              "Years",
-              range = TRUE,
-              minDate = "1960-01-01",
-              maxDate = "2026-01-01"
-            ),
-            textInput(ns("title"), "Title"),
-            textInput(ns("abstract"), "Abstract")
+            layout_column_wrap(
+              width = "200px",
+              textInput(ns("author"), "Author"),
+              airYearpickerInput(
+                ns("years"),
+                "Years",
+                range = TRUE,
+                minDate = "1960-01-01",
+                maxDate = "2026-01-01"
+              ),
+              textInput(ns("title"), "Title"),
+              textInput(ns("abstract"), "Abstract")
+            )
           ),
-          card(card_header(h4("Notes criteria")), uiOutput(ns("notes"))),
           card(
             card_header(h4("Tag criteria")),
             navset_pill(id = ns("tag_tabs"))
           ),
+          card(card_header(h4("Notes criteria")), uiOutput(ns("notes"))),
           textInput(
             ns("custom_search"),
             "Advanced custom search (R condition syntax)",
@@ -152,7 +163,8 @@ viewer_ui <- function(id) {
     nav_panel(
       h2("Summary plots"),
       layout_sidebar(
-        sidebar = sidebar(h3("Plot Variables"),
+        sidebar = sidebar(
+          h3("Plot Variables"),
           radioButtons(
             ns("plot_data"),
             "Plot data",
@@ -216,14 +228,16 @@ viewer_ui <- function(id) {
             DTOutput(ns("criteria_table_plot"))
           )
         ),
-        h3("Plot"), plotOutput(ns("plot"))
+        h3("Plot"),
+        plotOutput(ns("plot"))
       )
     ),
     ## Summary table panel ---------------------------
     nav_panel(
       h2("Summary table"),
       layout_sidebar(
-        sidebar = sidebar(radioButtons(
+        sidebar = sidebar(
+          radioButtons(
             ns("summary_data"),
             "Summary data",
             choices = c("Full dataset", "Filtered dataset"),
@@ -264,7 +278,8 @@ viewer_ui <- function(id) {
     nav_panel(
       h2("Reports"),
       layout_sidebar(
-        sidebar = sidebar(textInput(ns("report_title"), "Report title:", value = "untitled"),
+        sidebar = sidebar(
+          textInput(ns("report_title"), "Report title:", value = "untitled"),
           textInput(ns("report_author"), "Report author:", value = ""),
 
           radioButtons(
@@ -331,13 +346,14 @@ viewer_ui <- function(id) {
         nav_panel(
           "example files",
           layout_sidebar(
-        sidebar = sidebar(# downloadButton(ns("unicorn_example"),
+            sidebar = sidebar(
+              # downloadButton(ns("unicorn_example"),
               #                "Unicorn db example files"),
               # div(class = "mb-3"),
               # div(class = "mb-3"),
               downloadButton(ns("mcdr_example"), "mCDR db example files")
             )
-      )
+          )
         )
       )
     )
