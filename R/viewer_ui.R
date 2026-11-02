@@ -114,27 +114,34 @@ viewer_ui <- function(id) {
             multiple = TRUE,
             disableOptionGroupCheckbox = TRUE
           ),
-          card(
-            card_header(h4("Paper criteria")),
-            layout_column_wrap(
-              width = "200px",
-              textInput(ns("author"), "Author"),
-              airYearpickerInput(
-                ns("years"),
-                "Years",
-                range = TRUE,
-                minDate = "1960-01-01",
-                maxDate = "2026-01-01"
-              ),
-              textInput(ns("title"), "Title"),
-              textInput(ns("abstract"), "Abstract")
+          accordion(
+            multiple = TRUE,
+            open = FALSE,
+            accordion_panel(
+              "Paper criteria",
+              layout_column_wrap(
+                width = "200px",
+                textInput(ns("author"), "Author"),
+                airYearpickerInput(
+                  ns("years"),
+                  "Years",
+                  range = TRUE,
+                  minDate = "1960-01-01",
+                  maxDate = "2026-01-01"
+                ),
+                textInput(ns("title"), "Title"),
+                textInput(ns("abstract"), "Abstract")
+              )
+            ),
+            accordion_panel(
+              "Tag criteria",
+              navset_pill(id = ns("tag_tabs"))
+            ),
+            accordion_panel(
+              "Notes criteria",
+              uiOutput(ns("notes"))
             )
           ),
-          card(
-            card_header(h4("Tag criteria")),
-            navset_pill(id = ns("tag_tabs"))
-          ),
-          card(card_header(h4("Notes criteria")), uiOutput(ns("notes"))),
           textInput(
             ns("custom_search"),
             "Advanced custom search (R condition syntax)",
