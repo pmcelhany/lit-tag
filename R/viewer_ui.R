@@ -27,7 +27,11 @@ viewer_ui <- function(id) {
 
   page_navbar(
     tags$head(
-      tags$link(rel = "stylesheet", type = "text/css", href = "www/styles.css")
+      tags$link(
+        rel = "stylesheet",
+        type = "text/css",
+        href = "www/styles.css?v=2"
+      )
     ),
 
     ## App title --------------------------------
