@@ -39,8 +39,8 @@ options("golem.app.prod" = TRUE)
 run_app(
   # database_file = "data/mcdr-x-fisheries-lit-tag-database.csv",
   # categories_file = "data/mcdr-x-fisheries-lit-tag-categories.xlsx",
-  # app_title = "mCDRxFisheries Literature Database",
-  # app_icon = "www/crab2.jpg"
+  # app_title = shiny::HTML("mCDRxFisheries<br/>Literature<br/>Database"),
+  # app_icon = "www/mcdr_x_fisheries_1.jpg"
 )
 
 # To run the app with updated resources (i.e. contents of of inst/app/www) during development,
