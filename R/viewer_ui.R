@@ -32,7 +32,7 @@ viewer_ui <- function(id) {
 
     ## App title --------------------------------
     title = div(
-      img(src = app_icon, height = "100px"),
+      img(src = app_icon, style = "max-height: 8vh; min-height: 50px; object-fit: contain;"),
       h1(app_title),
       HTML("&nbsp; &nbsp;"),
       style = "color: brown; display: flex; align-items: center;"
@@ -41,11 +41,8 @@ viewer_ui <- function(id) {
     ## Load database panel -------------------------
     nav_panel(
       h2("Load database"),
-      sidebarLayout(
-        sidebarPanel(
-          width = 3,
-
-          # If in app data, show db info after loading
+      layout_sidebar(
+        sidebar = sidebar(# If in app data, show db info after loading
           uiOutput(ns("in_app_db_info")),
 
           # If user data, show file choosers
@@ -55,17 +52,17 @@ viewer_ui <- function(id) {
           ######
           # Always show load and download buttons
           uiOutput(ns("load_button")),
-          div(style = "margin-bottom:20px"),
+          div(class = "mb-4"),
           downloadButton(ns("download_db"), "Download database"),
-          div(style = "margin-bottom:20px"),
+          div(class = "mb-4"),
           downloadButton(ns("download_tag_cat"), "Download tag categories"),
-          div(style = "margin-bottom:20px"),
+          div(class = "mb-4"),
           downloadButton(
             ns("download_ris_load"),
             "Download citation file (.ris)"
           )
         ),
-        mainPanel(width = 9, DTOutput(ns("table_full")))
+        DTOutput(ns("table_full"))
       )
     ),
     ## Search db panel ---------------------
@@ -73,7 +70,7 @@ viewer_ui <- function(id) {
       h2("Search database"),
       #useWaiter(),
       layout_columns(
-        col_widths = c(4, 4, 4),
+        col_widths = breakpoints(md = c(12, 12, 12), lg = c(6, 6, 12), xl = c(4, 4, 4)),
         ### Left panel: table of papers ---------------------
         card(
           card_header(h3("Paper table (filtered)")),
@@ -154,10 +151,8 @@ viewer_ui <- function(id) {
     ## Summary graphs panel ---------------------
     nav_panel(
       h2("Summary plots"),
-      sidebarLayout(
-        sidebarPanel(
-          width = 3,
-          h3("Plot Variables"),
+      layout_sidebar(
+        sidebar = sidebar(h3("Plot Variables"),
           radioButtons(
             ns("plot_data"),
             "Plot data",
@@ -214,23 +209,21 @@ viewer_ui <- function(id) {
             selected = "None"
           ),
           downloadButton(ns("download_plot_data"), "Download plot data"),
-          HTML("<br>"),
-          HTML("<br>"),
+          div(class = "mb-3"),
+          div(class = "mb-3"),
           card(
             card_header("Selection criteria"),
             DTOutput(ns("criteria_table_plot"))
           )
         ),
-        mainPanel(width = 9, h3("Plot"), plotOutput(ns("plot")))
+        h3("Plot"), plotOutput(ns("plot"))
       )
     ),
     ## Summary table panel ---------------------------
     nav_panel(
       h2("Summary table"),
-      sidebarLayout(
-        sidebarPanel(
-          width = 3,
-          radioButtons(
+      layout_sidebar(
+        sidebar = sidebar(radioButtons(
             ns("summary_data"),
             "Summary data",
             choices = c("Full dataset", "Filtered dataset"),
@@ -253,27 +246,25 @@ viewer_ui <- function(id) {
             ns("download_summary"),
             "Download summary table (.csv)"
           ),
-          div(style = "margin-bottom:20px"),
+          div(class = "mb-4"),
           downloadButton(
             ns("download_ris_summary"),
             "Download citation file (.ris)"
           ),
-          div(style = "margin-bottom:20px"),
+          div(class = "mb-4"),
           card(
             card_header("Selection criteria"),
             DTOutput(ns("criteria_table_summary"))
           )
         ),
-        mainPanel(width = 9, DTOutput(ns("summary_table")))
+        DTOutput(ns("summary_table"))
       )
     ),
     ## Reports panel --------------------------
     nav_panel(
       h2("Reports"),
-      sidebarLayout(
-        sidebarPanel(
-          width = 3,
-          textInput(ns("report_title"), "Report title:", value = "untitled"),
+      layout_sidebar(
+        sidebar = sidebar(textInput(ns("report_title"), "Report title:", value = "untitled"),
           textInput(ns("report_author"), "Report author:", value = ""),
 
           radioButtons(
@@ -323,7 +314,7 @@ viewer_ui <- function(id) {
           ),
           downloadButton(ns("download_report"), "Download report")
         ),
-        mainPanel(width = 9, htmlOutput(ns("report"), style = "width: 100%;"))
+        htmlOutput(ns("report"), style = "width: 100%;")
       )
     ),
     ## Help panel ------------------------
@@ -339,17 +330,14 @@ viewer_ui <- function(id) {
         ),
         nav_panel(
           "example files",
-          sidebarLayout(
-            sidebarPanel(
-              width = 3,
-              # downloadButton(ns("unicorn_example"),
+          layout_sidebar(
+        sidebar = sidebar(# downloadButton(ns("unicorn_example"),
               #                "Unicorn db example files"),
-              # HTML("<br>"),
-              # HTML("<br>"),
+              # div(class = "mb-3"),
+              # div(class = "mb-3"),
               downloadButton(ns("mcdr_example"), "mCDR db example files")
-            ),
-            mainPanel(width = 9)
-          )
+            )
+      )
         )
       )
     )

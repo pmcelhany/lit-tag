@@ -16,7 +16,7 @@ builder_ui <- function(id) {
   page_navbar(
     ## App title --------------------------------
     title = div(
-      img(src = "www/lit_tag_logo_1.png", height = "100px"),
+      img(src = "www/lit_tag_logo_1.png", style = "max-height: 8vh; min-height: 50px; object-fit: contain;"),
       h1("Builder"),
       HTML("&nbsp; &nbsp;"),
       style = "color: brown; display: flex; align-items: center;"
@@ -34,7 +34,7 @@ builder_ui <- function(id) {
       ),
       useWaiter(),
       layout_columns(
-        col_widths = c(4, 4, 4),
+        col_widths = breakpoints(md = c(12, 12, 12), lg = c(6, 6, 12), xl = c(4, 4, 4)),
         ### Left panel: database path and table of papers ---------------------
         card(
           card_header(h3("Paper table")),
@@ -105,12 +105,10 @@ builder_ui <- function(id) {
     ## New database panel -------------------------
     nav_panel(
       h2("New database"),
-      sidebarLayout(
-        sidebarPanel(
-          width = 3,
-          h3("Create a new lit-tag database"),
-          HTML("<br>"),
-          HTML("<br>"),
+      layout_sidebar(
+        sidebar = sidebar(h3("Create a new lit-tag database"),
+          div(class = "mb-3"),
+          div(class = "mb-3"),
           fileInput(
             ns("new_zotero_csv"),
             h4("Zotero CSV File"),
@@ -126,21 +124,16 @@ builder_ui <- function(id) {
           textInput(ns("new_db_name"), "New database name", value = "Untitled"),
           downloadButton(ns("new_database"), "Download new database")
         ),
-        mainPanel(
-          width = 9,
-          h3(textOutput(ns("nrow_new_db"))),
+        h3(textOutput(ns("nrow_new_db"))),
           h3(textOutput(ns("n_new_tags")))
-        )
       )
     ),
 
     ## Sync zotero panel ---------------------
     nav_panel(
       h2("Sync Zotero"),
-      sidebarLayout(
-        sidebarPanel(
-          width = 3,
-          fileInput(
+      layout_sidebar(
+        sidebar = sidebar(fileInput(
             ns("sync_database_csv"),
             h4("Database to sync"),
             multiple = FALSE,
@@ -163,14 +156,11 @@ builder_ui <- function(id) {
             "Update database from Zotero"
           )
         ),
-        mainPanel(
-          width = 9,
-          h4(textOutput(ns("n_init_db"))),
+        h4(textOutput(ns("n_init_db"))),
           h4(textOutput(ns("n_zotero"))),
           h4(textOutput(ns("n_new_keys"))),
           h4(textOutput(ns("n_old_key"))),
           h4(textOutput(ns("n_new_db")))
-        )
       )
     ),
     ## Database maintenance panel --------------------------------
@@ -181,37 +171,33 @@ builder_ui <- function(id) {
         ### Database contents ------------------------------------------
         tabPanel(
           "Database contents",
-          sidebarLayout(
-            sidebarPanel(
-              width = 3,
-              h3(
+          layout_sidebar(
+        sidebar = sidebar(h3(
                 "This tab shows all contents of db, not just options from categories file"
               ),
-              HTML("<br>"),
+              div(class = "mb-3"),
               fileInput(
                 ns("content_db"),
                 h4("Database for evaluation"),
                 multiple = FALSE,
                 accept = c(".csv")
               ),
-              HTML("<br>"),
+              div(class = "mb-3"),
               h4("Click on table row to see unique tag values"),
-              HTML("<br>"),
+              div(class = "mb-3"),
               htmlOutput(ns("n_papers")),
-              HTML("<br>"),
+              div(class = "mb-3"),
               HTML("<b>Noted fields</b>"),
               DT::DTOutput(ns("db_notes_table"))
             ),
-            mainPanel(width = 9, DT::DTOutput(ns("db_tags_table")))
-          )
+        DT::DTOutput(ns("db_tags_table"))
+      )
         ),
         ### Compare databases -------------------------
         tabPanel(
           "Compare databases",
-          sidebarLayout(
-            sidebarPanel(
-              width = 3,
-              fileInput(
+          layout_sidebar(
+        sidebar = sidebar(fileInput(
                 ns("compare_db_1"),
                 h4("Database to compare #1"),
                 multiple = FALSE,
@@ -227,14 +213,11 @@ builder_ui <- function(id) {
               htmlOutput(ns("n_papers_compare_1")),
               htmlOutput(ns("n_papers_compare_2"))
             ),
-            mainPanel(
-              width = 9,
-              h3("Papers in db #1, but not in db #2"),
+        h3("Papers in db #1, but not in db #2"),
               DTOutput(ns("papers_in_1_not_2")),
               h3("Papers in db #2, but not in db #1"),
               DTOutput(ns("papers_in_2_not_1"))
-            )
-          )
+      )
         ),
         ### Replace/delete data -----------------
         tabPanel(
@@ -320,10 +303,8 @@ builder_ui <- function(id) {
         ### Combine databases -----------------
         tabPanel(
           "Combine databases",
-          sidebarLayout(
-            sidebarPanel(
-              width = 3,
-              fileInput(
+          layout_sidebar(
+        sidebar = sidebar(fileInput(
                 ns("combine_dbs"),
                 h4("Databases to combine"),
                 multiple = TRUE,
@@ -345,8 +326,8 @@ builder_ui <- function(id) {
                 "Download combined database"
               )
             ),
-            mainPanel(width = 9, h3(htmlOutput(ns("n_combined"))))
-          )
+        h3(htmlOutput(ns("n_combined")))
+      )
         )
       )
     ),
@@ -354,10 +335,8 @@ builder_ui <- function(id) {
     ## New zotero panel ---------------------
     nav_panel(
       h2("New Zotero"),
-      sidebarLayout(
-        sidebarPanel(
-          width = 3,
-          fileInput(
+      layout_sidebar(
+        sidebar = sidebar(fileInput(
             ns("database_nz_csv"),
             h4("Old Keys Database File"),
             multiple = FALSE,
@@ -370,8 +349,8 @@ builder_ui <- function(id) {
             selected = "All references"
           ),
           downloadButton(ns("generate_ris"), "Generate RIS"),
-          HTML("<br>"),
-          HTML("<br>"),
+          div(class = "mb-3"),
+          div(class = "mb-3"),
           fileInput(
             ns("database_knz_csv"),
             h4("New Keys Zotero File"),
@@ -383,14 +362,11 @@ builder_ui <- function(id) {
             "Generate new keys database"
           )
         ),
-        mainPanel(
-          width = 9,
-          textOutput(ns("n_old_key_db")),
+        textOutput(ns("n_old_key_db")),
           textOutput(ns("ris_generated")),
           textOutput(ns("n_new_key_zotero")),
           textOutput(ns("n_new_key_db")),
           textOutput(ns("n_new_key_db_missing"))
-        )
       )
     ),
 
@@ -407,16 +383,13 @@ builder_ui <- function(id) {
         ),
         nav_panel(
           "example files",
-          sidebarLayout(
-            sidebarPanel(
-              width = 3,
-              downloadButton(ns("unicorn_example"), "Unicorn db example files"),
-              HTML("<br>"),
-              HTML("<br>"),
+          layout_sidebar(
+        sidebar = sidebar(downloadButton(ns("unicorn_example"), "Unicorn db example files"),
+              div(class = "mb-3"),
+              div(class = "mb-3"),
               downloadButton(ns("mcdr_example"), "mCDR db example files")
-            ),
-            mainPanel(width = 9)
-          )
+            )
+      )
         )
       )
     )
