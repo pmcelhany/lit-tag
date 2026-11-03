@@ -618,9 +618,14 @@ builder_server <- function(id) {
           ### Add notes input to ui  ------------------------------------
           if (!is.null(notes_variables)) {
             output$notes <- renderUI({
-              notes_variables %>%
-                map(\(x) {
-                  textAreaInput(ns(x), x, width = 600, height = 200)
+              categories$notes %>%
+                purrr::pmap(\(notes, cat_label, ...) {
+                  textAreaInput(
+                    ns(notes),
+                    label = cat_label,
+                    width = 600,
+                    height = 200
+                  )
                 })
             })
           } else {

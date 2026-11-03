@@ -63,6 +63,20 @@ viewer_server_tab_01_load_database <- function() {
       values$categories <- values$categories_with_meta %>%
         map(\(x) category_remove_meta_fun(x))
 
+      if ("notes" %in% names(values$categories)) {
+        if ("notes" %in% names(values$categories$notes)) {
+          values$categories$notes <- values$categories$notes %>%
+            mutate(
+              cat_label = notes,
+              notes = if_else(
+                is.na(notes),
+                NA_character_,
+                janitor::make_clean_names(notes)
+              )
+            )
+        }
+      }
+
       # Set has_notes
       if ("notes" %in% row.names(values$d_category_meta)) {
         values$has_notes <- TRUE
@@ -412,8 +426,10 @@ viewer_server_tab_01_load_database <- function() {
       ### Add notes input to ui  ------------------------------------
       if (!is.null(values$notes_variables)) {
         output$notes <- renderUI({
-          values$notes_variables %>%
-            map(\(x) textInput(ns(x), x))
+          values$categories$notes %>%
+            purrr::pmap(\(notes, cat_label, ...) {
+              textInput(ns(notes), label = cat_label)
+            })
         })
       } else {
         output$notes <- renderUI({
