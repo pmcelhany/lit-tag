@@ -10,9 +10,9 @@ id = "36ea4ada-78c3-447e-8d3b-105fff332ecb"
 dashboard_url = "https://connect.fisheries.noaa.gov/connect/#/apps/36ea4ada-78c3-447e-8d3b-105fff332ecb"
 direct_url = "https://connect.fisheries.noaa.gov/content/36ea4ada-78c3-447e-8d3b-105fff332ecb/"
 logs_url = "https://connect.fisheries.noaa.gov/connect/#/apps/36ea4ada-78c3-447e-8d3b-105fff332ecb/logs"
-deployed_at = "2026-09-29T19:10:39.176Z"
-bundle_id = "7449"
-bundle_url = "https://connect.fisheries.noaa.gov/__api__/v1/content/36ea4ada-78c3-447e-8d3b-105fff332ecb/bundles/7449/download"
+deployed_at = "2026-11-03T15:08:58.457Z"
+bundle_id = "7768"
+bundle_url = "https://connect.fisheries.noaa.gov/__api__/v1/content/36ea4ada-78c3-447e-8d3b-105fff332ecb/bundles/7768/download"
 files = [
     ".posit/publish/deployments/deployment-OPEL.toml",
     ".posit/publish/lit-tag-UP0A.toml",
@@ -33,6 +33,7 @@ files = [
     "R/builder_ui.R",
     "R/run_app.R",
     "R/utils_quarto.R",
+    "R/utils_ris.R",
     "R/viewer_server.R",
     "R/viewer_server_tab_01_load_database.R",
     "R/viewer_server_tab_02_search_database.R",
@@ -43,13 +44,17 @@ files = [
     "R/viewer_server_utils.R",
     "R/viewer_ui.R",
     "app.R",
+    "data/mcdr-x-fisheries-lit-tag-categories.xlsx",
+    "data/mcdr-x-fisheries-lit-tag-database.csv",
     "data/mcdr_example.zip",
     "data/unicorn_example.zip",
     "data/zotero_fields.csv",
+    "inst/app/www/crab2.jpg",
     "inst/app/www/favicon.ico",
     "inst/app/www/lit_tag_builder_guide.pdf",
     "inst/app/www/lit_tag_logo_1.png",
     "inst/app/www/lit_tag_viewer_guide.pdf",
+    "inst/app/www/mcdr_x_fisheries_1.jpg",
     "inst/app/www/styles.css",
     "inst/golem-config.yml",
     "inst/user_guides_raw/.gitignore",
@@ -87,6 +92,7 @@ files = [
     "inst/user_guides_raw/images_viewer_guide/media/search_tab.png",
     "inst/user_guides_raw/images_viewer_guide/media/summary_table.png",
     "inst/user_guides_raw/lit_tag_builder_guide.qmd",
+    "inst/user_guides_raw/lit_tag_viewer_guide.pdf",
     "inst/user_guides_raw/lit_tag_viewer_guide.qmd",
     "quarto-1.5.57/bin/quarto",
     "quarto-1.5.57/bin/quarto.js",

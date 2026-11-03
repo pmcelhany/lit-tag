@@ -37,10 +37,10 @@ options("golem.app.prod" = TRUE)
 # To create a standard app (where the user uploads their own files):
 # Simply comment out the assignments inside run_app().
 run_app(
-  # database_file = "data/mcdr-x-fisheries-lit-tag-database.csv",
-  # categories_file = "data/mcdr-x-fisheries-lit-tag-categories.xlsx",
-  # app_title = shiny::HTML("mCDRxFisheries<br/>Literature<br/>Database"),
-  # app_icon = "www/mcdr_x_fisheries_1.jpg"
+  database_file = "data/mcdr-x-fisheries-lit-tag-database.csv",
+  categories_file = "data/mcdr-x-fisheries-lit-tag-categories.xlsx",
+  app_title = shiny::HTML("mCDRxFisheries<br/>Literature<br/>Database"),
+  app_icon = "www/mcdr_x_fisheries_1.jpg"
 )
 
 # To run the app with updated resources (i.e. contents of of inst/app/www) during development,
