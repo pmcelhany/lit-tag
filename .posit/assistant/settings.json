@@ -1,0 +1,17 @@
+{
+  "permission": {
+    "executeCode": {
+      "*": "allow"
+    },
+    "bash": {
+      "cat *": "allow",
+      "sed *": "allow",
+      "mkdir *": "allow",
+      "git checkout *": "allow"
+    },
+    "edit": {
+      "*.md": "allow",
+      "*.R": "allow"
+    }
+  }
+}
