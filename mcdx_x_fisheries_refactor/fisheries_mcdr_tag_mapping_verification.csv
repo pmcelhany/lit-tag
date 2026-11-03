@@ -1,0 +1,140 @@
+tag_name,snake_case_value,sentence_case_value
+m_cdr_focus,specific_mcdr,Specific mCDR
+m_cdr_focus,general_mcdr,General mCDR
+m_cdr_focus,associated_fields,Associated fields
+m_cdr_method,ocean_alkalinity_enhancement,Ocean alkalinity enhancement
+m_cdr_method,direct_ocean_removal,Direct ocean removal
+m_cdr_method,ocean_nutrient_fertilization,Ocean nutrient fertilization
+m_cdr_method,macro_algae_cultivation_and_sinking,Macroalgae cultivation and sinking
+m_cdr_method,artificial_upwelling,Artificial upwelling
+m_cdr_method,artificial_downwelling,Artificial downwelling
+m_cdr_method,not_applicable,not_applicable
+paper_type,original_research,Original research
+paper_type,review,Review
+paper_type,perspective,Perspective
+paper_type,comment,Comment
+paper_type,report,Report
+paper_type,not_applicable,not_applicable
+paper_topic,mcdr_review,mCDR review
+paper_topic,species_sensitivity,Species sensitivity
+paper_topic,mcdr_pilot,mCDR pilot
+paper_topic,community_impacts,Community impacts
+paper_topic,biological_ecological_impacts,Biological ecological impacts
+paper_topic,environmental_impacts,Environmental impacts
+paper_topic,mrv,MRV
+paper_topic,ethics_best_practices,Ethics best practices
+paper_topic,governance,Governance
+paper_topic,air_sea_gas_exchange,Air-sea gas exchange
+paper_topic,dissolution,Dissolution
+paper_topic,ecotoxicity,Ecotoxicity
+paper_topic,nutrient_dynamics,Nutrient dynamics
+paper_topic,mcdr_method,mCDR method
+paper_topic,precipitation,Precipitation
+paper_topic,socio_economic,Socio-economic
+paper_topic,carbon_flux,Carbon flux
+paper_topic,natural_analogue,Natural analogue
+paper_topic,durability,Durability
+paper_topic,thresholds,Thresholds
+paper_topic,LCA_related_resources,LCA-related resources
+paper_topic,spatial_planning,Spatial planning
+paper_topic,tech_engineering,Tech engineering
+paper_topic,not_applicable,not_applicable
+type_of_method_used,modeling,Modeling
+type_of_method_used,field_study,Field study
+type_of_method_used,lab_experiment,Lab experiment
+type_of_method_used,mesocosm,Mesocosm
+type_of_method_used,observation,Observation
+type_of_method_used,expert_interview,Expert interview
+type_of_method_used,not_applicable,not_applicable
+adjacent_topic_to_m_cdr,ocean_acidification,Ocean acidification
+adjacent_topic_to_m_cdr,blue_carbon,Blue carbon
+adjacent_topic_to_m_cdr,aquaculture,Aquaculture
+adjacent_topic_to_m_cdr,acid_rain,Acid rain
+adjacent_topic_to_m_cdr,fundamental_carbon_chem,Fundamental carbon chem
+adjacent_topic_to_m_cdr,freshwater_environments,Freshwater environments
+adjacent_topic_to_m_cdr,other,Other
+adjacent_topic_to_m_cdr,not_applicable,not_applicable
+adjacent_topic_to_fisheries,fisheries_practices,Fisheries practices
+adjacent_topic_to_fisheries,higher_trophic,Higher trophic
+adjacent_topic_to_fisheries,lower_trophic,Lower trophic
+adjacent_topic_to_fisheries,aquaculture,Aquaculture
+adjacent_topic_to_fisheries,biologic_carbon_pump,Biologic carbon pump
+adjacent_topic_to_fisheries,nutrient_dynamics,Nutrient dynamics
+adjacent_topic_to_fisheries,other,Other
+adjacent_topic_to_fisheries,not_applicable,not_applicable
+paper_review_status,no_review,No review
+paper_review_status,abstract_reviewed,Abstract reviewed
+paper_review_status,complete_paper_review,Complete paper review
+ocean_basin,global,Global
+ocean_basin,pacific,Pacific
+ocean_basin,atlantic,Atlantic
+ocean_basin,southern_ocean,Southern Ocean
+ocean_basin,gulf_of_america_mexico_cuba,Gulf of Mexico
+ocean_basin,indian_ocean,Indian Ocean
+ocean_basin,mediterranean,Mediterranean
+ocean_basin,arctic,Arctic
+ocean_basin,caribbean,Caribbean
+ocean_basin,not_applicable,not_applicable
+geopolitical_area,united_states,United States
+geopolitical_area,europe,Europe
+geopolitical_area,australia,Australia
+geopolitical_area,asia,Asia
+geopolitical_area,canada,Canada
+geopolitical_area,africa,Africa
+geopolitical_area,south_america,Aouth America
+geopolitical_area,antarctica,Antarctica
+geopolitical_area,not_applicable,not_applicable
+habitat_type,open_ocean,Open ocean
+habitat_type,nearshore,Nearshore
+habitat_type,estuary,Estuary
+habitat_type,wetlands,Wetlands
+habitat_type,terrestrial_watershed,Terrestrial watershed
+habitat_type,not_applicable,not_applicable
+depth,surface,Surface
+depth,mid_depth,Mid-depth
+depth,deep_ocean,Deep ocean
+depth,benthic,Benthic
+depth,not_applicable,not_applicable
+experiment_location,field,Field
+experiment_location,laboratory,Laboratory
+experiment_location,mesocosm,Mesocosm
+experiment_location,not_applicable,not_applicable
+taxon,fish,Fish
+taxon,crustacean,Crustacean
+taxon,echinoderm,Echinoderm
+taxon,macroalgae,Macroalgae
+taxon,phytoplankton,Phytoplankton
+taxon,zooplankton,Zooplankton
+taxon,microbes,Microbes
+taxon,bivalves,Bivalves
+taxon,other,Other
+taxon,not_applicable,not_applicable
+life_stage,egg,Egg
+life_stage,larvae,Larvae
+life_stage,juvenile,Juvenile
+life_stage,adult,Adult
+life_stage,not_applicable,not_applicable
+exposure,mineral,Mineral
+exposure,chemical,Chemical
+exposure,low_co2,Low CO2
+exposure,natural_exposure,Natural exposure
+exposure,electrochemical,Electrochemical
+exposure,deep_water,Deep water
+exposure,manufacturing_byproduct,Manufacturing byproduct
+exposure,other,Other
+exposure,not_applicable,not_applicable
+chemical_mineral_added,naoh,NaOH
+chemical_mineral_added,olivine,Olivine
+chemical_mineral_added,calcium_carbonate,Calcium carbonate
+chemical_mineral_added,iron_sulfate,Iron sulfate
+chemical_mineral_added,dust,Dust
+chemical_mineral_added,nutrients,Nutrients
+chemical_mineral_added,steel_slag_concrete_waste,Steel slag or concrete waste
+chemical_mineral_added,other,Other
+chemical_mineral_added,not_applicable,not_applicable
+response_observed,biological_effect_observed,Biological effect observed
+response_observed,no_effect_on_biology,No effect on biology
+response_observed,biological_effect_not_investigated,Biological effect not investigated
+notes,summary_notes,Summary notes
+notes,mcdr_relevance_notes,mCDR relevance notes
+notes,fisheries_relevance_notes,Fisheries relevance notes
