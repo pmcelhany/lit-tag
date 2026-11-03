@@ -162,11 +162,35 @@ viewer_server_tab_01_load_database <- function() {
           }
         }
       }
-      # Show dialog if number tags have non-number values
-      if (length(invalid_loaded_tags) > 0) {
-        shiny::showModal(shiny::modalDialog(
-          title = "Invalid Numeric Data in Loaded Database",
-          shiny::tagList(
+      # Show dialog if missing tags or number tags have non-number values
+      if (length(new_tags) > 0 || length(invalid_loaded_tags) > 0) {
+        dialog_content <- shiny::tagList()
+
+        if (length(new_tags) > 0) {
+          dialog_content <- shiny::tagAppendChildren(
+            dialog_content,
+            shiny::p(
+              "The following tags from the categories file are missing in the database file and will be added as new columns:"
+            ),
+            shiny::tags$ul(
+              lapply(new_tags, function(tag_name) {
+                shiny::tags$li(tag_name)
+              })
+            ),
+            shiny::p("Note: This is expected if you are adding new tags.")
+          )
+        }
+
+        if (length(new_tags) > 0 && length(invalid_loaded_tags) > 0) {
+          dialog_content <- shiny::tagAppendChildren(
+            dialog_content,
+            shiny::hr()
+          )
+        }
+
+        if (length(invalid_loaded_tags) > 0) {
+          dialog_content <- shiny::tagAppendChildren(
+            dialog_content,
             shiny::p(
               "The loaded database contains non-numeric data for the following tags which are expecting only numeric values:"
             ),
@@ -178,7 +202,19 @@ viewer_server_tab_01_load_database <- function() {
             shiny::p(
               "For histogram plots, non-numeric values are ignored (i.e. treated as missing). For all other features in lit-tag-viewer, the all values for these tags are treated as text."
             )
-          ),
+          )
+        }
+
+        modal_title <- "Database Load Information"
+        if (length(new_tags) == 0 && length(invalid_loaded_tags) > 0) {
+          modal_title <- "Invalid Numeric Data in Loaded Database"
+        } else if (length(new_tags) > 0 && length(invalid_loaded_tags) == 0) {
+          modal_title <- "Missing Tags in Loaded Database"
+        }
+
+        shiny::showModal(shiny::modalDialog(
+          title = modal_title,
+          dialog_content,
           easyClose = TRUE,
           footer = shiny::modalButton("OK")
         ))
