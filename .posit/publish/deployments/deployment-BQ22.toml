@@ -10,9 +10,9 @@ id = "fc6a235a-0108-4ca3-9b1d-c6828d8b471f"
 dashboard_url = "https://connect.fisheries.noaa.gov/connect/#/apps/fc6a235a-0108-4ca3-9b1d-c6828d8b471f"
 direct_url = "https://connect.fisheries.noaa.gov/content/fc6a235a-0108-4ca3-9b1d-c6828d8b471f/"
 logs_url = "https://connect.fisheries.noaa.gov/connect/#/apps/fc6a235a-0108-4ca3-9b1d-c6828d8b471f/logs"
-deployed_at = "2026-11-03T15:44:16.760Z"
-bundle_id = "7769"
-bundle_url = "https://connect.fisheries.noaa.gov/__api__/v1/content/fc6a235a-0108-4ca3-9b1d-c6828d8b471f/bundles/7769/download"
+deployed_at = "2026-11-04T22:36:36.219Z"
+bundle_id = "7796"
+bundle_url = "https://connect.fisheries.noaa.gov/__api__/v1/content/fc6a235a-0108-4ca3-9b1d-c6828d8b471f/bundles/7796/download"
 files = [
     ".posit/publish/deployments/deployment-BQ22.toml",
     ".posit/publish/mcdrxfisheries-lit-db-viewer-t-AS9F.toml",
@@ -59,6 +59,10 @@ files = [
     "inst/app/www/mcdr_x_fisheries_1.jpg",
     "inst/app/www/styles.css",
     "inst/golem-config.yml",
+    "inst/report/lit_tag_report_template.docx",
+    "inst/report/lit_tag_report_template.html",
+    "inst/report/lit_tag_report_template.pdf",
+    "inst/report/lit_tag_report_template.qmd",
     "inst/user_guides_raw/.gitignore",
     "inst/user_guides_raw/images_builder_guide/media/builder_compare_db_shot.png",
     "inst/user_guides_raw/images_builder_guide/media/builder_db_contents_shot.png",
@@ -3312,7 +3316,6 @@ files = [
     "quarto-1.5.57/share/use/binder/vscode.svg",
     "quarto-1.5.57/share/version",
     "quarto-1.5.57/share/wasm/graphvizlib.wasm",
-    "report/lit_tag_report_template.docx",
 ]
 
 [configuration]

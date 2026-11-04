@@ -3,24 +3,30 @@
 
 options(shiny.autoreload = FALSE)
 
-# Configure Quarto for report generation
-# We use a bundled version of Quarto (1.5.57) to ensure compatibility on the NMFS Posit server,
-# as newer versions (e.g. 1.9.37) have caused crashes.
-quarto_base_dir <- file.path(getwd(), "quarto-1.5.57", "bin")
-local_quarto <- file.path(quarto_base_dir, "quarto")
+# Set to TRUE to use the bundled Quarto (1.5.57) for Posit Connect deployments.
+# Set to FALSE to use the system Quarto during local development.
+use_bundled_quarto <- TRUE
 
-# Ensure all bundled binaries have executable permissions when running on Linux servers
-if (dir.exists(quarto_base_dir)) {
-  all_binaries <- list.files(
-    quarto_base_dir,
-    recursive = TRUE,
-    full.names = TRUE
-  )
-  Sys.chmod(all_binaries, mode = "0755")
+if (use_bundled_quarto) {
+  # Configure Quarto for report generation
+  # We use a bundled version of Quarto (1.5.57) to ensure compatibility on the NMFS Posit server,
+  # as newer versions (e.g. 1.9.37) have caused crashes.
+  quarto_base_dir <- file.path(getwd(), "quarto-1.5.57", "bin")
+  local_quarto <- file.path(quarto_base_dir, "quarto")
+
+  # Ensure all bundled binaries have executable permissions when running on Linux servers
+  if (dir.exists(quarto_base_dir)) {
+    all_binaries <- list.files(
+      quarto_base_dir,
+      recursive = TRUE,
+      full.names = TRUE
+    )
+    Sys.chmod(all_binaries, mode = "0755")
+  }
+
+  # Point R to the local bundled version of Quarto
+  Sys.setenv(QUARTO_PATH = local_quarto)
 }
-
-# Point R to the local bundled version of Quarto
-Sys.setenv(QUARTO_PATH = local_quarto)
 
 # Load application package
 pkgload::load_all(export_all = TRUE, helpers = FALSE, attach_testthat = FALSE)

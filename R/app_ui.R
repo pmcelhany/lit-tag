@@ -26,11 +26,6 @@ golem_add_external_resources <- function() {
     app_sys("app/www")
   )
 
-  add_resource_path(
-    "reports",
-    app_sys("report")
-  )
-
   tags$head(
     favicon(),
     bundle_resources(

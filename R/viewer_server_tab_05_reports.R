@@ -1,6 +1,13 @@
 # R/viewer_server_tab_05_reports.R
 
 viewer_server_tab_05_reports <- function() {
+  # Create a session-specific directory for rendering reports
+  session_dir <- file.path(tempdir(), session$token)
+  if (!dir.exists(session_dir)) {
+    dir.create(session_dir, recursive = TRUE)
+    addResourcePath(paste0("reports_", session$token), session_dir)
+  }
+
   ## Render quarto fun -----------
   render_quarto_fun <- function(report_type) {
     d_report <- values$d_mcdr_tagged
@@ -50,8 +57,27 @@ viewer_server_tab_05_reports <- function() {
 
     names(d_cat_tag) <- names(categories)
 
+    template_path <- app_sys("report/lit_tag_report_template.qmd")
+    if (template_path == "" || !file.exists(template_path)) {
+      # Fallback for when running via pkgload or directly
+      template_path <- file.path(
+        getwd(),
+        "inst/report/lit_tag_report_template.qmd"
+      )
+    }
+
+    # Copy template to the session directory to avoid read-only filesystem errors
+    if (!file.copy(template_path, session_dir, overwrite = TRUE)) {
+      stop(
+        "Failed to copy report template from ",
+        template_path,
+        " to ",
+        session_dir
+      )
+    }
+
     quarto::quarto_render(
-      input = "report/lit_tag_report_template.qmd",
+      input = file.path(session_dir, "lit_tag_report_template.qmd"),
       output_format = report_type,
       #output_file = ,
       execute_params = list(
@@ -86,7 +112,9 @@ viewer_server_tab_05_reports <- function() {
       output$report <- renderUI({
         tags$iframe(
           src = paste0(
-            "reports/lit_tag_report_template.html?t=",
+            "reports_",
+            session$token,
+            "/lit_tag_report_template.html?t=",
             as.numeric(Sys.time())
           ),
           style = "width: 100%; height: 100vh; border: none;"
@@ -110,11 +138,11 @@ viewer_server_tab_05_reports <- function() {
 
         # copy the quarto generated file to `file` argument.
         generated_file_name <- paste(
-          "report/lit_tag_report_template",
+          "lit_tag_report_template",
           input$report_type,
           sep = "."
         )
-        file.copy(generated_file_name, file)
+        file.copy(file.path(session_dir, generated_file_name), file)
 
         incProgress(4 / 4)
       })
